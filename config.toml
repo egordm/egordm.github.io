@@ -46,11 +46,11 @@ socials = [
 ]
 
 allowed_domains = [
-    { directive = "font-src", domains = ["'self'", "data:"] },
-    { directive = "img-src", domains = ["'self'", "https://*", "data:"] },
-    { directive = "script-src", domains = ["'self'"] },
-    { directive = "style-src", domains = ["'self'"] },
-    { directive = "frame-src", domains = ["player.vimeo.com", "https://www.youtube-nocookie.com"] },
+    { directive = "font-src", domains = ["'self'", "data:", "egordm.github.io"] },
+    { directive = "img-src", domains = ["'self'", "https://*", "data:", "egordm.github.io"] },
+    { directive = "script-src", domains = ["'self'", "egordm.github.io"] },
+    { directive = "style-src", domains = ["'self'", "egordm.github.io"] },
+    { directive = "frame-src", domains = ["player.vimeo.com", "https://www.youtube-nocookie.com", "egordm.github.io"] },
 ]
 
 custom_subset = true

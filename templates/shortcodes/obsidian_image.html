@@ -1,0 +1,12 @@
+{% set meta = get_image_metadata(path=src, allow_missing=true) %}
+{% set image = resize_image(path=src, width=width, op="fit_width") %}
+
+<figure class="image-captions-figure">
+  <img
+    alt="Anomaly Detection on Row Count quality metric in Soda Cloud"
+    width="{{ image.width }}"
+    height="{{ image.height }}"
+    src="{{ image.url }}"
+  >
+  <figcaption class="image-captions-caption">{{ caption | markdown | safe }}</figcaption>
+</figure>

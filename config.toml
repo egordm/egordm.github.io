@@ -1,0 +1,56 @@
+title = "EgorDm's Blog"
+base_url = "https://egordmitriev.net"
+theme = "tabi"
+version = "1.0.0"
+
+generate_feed = true
+compile_sass = true
+minify_html = true
+build_search_index = true
+
+taxonomies = [
+    { name = "tags", feed = true },
+]
+
+[markdown]
+external_links_target_blank = true
+highlight_code = true
+highlight_theme = "css"
+
+[slugify]
+paths = "on"
+taxonomies = "on"
+anchors = "on"
+
+[extra]
+long_date_format = "%d %B %Y"
+short_date_format = ""
+separator = "•"
+
+avatar = "static/img/avatar.jpg"
+favicon = "static/img/avatar.jpg"
+
+email = "egordmitriev2@gmail.com"
+
+menu = [
+    { name = "home", url = "$BASE_URL" },
+    { name = "blog", url = "$BASE_URL/blog" },
+    { name = "archive", url = "$BASE_URL/archive" },
+    { name = "tags", url = "$BASE_URL/tags" },
+]
+
+socials = [
+    { name = "atom feed", url = "$BASE_URL/atom.xml", icon = "rss" },
+    { name = "github", url = "https://github.com/egordm/", icon = "github" },
+    { name = "linkedin", url = "https://www.linkedin.com/in/egor-dmitriev/", icon = "linkedin" },
+]
+
+allowed_domains = [
+    { directive = "font-src", domains = ["'self'", "data:"] },
+    { directive = "img-src", domains = ["'self'", "https://*", "data:"] },
+    { directive = "script-src", domains = ["'self'"] },
+    { directive = "style-src", domains = ["'self'"] },
+    { directive = "frame-src", domains = ["player.vimeo.com", "https://www.youtube-nocookie.com"] },
+]
+
+custom_subset = true

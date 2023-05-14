@@ -1,0 +1,134 @@
+@import "../themes/tabi/sass/main.scss";
+
+:root {
+//     --scale: 1.125;
+    --scale: 1;
+    --max-layout-width: 900px;
+
+    --h1-line-height: 1.2;
+    --h2-line-height: 1.2;
+    --h3-line-height: 1.3;
+    --h4-line-height: 1.4;
+    --h5-line-height: var(--line-height-normal);
+    --h6-line-height: var(--line-height-normal);
+    --line-height-normal: 1.5;
+
+    --h1-size: calc(2.0em * var(--scale));
+    --h2-size: calc(1.8em * var(--scale));
+    --h3-size: calc(1.37em * var(--scale));
+    --h4-size: calc(1.25em * var(--scale));
+    --h5-size: calc(1.12em * var(--scale));
+    --h6-size: calc(1.12em * var(--scale));
+    --font-size-normal: calc(1.0em * var(--scale));
+    --font-size-ui-small: calc(0.8em * var(--scale));
+
+    --h1-weight: 700;
+    --h2-weight: 600;
+    --h3-weight: 600;
+    --h4-weight: 600;
+    --h5-weight: 600;
+    --h6-weight: 600;
+
+    --primary-color: #8B6CEF;
+}
+
+article {
+    max-width: var(--max-layout-width);
+
+    line-height: var(--line-height-normal);
+
+    p,
+    li {
+        font-family: var(--sans-serif-font);
+        line-height: var(--line-height-normal);
+        font-size: var(--font-size-normal);
+    }
+}
+
+.article-title {
+    line-height: var(--h1-line-height);
+    font-size: var(--h1-size);
+    font-weight: var(--h1-weight);
+}
+
+h1 {
+    line-height: var(--h1-line-height);
+    font-size: var(--h1-size);
+    font-weight: var(--h1-weight);
+}
+
+h2 {
+    line-height: var(--h2-line-height);
+    font-size: var(--h2-size);
+    font-weight: var(--h2-weight);
+}
+
+h3 {
+    line-height: var(--h3-line-height);
+    font-size: var(--h3-size);
+    font-weight: var(--h3-weight);
+}
+
+h4 {
+    line-height: var(--h4-line-height);
+    font-size: var(--h4-size);
+    font-weight: var(--h4-weight);
+}
+
+h5 {
+    line-height: var(--h5-line-height);
+    font-size: var(--h5-size);
+    font-weight: var(--h5-weight);
+}
+
+
+p {
+    line-height: var(--line-height-normal);
+    font-size: var(--font-size-normal);
+}
+
+strong {
+    font-weight: 600;
+}
+
+a {
+    text-decoration: underline;
+}
+
+ul {
+  padding-left: 1.5rem;
+}
+
+figure {
+  background: #303030;
+  width: 100%;
+}
+
+figcaption {
+  font-family: var(--sans-serif-font);
+  line-height: var(--line-height-normal);
+  font-size: var(--font-size-ui-small);
+  padding: 6px 8px;
+
+  > p:first-child {
+    margin-top: 0;
+  }
+
+  > p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.bloglist-title {
+    a {
+        text-decoration: none;
+    }
+}
+
+.bloglist-row {
+  padding: 1.5rem 0;
+}
+
+.meta {
+    font-size: var(--font-size-ui-small);
+}

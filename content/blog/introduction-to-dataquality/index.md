@@ -3,14 +3,16 @@ title = "Introduction to Data Quality"
 date = 2023-05-12
 description = "This blog delves into the importance of data quality, and provides insight into how Data and MLOps Engineers can ensure that quality is maintained throughout the system lifecycle."
 
-[extra]
-redirect_to = "https://www.luminis.eu/blog/introduction-to-data-quality/"
+#[extra]
+#redirect_to = "https://www.luminis.eu/blog/introduction-to-data-quality/"
 
 [taxonomies]
-tags = ["data engineering", "devops"]
+tags = ["data engineering", "dataops"]
 +++
 
-
+<small>
+Originaly published as part of <a href="https://www.luminis.eu/blog/introduction-to-data-quality/" target="_blank">Luminis Data Blog</a>.
+</small>
 
 ## Introduction
 We've all heard the phrase “garbage in, garbage out” which highlights the importance of quality data for data-driven systems. Here, quality data can be interpreted in two ways: firstly as clean and well-standardized data that meets expectations, and secondly, as well-thought-out data that fits a particular business case. Although the latter is typically determined during the research or data strategy phase, in this blog we will focus on the former interpretation.

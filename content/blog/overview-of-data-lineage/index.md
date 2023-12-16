@@ -1,7 +1,7 @@
 +++
 title = "Overview of Data Lineage"
 date = 2023-08-13
-description = "In this article, we delve into the often overlooked, but crucial aspect of data quality – data lineage. Data lineage records the flow of data and all the transformations throughout its life-cycle, from source to destination. Understanding this is vital for maintaining data integrity and transparency in data processes, making it an essential component of the data quality workflow."
+description = "This article explores the importance of data lineage, which tracks the flow and transformations of data from source to destination, playing a vital role in ensuring data integrity and transparency in data processes."
 
 #[extra]
 #redirect_to = "https://www.luminis.eu/blog/data-quality-series-part-3-overview-of-data-lineage/"

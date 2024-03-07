@@ -440,4 +440,4 @@ In this blog, we have leaned how to write a simple SageMaker Pipeline in Python 
 
 We have only scratched the surface of what is possible with SageMaker, there are various topics that are equally important within MLOps projects such as testing your code and pipelines, local development, and automated quality monitoring.
 
-Stay tuned for more, or [contact me](https://egordmitriev.net) if you have any questions.
+Stay tuned for more, or [contact me](https://egordmitriev.dev) if you have any questions.

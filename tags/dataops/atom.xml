@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>EgorDm&#x27;s Blog - dataops</title>
+    <link href="https://egordmitriev.dev/tags/dataops/atom.xml" rel="self" type="application/atom+xml"/>
+    <link href="https://egordmitriev.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-08-13T00:00:00+00:00</updated>
+    <id>https://egordmitriev.dev/tags/dataops/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Overview of Data Lineage</title>
+        <published>2023-08-13T00:00:00+00:00</published>
+        <updated>2023-08-13T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://egordmitriev.dev/blog/overview-of-data-lineage/" type="text/html"/>
+        <id>https://egordmitriev.dev/blog/overview-of-data-lineage/</id>
+        
+        <content type="html">&lt;small&gt;
+Originaly published as part of &lt;a href=&quot;https:&#x2F;&#x2F;www.luminis.eu&#x2F;blog&#x2F;data-quality-series-part-3-overview-of-data-lineage&#x2F;&quot; target=&quot;_blank&quot;&gt;Luminis Data Blog&lt;&#x2F;a&gt;.
+&lt;&#x2F;small&gt;
+&lt;h2 id=&quot;introduction&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#introduction&quot; aria-label=&quot;Anchor link for: introduction&quot;&gt;🔗&lt;&#x2F;a&gt;Introduction&lt;&#x2F;h2&gt;
+&lt;p&gt;In this article, we will delve into the often overlooked, but crucial aspect of data quality – data lineage.  Data lineage records the flow of data and all the transformations throughout its lifecycle, from source to destination. Understanding data lineage is vital for maintaining data integrity and transparency in data processes, making it an essential component of the data quality workflow.&lt;&#x2F;p&gt;
+&lt;p&gt;We have previously explored the significance of data quality in our blog post, &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.luminis.eu&#x2F;blog&#x2F;introduction-to-data-quality&#x2F;&quot;&gt;“Introduction to Data Quality”&lt;&#x2F;a&gt;, which emphasizes the importance of clean and standardized data for accurate analysis and decision-making. If you are interested in getting more hands-on experience with data quality testing, you can read our previous blog post, &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.luminis.eu&#x2F;blog&#x2F;data-quality-testing-with-deequ-in-spark&#x2F;&quot;&gt;&amp;quot;Data Quality Testing with Deequ in Spark&amp;quot;&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Now, we will take a closer look at data lineage, its benefits, and how it contributes to maintaining data reliability. As a whole, we aim to compile a comprehensive overview of important concepts to guide a user who is considering on implementing data lineage within their organization.&lt;&#x2F;p&gt;
+&lt;p&gt;The rest of the blog is structured as follows:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;What is Data Lineage?&lt;&#x2F;strong&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Requirements for Effective Data Lineage&lt;&#x2F;strong&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Benefits of Data Lineage&lt;&#x2F;strong&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Tools for Data Lineage&lt;&#x2F;strong&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;what-is-data-lineage&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#what-is-data-lineage&quot; aria-label=&quot;Anchor link for: what-is-data-lineage&quot;&gt;🔗&lt;&#x2F;a&gt;What is Data Lineage?&lt;&#x2F;h2&gt;
+&lt;p&gt;Traditionally, the data resided in a data warehouse with only a few connections to external systems. Today, the as the demand has grown, the data flows between a multitude of systems, teams, and (external) organizations. Consequently, it is easy to overlook the impact of a single change somewhere in the lifecycle of the data.&lt;&#x2F;p&gt;
+&lt;p&gt;Data lineage refers to the steps a dataset took to reach its current state. It encompasses the entire lifecycle of data, from its creation or ingestion to its consumption and usage in various processes and applications. By understanding data lineage, organizations gain visibility into how data is transformed and manipulated as it moves through different systems, processes, and transformations. It is an important tool for data engineers to debug potential issues in the data flow processes.&lt;&#x2F;p&gt;
+&lt;p&gt;There are two primary types of data lineage: table-level lineage and field-level lineage. Table-level lineage provides an overview of the tables or datasets involved in the data flow, whereas field-level lineage goes deeper, tracking the lineage of individual fields or columns within those tables.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;requirements-for-effective-data-lineage&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#requirements-for-effective-data-lineage&quot; aria-label=&quot;Anchor link for: requirements-for-effective-data-lineage&quot;&gt;🔗&lt;&#x2F;a&gt;Requirements for Effective Data Lineage&lt;&#x2F;h2&gt;
+&lt;p&gt;Data lineage is just like documentation, when done right, it shouldn&#x27;t put an additional burden on your development workflow, and in fact, should only enhance it. To harness the full potential of data lineage, there are some general guidelines that should be satisfied as described in &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.oreilly.com&#x2F;library&#x2F;view&#x2F;data-quality-fundamentals&#x2F;9781098112035&#x2F;&quot;&gt;Data Quality Fundamentals&lt;&#x2F;a&gt; book by Moses, et al.:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Fast Time to Value&lt;&#x2F;strong&gt;: Abstracting the relationships between data objects down to the field level is crucial for quick remediation. Simply tracking at the table level may be too broad and insufficient for understanding the impact of changes and identifying specific issues. (split point)&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Secure by Design&lt;&#x2F;strong&gt;: Data lineage shouldn&#x27;t directly access the data. Instead, it should rely on metadata, logs, and queries to gather information about the data flow. This simplifies the design as well ensures that no potentially private business data leaks into your documentation.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Automation&lt;&#x2F;strong&gt;: Manual maintenance of data lineage becomes increasingly challenging and error-prone as data pipelines become more complex. Investing in an automated data lineage generation approach saves time and reduces the risk of human error.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Integration with Popular Data Tools&lt;&#x2F;strong&gt;: A data project typically orchestrates data flow between multiple tools. The lineage tracking should seamlessly integrate with these technologies to create a unified view of your business, rather than dictating your workflow.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h2 id=&quot;benefits-of-data-lineage&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#benefits-of-data-lineage&quot; aria-label=&quot;Anchor link for: benefits-of-data-lineage&quot;&gt;🔗&lt;&#x2F;a&gt;Benefits of Data Lineage&lt;&#x2F;h2&gt;
+&lt;p&gt;Implementing robust data lineage practices offers several benefits to organizations:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Communication and Transparency&lt;&#x2F;strong&gt;: Data lineage acts as a communication channel between data producers and data consumers. It helps bridge the gap between different teams by providing a clear understanding of the impact of broken or changed data on downstream consumers.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Improved Data Quality and Trust&lt;&#x2F;strong&gt;: Data lineage allows organizations to build trust in their data assets. By providing visibility into the data&#x27;s journey and transformation, it enhances data quality, reliability, and accuracy. This, in turn, promotes better decision-making based on trustworthy information.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Compliance and Auditability&lt;&#x2F;strong&gt;: Data lineage supports compliance efforts by enabling organizations to demonstrate adherence to regulations, such as the General Data Protection Regulation (GDPR). It provides an audit trail of data usage and ensures transparency in data management practices.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;Some practical applications of data lineage in use include:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Debugging&lt;&#x2F;strong&gt;: When issues arise in data analysis or reporting, data lineage can be invaluable for root cause analysis. By tracing the lineage of problematic data, analysts can identify where the issue originated and take corrective action more efficiently.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Reducing Technical Debt&lt;&#x2F;strong&gt;: Data lineage helps identify columns or fields that are no longer in use or have been deprecated. By marking and propagating these changes downstream, organizations can reduce technical debt and streamline their data pipelines.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Governance&lt;&#x2F;strong&gt;: With privacy regulations and data governance becoming increasingly important, data lineage provides a way to track how personally identifiable information (PII) is used within an organization. It enables organizations to understand who has access to sensitive data, how it is utilized, and ensures compliance with data protection regulations.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;tools-for-data-lineage&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#tools-for-data-lineage&quot; aria-label=&quot;Anchor link for: tools-for-data-lineage&quot;&gt;🔗&lt;&#x2F;a&gt;Tools for Data Lineage&lt;&#x2F;h2&gt;
+&lt;p&gt;Now, let&#x27;s explore some powerful tools that can help you establish and maintain a seamless data lineage process.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;openlineage&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#openlineage&quot; aria-label=&quot;Anchor link for: openlineage&quot;&gt;🔗&lt;&#x2F;a&gt;OpenLineage&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;openlineage.io&#x2F;&quot;&gt;OpenLineage&lt;&#x2F;a&gt; is an emerging industry standard for data lineage tracking that is gaining traction. It is supported by the Linux Foundation, Atronomer, Collibra. It &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;openlineage.io&#x2F;blog&#x2F;why-open-standard&quot;&gt;aims to establish a unified framework&lt;&#x2F;a&gt; for capturing, managing, and sharing data lineage metadata across various tools and platforms. OpenLineage provides a consistent way to represent data lineage, making it easier to integrate with different systems and tools. You can easily incorporate it with any tool by submitting events to its API endpoint.&lt;&#x2F;p&gt;
+&lt;p&gt;One exciting integration with OpenLineage is the combination with &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;marquezproject.github.io&#x2F;marquez&#x2F;&quot;&gt;Marquez&lt;&#x2F;a&gt;, a metadata service that tracks data workflows and lineage, open-sourced by WeWork. Together, they offer a simple, yet powerful solution to maintain a comprehensive and standardized view of data lineage. With this integration, you can easily trace data transformations, dependencies, and the origin of data through various data pipelines.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;microsoft-purview&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#microsoft-purview&quot; aria-label=&quot;Anchor link for: microsoft-purview&quot;&gt;🔗&lt;&#x2F;a&gt;Microsoft Purview&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.microsoft.com&#x2F;en-ww&#x2F;security&#x2F;business&#x2F;microsoft-purview&quot;&gt;Microsoft Purview&lt;&#x2F;a&gt; is a comprehensive data governance and data cataloging solution that also offers &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;learn.microsoft.com&#x2F;en-us&#x2F;purview&#x2F;concept-data-lineage&quot;&gt;data lineage capabilities&lt;&#x2F;a&gt;. Purview is part of the Microsoft Azure ecosystem and integrates well with other Azure services. It allows organizations to discover, classify, and understand their data assets, making it easier to implement robust data lineage practices.&lt;&#x2F;p&gt;
+&lt;p&gt;One notable feature of Purview is its integration with Azure Data Factory (ADF). While ADF provides some level of data lineage tracking through job dependencies, Purview enhances this functionality by offering a more unified and visual representation of data lineage across the data ecosystem.&lt;&#x2F;p&gt;
+
+
+
+&lt;figure class=&quot;image-captions-figure&quot;&gt;
+  &lt;img
+    alt=&quot;Anomaly Detection on Row Count quality metric in Soda Cloud&quot;
+    width=&quot;700&quot;
+    height=&quot;282&quot;
+    src=&quot;https:&amp;#x2F;&amp;#x2F;egordmitriev.dev&amp;#x2F;processed_images&amp;#x2F;MS-Purview-Lineage.388b62fc787624b7.png&quot;
+  &gt;
+  &lt;figcaption class=&quot;image-captions-caption&quot;&gt;&lt;p&gt;Data Lineage in Microsoft Purview&lt;&#x2F;p&gt;
+&lt;&#x2F;figcaption&gt;
+&lt;&#x2F;figure&gt;&lt;h3 id=&quot;datahub&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#datahub&quot; aria-label=&quot;Anchor link for: datahub&quot;&gt;🔗&lt;&#x2F;a&gt;Datahub&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;datahub-project&#x2F;datahub&quot;&gt;Datahub&lt;&#x2F;a&gt; is a versatile data platform that provides robust data lineage capabilities, among other features. It offers extensive integration support, making it suitable for various data environments. While it is open source, the installation is quite heavy and requires both Kafka and Elasticsearch to operate, making it a tough choice for small projects.&lt;&#x2F;p&gt;
+&lt;p&gt;Datahub can handle large-scale data lineage requirements. Data engineers and data analysts can rely on Datahub to trace data paths, identify data inconsistencies, and ensure data quality across their pipelines, making it a one-stop shop data quality tool.&lt;&#x2F;p&gt;
+
+
+
+&lt;figure class=&quot;image-captions-figure&quot;&gt;
+  &lt;img
+    alt=&quot;Anomaly Detection on Row Count quality metric in Soda Cloud&quot;
+    width=&quot;700&quot;
+    height=&quot;327&quot;
+    src=&quot;https:&amp;#x2F;&amp;#x2F;egordmitriev.dev&amp;#x2F;processed_images&amp;#x2F;datahub-lineage.d493df7b70d15ac5.png&quot;
+  &gt;
+  &lt;figcaption class=&quot;image-captions-caption&quot;&gt;&lt;p&gt;Dataset Lineage overview in DataHub&lt;&#x2F;p&gt;
+&lt;&#x2F;figcaption&gt;
+&lt;&#x2F;figure&gt;&lt;h4 id=&quot;spline&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#spline&quot; aria-label=&quot;Anchor link for: spline&quot;&gt;🔗&lt;&#x2F;a&gt;Spline&lt;&#x2F;h4&gt;
+&lt;p&gt;If your organization mainly utilizes Apache Spark for data processing, &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;absaoss.github.io&#x2F;spline&#x2F;&quot;&gt;Spline&lt;&#x2F;a&gt; is an excellent tool to consider for data lineage tracking. Spline offers the ability to join lineage across multiple datasets, providing a comprehensive view of how data transformations take place.&lt;&#x2F;p&gt;
+&lt;p&gt;One notable advantage of Spline is its compatibility with OpenLineage (&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;AbsaOSS&#x2F;spline-openlineage&quot;&gt;currently as POC&lt;&#x2F;a&gt;). This allows you to leverage OpenLineage&#x27;s ecosystem to combine lineage across environments for visualization.&lt;&#x2F;p&gt;
+
+
+
+&lt;figure class=&quot;image-captions-figure&quot;&gt;
+  &lt;img
+    alt=&quot;Anomaly Detection on Row Count quality metric in Soda Cloud&quot;
+    width=&quot;400&quot;
+    height=&quot;300&quot;
+    src=&quot;https:&amp;#x2F;&amp;#x2F;egordmitriev.dev&amp;#x2F;processed_images&amp;#x2F;spline_lineage.d9e3d629122c114c.jpg&quot;
+  &gt;
+  &lt;figcaption class=&quot;image-captions-caption&quot;&gt;&lt;p&gt;Dataset High Level Data Lineage overview in Spline UI&lt;&#x2F;p&gt;
+&lt;&#x2F;figcaption&gt;
+&lt;&#x2F;figure&gt;&lt;h4 id=&quot;dbt-data-build-tool-and-dagster&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#dbt-data-build-tool-and-dagster&quot; aria-label=&quot;Anchor link for: dbt-data-build-tool-and-dagster&quot;&gt;🔗&lt;&#x2F;a&gt;DBT (Data Build Tool) and Dagster&lt;&#x2F;h4&gt;
+&lt;p&gt;DBT and Dagster are two powerful data tools that emphasize data-first practices and can significantly contribute to your data lineage efforts.&lt;&#x2F;p&gt;
+&lt;p&gt;DBT is a popular data transformation tool that enables data engineers and analysts to model, transform, and organize data in a structured manner. By leveraging DBT&#x27;s features, you can ensure that your data lineage accurately reflects data transformations and helps maintain data integrity.&lt;&#x2F;p&gt;
+&lt;p&gt;On the other hand, Dagster is a data orchestration tool designed to facilitate the development and management of data workflows. With Dagster, you can build robust data pipelines that capture data lineage effectively, making it easier to identify and resolve issues in your data processes.&lt;&#x2F;p&gt;
+
+
+
+&lt;figure class=&quot;image-captions-figure&quot;&gt;
+  &lt;img
+    alt=&quot;Anomaly Detection on Row Count quality metric in Soda Cloud&quot;
+    width=&quot;500&quot;
+    height=&quot;467&quot;
+    src=&quot;https:&amp;#x2F;&amp;#x2F;egordmitriev.dev&amp;#x2F;processed_images&amp;#x2F;dagster-lineage.31462da7369c6594.png&quot;
+  &gt;
+  &lt;figcaption class=&quot;image-captions-caption&quot;&gt;&lt;p&gt;Data Graph in Dagster Combining FiveTran, DBT and Tensorflow Assets&lt;&#x2F;p&gt;
+&lt;&#x2F;figcaption&gt;
+&lt;&#x2F;figure&gt;&lt;h4 id=&quot;apache-airflow&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#apache-airflow&quot; aria-label=&quot;Anchor link for: apache-airflow&quot;&gt;🔗&lt;&#x2F;a&gt;Apache Airflow&lt;&#x2F;h4&gt;
+&lt;p&gt;Apache Airflow is a widely used workflow management platform that, while not a strict data lineage tool, supports data lineage indirectly through its connectors and integrations. By utilizing these connectors, you can associate data pipelines with metadata about the data sources, dependencies, and transformations.&lt;&#x2F;p&gt;
+&lt;p&gt;While Airflow&#x27;s data lineage capabilities might not be as sophisticated as some dedicated data lineage tools, it can still play a significant role in providing visibility into your data workflows and their impact on downstream processes.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#conclusion&quot; aria-label=&quot;Anchor link for: conclusion&quot;&gt;🔗&lt;&#x2F;a&gt;Conclusion&lt;&#x2F;h2&gt;
+&lt;p&gt;In conclusion, data lineage is a vital aspect of data quality, providing transparency in data processes and transformations. Building your lineage with best practices in mind, such as automation and the correct level of abstraction, brings a multitude of benefits like improved communication, enhanced data quality, and compliance support.&lt;&#x2F;p&gt;
+&lt;p&gt;Powerful tools are available for establishing and maintaining data lineage, offering unified frameworks for metadata management and comprehensive tracking across workflows.&lt;&#x2F;p&gt;
+&lt;p&gt;Embracing data lineage and leveraging these tools empowers everyone within the organization to make better decisions, ensure data reliability, and build trust in their data.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Introduction to Data Quality</title>
+        <published>2023-05-12T00:00:00+00:00</published>
+        <updated>2023-05-12T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://egordmitriev.dev/blog/introduction-to-dataquality/" type="text/html"/>
+        <id>https://egordmitriev.dev/blog/introduction-to-dataquality/</id>
+        
+        <content type="html">&lt;small&gt;
+Originaly published as part of &lt;a href=&quot;https:&#x2F;&#x2F;www.luminis.eu&#x2F;blog&#x2F;introduction-to-data-quality&#x2F;&quot; target=&quot;_blank&quot;&gt;Luminis Data Blog&lt;&#x2F;a&gt;.
+&lt;&#x2F;small&gt;
+&lt;h2 id=&quot;introduction&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#introduction&quot; aria-label=&quot;Anchor link for: introduction&quot;&gt;🔗&lt;&#x2F;a&gt;Introduction&lt;&#x2F;h2&gt;
+&lt;p&gt;We&#x27;ve all heard the phrase “garbage in, garbage out” which highlights the importance of quality data for data-driven systems. Here, quality data can be interpreted in two ways: firstly as clean and well-standardized data that meets expectations, and secondly, as well-thought-out data that fits a particular business case. Although the latter is typically determined during the research or data strategy phase, in this blog we will focus on the former interpretation.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;motivation&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#motivation&quot; aria-label=&quot;Anchor link for: motivation&quot;&gt;🔗&lt;&#x2F;a&gt;Motivation&lt;&#x2F;h2&gt;
+&lt;p&gt;Maintaining high-quality data is critical for accurate data analysis, decision-making, and achieving business objectives. Real-world data is often noisy and subject to constant changes, which makes maintaining data quality a challenging task. Therefore, it&#x27;s crucial to identify data quality issues early on and address them before they have any effects on downstream analytics tasks or decision-making processes. One of the responsibilities of Data and MLOps Engineers is to ensure that quality is maintained throughout its lifecycle.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;measuring-data-quality&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#measuring-data-quality&quot; aria-label=&quot;Anchor link for: measuring-data-quality&quot;&gt;🔗&lt;&#x2F;a&gt;Measuring Data Quality&lt;&#x2F;h2&gt;
+&lt;p&gt;To ensure data quality throughout the data pipeline, it&#x27;s important to measure and test it at different stages. A typical testing workflow in data engineering would involve several types of tests:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Unit testing&lt;&#x2F;strong&gt;: focuses on testing separate components of your pipeline in isolation. For example, testing whether (a part of) an SQL or a Spark script does what it is supposed to do.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Functional Testing&lt;&#x2F;strong&gt;: includes data flow validation such as transformation logic validation based on business rules, as well as data integrity, which validates data based on constraints and schema checks. This type of testing occurs frequently at different stages of the pipeline (think ingestion, processing, and storage).&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Integration Testing&lt;&#x2F;strong&gt;: ensures that the data pipeline meets the business requirements. Generally, this is done by running fake data through the pipeline and validating the result.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Although we have covered different types of tests, it&#x27;s worth noting that traditional software engineering practices only cover these points to a certain extent. For this reason, let&#x27;s focus on functional testing of data and take a look at testable properties attributed to quality data.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Completeness&lt;&#x2F;strong&gt;: checks whether all expected data is present and accounted for in the data pipeline. Simple checks may test for null values, while more complex checks may also condition based on value or other columns.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Uniqueness&lt;&#x2F;strong&gt;: verifies if there are no duplicate records in the data pipeline. Duplicate records can cause issues with aggregation and analysis, leading to incorrect results.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Distribution&lt;&#x2F;strong&gt;: focuses on closely examining the validity of column values. This may involve checks to ensure that the data falls within an accepted range or that the units used in a given column are consistent.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Validity&lt;&#x2F;strong&gt;: enforces known invariants that should always hold true, regardless of the input data. These may be defined based on data standards or business rules. For example, the price column may never be negative, or the total column should equal to the sum of pre-tax subtotal and tax amount.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Accuracy&lt;&#x2F;strong&gt;: measures the level to which data reflects the real world by using a verifiable source. For example, a customer phone number can be validated.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Integrity&lt;&#x2F;strong&gt;: takes into account relationships of data with other systems within an organization. It involves limiting changes or additions to the data that may break connections and generate orphaned records.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Consistency&lt;&#x2F;strong&gt;: ensures that the data is accurate, and aligned with the organization&#x27;s attributes. By having consistent attribute values on can building relationships between different data systems, prevent data duplication, and inconsistencies.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;data-observability&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#data-observability&quot; aria-label=&quot;Anchor link for: data-observability&quot;&gt;🔗&lt;&#x2F;a&gt;Data Observability&lt;&#x2F;h2&gt;
+&lt;p&gt;Having proper testing mechanisms set up is only the first step, as it is only natural that the data keeps evolving and may change unexpectedly. This aspect of data is not easy to tame, since you don&#x27;t always have control over the source systems. That&#x27;s why it&#x27;s crucial to continuously test and monitor data quality, which is where &lt;strong&gt;Data Observability&lt;&#x2F;strong&gt; comes into play.&lt;&#x2F;p&gt;
+&lt;p&gt;The five pillars of &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.montecarlodata.com&#x2F;blog-what-is-data-observability&#x2F;&quot;&gt;data observability&lt;&#x2F;a&gt; provide good guidance criteria you would want to include in your testing and monitoring.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Freshness&lt;&#x2F;strong&gt;: Does the asset use the most recent data? This is a critical aspect of data quality, as outdated or stale data can lead to incorrect decisions being made. Depending on the use case, you may need to validate that the data is fresh within a certain time window, such as the past hour or day.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Quality&lt;&#x2F;strong&gt;: The quality checks are vital in verifying the quality of data, as they ensure that the data is in the correct format and within acceptable limits. These checks are useful for ensuring that the transformation pipeline can handle the input data, as well as, validating the output data, as is commonly applied when &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;paypal&#x2F;data-contract-template&quot;&gt;writing data contracts&lt;&#x2F;a&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Volume&lt;&#x2F;strong&gt;: Did all the data arrive? How many rows were changed? Did the dataset decrease in size? These are important questions to answer when monitoring the volume of your data pipeline. Sudden spikes or drops in volume could indicate issues with the pipeline or changes in the underlying data sources.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Schema&lt;&#x2F;strong&gt;: The schema of a dataset defines the structure and type of each field in the data. It is often used in contracts between producers and consumers of the data. Especially when working with raw data sources, schema validation checks can help catch issues such as missing or incorrectly formatted fields, and ensure that any changes to the schema are properly communicated to downstream consumers.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Lineage&lt;&#x2F;strong&gt;: Lineage refers to the record of the origins, movement, and transformation of data throughout the data pipeline. It can answer questions about upstream sources that the data depends on and downstream assets that would be impacted by any change. The data lineage is a critical component during compliance auditing and root cause analysis.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+
+
+
+&lt;figure class=&quot;image-captions-figure&quot;&gt;
+  &lt;img
+    alt=&quot;Anomaly Detection on Row Count quality metric in Soda Cloud&quot;
+    width=&quot;350&quot;
+    height=&quot;361&quot;
+    src=&quot;https:&amp;#x2F;&amp;#x2F;egordmitriev.dev&amp;#x2F;processed_images&amp;#x2F;data_lineage.5f142e90278ef3df.png&quot;
+  &gt;
+  &lt;figcaption class=&quot;image-captions-caption&quot;&gt;&lt;p&gt;Lineage of Continent Statistics table visualized in Dagster&lt;&#x2F;p&gt;
+&lt;&#x2F;figcaption&gt;
+&lt;&#x2F;figure&gt;
+&lt;p&gt;You can not test for everything, and as things inevitably break, you may be unknowingly making decisions on bad data. There is an exponential relation between lost revenue and how far down the line data issues are diagnosed.&lt;&#x2F;p&gt;
+&lt;p&gt;When you write tests for your data, you are testing for “&lt;strong&gt;known unknowns&lt;&#x2F;strong&gt;”. The next step you can take is testing for “&lt;strong&gt;unknown unknowns&lt;&#x2F;strong&gt;”, which on contrary are not apparent during the creation of the data systems. Detecting these issues is typically done through &lt;strong&gt;health checks&lt;&#x2F;strong&gt; and &lt;strong&gt;anomaly detection&lt;&#x2F;strong&gt; on collected metrics through simple thresholding or forecasting-based methods.&lt;&#x2F;p&gt;
+&lt;p&gt;Monitoring the percentage of faulty rows or checking whether the number of days since the last update does not exceed the historical average duration are good examples of proxy measures that can detect “unknown unknowns”.&lt;&#x2F;p&gt;
+
+
+
+&lt;figure class=&quot;image-captions-figure&quot;&gt;
+  &lt;img
+    alt=&quot;Anomaly Detection on Row Count quality metric in Soda Cloud&quot;
+    width=&quot;600&quot;
+    height=&quot;342&quot;
+    src=&quot;https:&amp;#x2F;&amp;#x2F;egordmitriev.dev&amp;#x2F;processed_images&amp;#x2F;anomaly_detection.bfe5ae581ee9ac3f.png&quot;
+  &gt;
+  &lt;figcaption class=&quot;image-captions-caption&quot;&gt;&lt;p&gt;Anomaly Detection on Row Count quality metric in &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.soda.io&#x2F;resources&#x2F;time-series-anomaly-detection-with-soda&quot;&gt;Soda Cloud&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;figcaption&gt;
+&lt;&#x2F;figure&gt;
+&lt;p&gt;Performing &lt;strong&gt;data profiling&lt;&#x2F;strong&gt; by defining rule-based sets of metrics to be computed on all columns within your dataset can give you a good starting point when writing tests. Some data processing tools like &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;openrefine.org&#x2F;&quot;&gt;OpenRefine&lt;&#x2F;a&gt; and &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;aws.amazon.com&#x2F;glue&#x2F;features&#x2F;databrew&#x2F;&quot;&gt;AWS DataBrew&lt;&#x2F;a&gt; have built-in data profiling to aid in building cleaning transformations. Similarly, it can also be a powerful tool when combined with anomaly detection for building automated monitoring systems.&lt;&#x2F;p&gt;
+
+
+
+&lt;figure class=&quot;image-captions-figure&quot;&gt;
+  &lt;img
+    alt=&quot;Anomaly Detection on Row Count quality metric in Soda Cloud&quot;
+    width=&quot;1000&quot;
+    height=&quot;543&quot;
+    src=&quot;https:&amp;#x2F;&amp;#x2F;egordmitriev.dev&amp;#x2F;processed_images&amp;#x2F;data_profiles.ef523c009981f8c0.png&quot;
+  &gt;
+  &lt;figcaption class=&quot;image-captions-caption&quot;&gt;&lt;p&gt;Data Profiles in &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.datanami.com&#x2F;2020&#x2F;11&#x2F;12&#x2F;aws-launches-visual-data-prep-tool&#x2F;&quot;&gt;AWS DataBrew&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;figcaption&gt;
+&lt;&#x2F;figure&gt;
+&lt;p&gt;Presenting the data profiles, quality information, and schema as part of a dashboard or data catalog can provide a lot of value for your business. Similarly, setting the right governance structure where the issues and alerts reach the appropriate team is an important aspect of maintaining high data reliability.&lt;&#x2F;p&gt;
+&lt;p&gt;For additional guidelines on improving data reliability, consider reviewing &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;docs.aws.amazon.com&#x2F;wellarchitected&#x2F;latest&#x2F;analytics-lens&quot;&gt;AWS Well-Architected Data Analytics Lens&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+
+
+
+&lt;figure class=&quot;image-captions-figure&quot;&gt;
+  &lt;img
+    alt=&quot;Anomaly Detection on Row Count quality metric in Soda Cloud&quot;
+    width=&quot;600&quot;
+    height=&quot;369&quot;
+    src=&quot;https:&amp;#x2F;&amp;#x2F;egordmitriev.dev&amp;#x2F;processed_images&amp;#x2F;data_quality_scorecards.482167c050ea8c60.png&quot;
+  &gt;
+  &lt;figcaption class=&quot;image-captions-caption&quot;&gt;&lt;p&gt;Data Quality Score Cards in &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.montecarlodata.com&#x2F;blog-announcing-monte-carlos-data-reliability-dashboard-a-better-way-understand-the-health-of-your-data&#x2F;&quot;&gt;Monte Carlo&#x27;s Data Reliability Dashboard&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;figcaption&gt;
+&lt;&#x2F;figure&gt;&lt;h2 id=&quot;data-testing-patterns&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#data-testing-patterns&quot; aria-label=&quot;Anchor link for: data-testing-patterns&quot;&gt;🔗&lt;&#x2F;a&gt;Data Testing Patterns&lt;&#x2F;h2&gt;
+&lt;p&gt;When it comes to designing reliable data systems, it&#x27;s essential to handle errors gracefully both during data quality testing and transformation. Depending on your environment, there are various testing approaches you can take. A common first concern is determining when and where to run data quality checks.&lt;&#x2F;p&gt;
+&lt;p&gt;Many cases such as ETL pipelines prefer &lt;strong&gt;on-demand execution&lt;&#x2F;strong&gt; where the quality of raw data is evaluated at the source or the destination after loading the data. This approach ensures that the transformation step can handle the data before actual processing is applied. Both approaches have their benefits; testing before load requires query access to the source database and may put excessive load on the application database, while loading data beforehand may result in additional latency.&lt;&#x2F;p&gt;
+&lt;p&gt;Similarly, &lt;strong&gt;scheduled execution&lt;&#x2F;strong&gt; periodically tests data quality in source tables and reports if any issues arise. This approach is typically found in data warehouse solutions, where transformation is postponed until query evaluation using views.&lt;&#x2F;p&gt;
+&lt;p&gt;A notable benefit of on-demand execution is that one can immediately act on it. As such, the &lt;strong&gt;circuit breaker&lt;&#x2F;strong&gt; pattern is utilized to break off pipeline execution if (batch) data does not pass the error checks or an anomaly is detected. The trade-off is that the rest of the system keeps using stale or partial data until the issue is resolved.&lt;&#x2F;p&gt;
+&lt;p&gt;To expand on this methodology, &lt;strong&gt;data quarantining&lt;&#x2F;strong&gt; is another related pattern that defines a flow where faulty data is set aside. The quarantined data can be used to fix the issues and reprocessed at a later date to ensure that no data loss occurs. This approach works particularly well for incremental processing pipelines or pipelines without &lt;strong&gt;idempotency&lt;&#x2F;strong&gt; property (i.e., processing data multiple times results in a different dataset).&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Self-healing&lt;&#x2F;strong&gt; pipelines combine none or multiple of the mentioned properties to gracefully recover from failure. This may be as simple as retrying data submission, reprocessing the full dataset, or waiting until prerequisite data is in the system.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;choosing-your-tools&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#choosing-your-tools&quot; aria-label=&quot;Anchor link for: choosing-your-tools&quot;&gt;🔗&lt;&#x2F;a&gt;Choosing Your Tools&lt;&#x2F;h2&gt;
+&lt;p&gt;We evaluated several open-source data quality tools (aside from AWS Glue) to use in our ETL pipelines. Our evaluation criteria included features, integrations, and compatibility with our existing pipeline architecture.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Great Expectations&lt;&#x2F;strong&gt; (GX): is the tool of choice for many data workloads. It has a large collection of community-made checks and a large collection of features. Supported integrations include some &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;greatexpectations.io&#x2F;integrations&quot;&gt;common data tools&lt;&#x2F;a&gt;, cloud analytics (including Amazon Athena, AWS Glue, and AWS Redshift), and pandas dataframes.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Codified data contracts and data docs generation&lt;&#x2F;li&gt;
+&lt;li&gt;Data profiling&lt;&#x2F;li&gt;
+&lt;li&gt;The Quality metrics are limited to what checks calculate.&lt;&#x2F;li&gt;
+&lt;li&gt;On-demand execution&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;&lt;strong&gt;AWS Deequ&lt;&#x2F;strong&gt;: is an open-source library built by AWS that covers a wide range of data quality needs. Deequ is based on the concept of data quarantining and has the functionality to filter out and store bad data at various stages of the process.&lt;&#x2F;p&gt;
+&lt;p&gt;The tool is built in Scala on top of Apache Spark, but it has a Python bindings library which unfortunately lags quite far behind. If you don&#x27;t use these tools in your stack, you will find them of limited use.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Anomaly detection&lt;&#x2F;li&gt;
+&lt;li&gt;Schema checks&lt;&#x2F;li&gt;
+&lt;li&gt;Data profiling&lt;&#x2F;li&gt;
+&lt;li&gt;Quality metrics calculation and merging&lt;&#x2F;li&gt;
+&lt;li&gt;On-demand execution&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;&lt;strong&gt;AWS Glue Data Quality Rules&lt;&#x2F;strong&gt;: Recently, AWS introduced a variety of data quality tools as part of their serverless computing platform Glue. The tool itself uses Deequ under the hood and provides excellent interoperability with the rest of AWS stack, such as AWS CloudWatch and result storage.&lt;&#x2F;p&gt;
+&lt;p&gt;As of writing this article, the functionality is still in public beta, does not offer a way to store quality metric results for anomaly detection nor has a way to run the checks outside AWS glue environment (closed source). Similarly, many of the features included in deequ are not yet supported, such as quality metrics calculation or custom checks.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Configuration-based tests&lt;&#x2F;li&gt;
+&lt;li&gt;Well integrated with AWS infrastructure&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;&lt;strong&gt;Soda Core&lt;&#x2F;strong&gt;: is a modern SQL-first data quality and observability tool. Similar to GX it includes a &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.soda.io&#x2F;integrations#data-sources&quot;&gt;wide range of integrations&lt;&#x2F;a&gt;. While Soda Core by itself is only for collecting metrics, a full-fledged data observability platform in form of Soda Cloud (proprietary) is provided with automatic monitoring of data quality results, data contracts, and anomaly detection.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Wide range of integrations&lt;&#x2F;li&gt;
+&lt;li&gt;Simple configuration&lt;&#x2F;li&gt;
+&lt;li&gt;Schema checks&lt;&#x2F;li&gt;
+&lt;li&gt;Quality measure calculation&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;&lt;strong&gt;DBT Unit Tests&lt;&#x2F;strong&gt;: comes as part of the DBT which is an SQL-first tool for managing and modeling your data in data warehouses. &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.getdbt.com&#x2F;product&#x2F;integrations&#x2F;&quot;&gt;The integrations&lt;&#x2F;a&gt; are not limited to data sources, but also other data quality tools. The tool itself is meant for unit testing and therefore runs separately from the data flow.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Custom metric calculation.&lt;&#x2F;li&gt;
+&lt;li&gt;Community support (resources, plugins, and integrations).&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;&lt;strong&gt;Apache Griffin&lt;&#x2F;strong&gt;: As a complete data quality platform, it provides an integrated dashboard for data quality analysis, and monitoring data quality over time. The quality testing runs are conducted within the tool but separate from the data flow. &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;apache&#x2F;griffin&#x2F;blob&#x2F;master&#x2F;griffin-doc&#x2F;measure&#x2F;measure-configuration-guide.md&quot;&gt;The integrations&lt;&#x2F;a&gt; are limited to the Apache Stack (Kafka, Spark, Hive), and a select few other tools.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Streaming data processing support&lt;&#x2F;li&gt;
+&lt;li&gt;Dashboard for data quality analysis&lt;&#x2F;li&gt;
+&lt;li&gt;Anomaly detection&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;All listed tools have their use cases and as such there is no clear winner. For simple ETL workloads, you might want to try Deequ. In a data warehouse setting, dbt in combination with Soda or GX might prove useful. When working in a data science setting or with streaming data, GX and Apache Griffin respectively might be good choices. If your infrastructure runs on AWS, it&#x27;s worth keeping an eye on developments in their Glue-based data quality tools.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#conclusion&quot; aria-label=&quot;Anchor link for: conclusion&quot;&gt;🔗&lt;&#x2F;a&gt;Conclusion&lt;&#x2F;h2&gt;
+&lt;p&gt;In conclusion, maintaining high-quality data is essential for accurate data analysis, decision-making, and achieving business objectives. Data quality testing is a huge part of the testing process for data systems, and there are many options on how this can be implemented. In this blog, we have covered a few fundamentals, which I hope give you a starting point for exploring more on the topic and applying it in your projects. Stay tuned for part two, where we will use deequ for data quality testing within an ETL pipeline on AWS.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;more-resources&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#more-resources&quot; aria-label=&quot;Anchor link for: more-resources&quot;&gt;🔗&lt;&#x2F;a&gt;More resources&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;aws.amazon.com&#x2F;blogs&#x2F;big-data&#x2F;build-data-lineage-for-data-lakes-using-aws-glue-amazon-neptune-and-spline&#x2F;&quot;&gt;Build data lineage for data lakes using AWS Glue, Amazon Neptune, and Spline | AWS Big Data Blog&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;benn.substack.com&#x2F;p&#x2F;data-contracts&quot;&gt;Fine, let&#x27;s talk about data contracts - by Benn Stancil&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;aws.amazon.com&#x2F;blogs&#x2F;big-data&#x2F;build-a-data-quality-score-card-using-aws-glue-databrew-amazon-athena-and-amazon-quicksight&#x2F;&quot;&gt;Build a data quality score card using AWS Glue DataBrew, Amazon Athena, and Amazon QuickSight | AWS Big Data Blog&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+        
+    </entry>
+</feed>

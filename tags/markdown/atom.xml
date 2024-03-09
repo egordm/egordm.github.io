@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>EgorDm&#x27;s Blog - markdown</title>
+    <link href="https://egordmitriev.dev/tags/markdown/atom.xml" rel="self" type="application/atom+xml"/>
+    <link href="https://egordmitriev.dev"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-05-10T00:00:00+00:00</updated>
+    <id>https://egordmitriev.dev/tags/markdown/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Hello World!</title>
+        <published>2023-05-10T00:00:00+00:00</published>
+        <updated>2023-05-10T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://egordmitriev.dev/blog/hello-world/" type="text/html"/>
+        <id>https://egordmitriev.dev/blog/hello-world/</id>
+        
+        <content type="html">&lt;p&gt;This is my first post. I&#x27;m testing the waters here.&lt;&#x2F;p&gt;
+&lt;p&gt;Let&#x27;s see if LaTeX works:
+$$
+\sum_{i=1}^{n} x_i
+$$&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>

@@ -110,28 +110,15 @@ vpc = ec2.Vpc(
 First things first, before we get into the details of creating a SageMaker domain, we need to establish a default role that all users will assume. This can be fine-tuned or overridden later, depending on your specific use case. Here’s how you can create an execution role:
 
 ```python
-vpc = ec2.Vpc(
-    self,
-    id="VpcConstruct",
-    ip_addresses=ec2.IpAddresses.cidr("10.0.0.0/16"),
-    vpc_name=f"{self.prefix}-vpc",
-    max_azs=3,
-    nat_gateways=1,
-    subnet_configuration=[
-        ec2.SubnetConfiguration(
-            cidr_mask=24,
-            name="Public",
-            subnet_type=ec2.SubnetType.PUBLIC,
-        ),
-        ec2.SubnetConfiguration(
-            cidr_mask=23,
-            name="Private",
-            subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS,
-        ),
-        ec2.SubnetConfiguration(
-            cidr_mask=24,
-            name="Isolated",
-            subnet_type=ec2.SubnetType.PRIVATE_ISOLATED,
+role = iam.Role(
+    self, 'SagemakerExecutionRole',
+    assumed_by=iam.ServicePrincipal('sagemaker.amazonaws.com'),
+    role_name=f"{self.prefix}-sm-execution-role",
+    managed_policies=[
+        iam.ManagedPolicy.from_managed_policy_arn(
+            self,
+            id="SagemakerFullAccess",
+            managed_policy_arn="arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
         ),
     ],
 )

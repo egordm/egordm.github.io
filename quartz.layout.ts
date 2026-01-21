@@ -1,5 +1,6 @@
 import { PageLayout, SharedLayout } from "./quartz/cfg"
 import * as Component from "./quartz/components"
+import { FileTrieNode } from "./quartz/util/fileTrie"
 
 // components shared across all pages
 export const sharedPageComponents: SharedLayout = {
@@ -51,7 +52,10 @@ export const defaultContentPageLayout: PageLayout = {
         { Component: Component.ReaderMode() },
       ],
     }),
-    Component.Explorer(),
+    Component.Explorer({
+      folderDefaultState: "collapsed",
+      sortFn: explorerSortFn,
+    }),
   ],
   right: [
     Component.Graph(),
@@ -75,7 +79,42 @@ export const defaultListPageLayout: PageLayout = {
         { Component: Component.Darkmode() },
       ],
     }),
-    Component.Explorer(),
+    Component.Explorer({
+      folderDefaultState: "collapsed",
+      sortFn: explorerSortFn,
+    }),
   ],
   right: [],
+}
+
+export function explorerSortFn(a: FileTrieNode, b: FileTrieNode) {
+  const nameA = (a.displayName || "").toLowerCase()
+  const nameB = (b.displayName || "").toLowerCase()
+
+  // Sort order: folders first, then files. Sort folders and files alphabetically
+  if ((!a.isFolder && !b.isFolder) || (a.isFolder && b.isFolder)) {
+    // specific order for top-level folders: projects then blog
+    if (nameA === "projects" && nameB === "blog") return -1
+    if (nameA === "blog" && nameB === "projects") return 1
+
+    // specific order for blog posts: by date descending
+    if (a.slug.startsWith("blog/") && b.slug.startsWith("blog/")) {
+      const dateA = a.data?.date ? new Date(a.data.date) : new Date(0)
+      const dateB = b.data?.date ? new Date(b.data.date) : new Date(0)
+      if (dateA.getTime() !== dateB.getTime()) {
+        return dateB.getTime() - dateA.getTime()
+      }
+    }
+
+    return a.displayName.localeCompare(b.displayName, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    })
+  }
+
+  if (!a.isFolder && b.isFolder) {
+    return 1
+  } else {
+    return -1
+  }
 }

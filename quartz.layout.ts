@@ -1,55 +1,6 @@
 import { PageLayout, SharedLayout } from "./quartz/cfg"
 import * as Component from "./quartz/components"
 
-// Custom sort function for explorer: Home first, then Projects, then Blog
-const explorerSortFn = (a: any, b: any) => {
-  // Define priority order for top-level items
-  const priority: Record<string, number> = {
-    "index": 0,      // Home
-    "projects": 1,   // Projects folder
-    "blog": 2,       // Blog folder (last since it has many items)
-  }
-
-  // Get the segment name (folder or file name)
-  const aName = a.slugSegment || a.displayName?.toLowerCase() || ""
-  const bName = b.slugSegment || b.displayName?.toLowerCase() || ""
-
-  const aPriority = priority[aName] ?? 99
-  const bPriority = priority[bName] ?? 99
-
-  if (aPriority !== bPriority) {
-    return aPriority - bPriority
-  }
-
-  // If same priority, folders first, then alphabetical
-  if (a.isFolder !== b.isFolder) {
-    return a.isFolder ? -1 : 1
-  }
-
-  return a.displayName.localeCompare(b.displayName, undefined, {
-    numeric: true,
-    sensitivity: "base",
-  })
-}
-
-// Filter function for explorer - hide individual blog posts, only show main sections
-const explorerFilterFn = (node: any) => {
-  const slug = node.slug as string
-
-  // Always hide tags
-  if (node.slugSegment === "tags") return false
-  // Hide assets folders
-  if (node.slugSegment === "assets") return false
-
-  // Hide individual blog posts - only show the Blog folder itself
-  // Blog folder has slug "blog/index", individual posts have slug "blog/post-name"
-  if (slug && slug.startsWith("blog/") && slug !== "blog/index") {
-    return false
-  }
-
-  return true
-}
-
 // components shared across all pages
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
@@ -100,10 +51,7 @@ export const defaultContentPageLayout: PageLayout = {
         { Component: Component.ReaderMode() },
       ],
     }),
-    Component.Explorer({
-      sortFn: explorerSortFn,
-      // filterFn: explorerFilterFn,
-    }),
+    Component.Explorer(),
   ],
   right: [
     Component.Graph(),
@@ -127,10 +75,7 @@ export const defaultListPageLayout: PageLayout = {
         { Component: Component.Darkmode() },
       ],
     }),
-    Component.Explorer({
-      sortFn: explorerSortFn,
-      // filterFn: explorerFilterFn,
-    }),
+    Component.Explorer(),
   ],
   right: [],
 }

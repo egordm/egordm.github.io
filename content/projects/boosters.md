@@ -8,18 +8,27 @@ tags:
   - "open-source"
 ---
 
-# Boosters
-
 **Boosters** is a high-performance gradient boosting library for Python and Rust.
 
-## Overview
+## The Story Behind Boosters
 
-Boosters provides state-of-the-art gradient boosting implementations designed for:
+What started as a learning experiment turned into a deep dive down the rabbit hole of gradient boosting internals.
 
-- ⚡ **High Performance** - Optimized for speed with Rust's zero-cost abstractions
+I initially set out to **dissect XGBoost models** - understanding what's really inside them and trying to reproduce their results from scratch. This curiosity led me through extensive research into how various optimizations and algorithms actually work under the hood.
+
+Along the way, I documented my entire research and design process on the library's website, complete with proper LaTeX formulas and detailed explanations:
+
+- 📚 **[Research Documentation](https://egordmitriev.dev/boosters/research/index.html)** - Deep dives into gradient boosting theory and algorithms
+- 🏗️ **[Design RFCs](https://egordmitriev.dev/boosters/design/rfcs.html)** - Architecture decisions and implementation rationale
+
+I implemented everything in **Rust**, which naturally led me further down the optimization path. After months of work, I ended up with a library that not only has **feature and algorithm parity with XGBoost and LightGBM**, but is also **just as fast - or faster**.
+
+## Features
+
+- ⚡ **High Performance** - Optimized Rust implementation with zero-cost abstractions
 - 🐍 **Python Integration** - Seamless Python bindings via PyO3
-- 🔧 **Flexibility** - Clean, configurable API for various use cases
-- 📊 **Modern Design** - Built with contemporary ML best practices
+- 🔧 **Full Feature Parity** - Supports all major XGBoost and LightGBM algorithms
+- 📊 **Well Documented** - Comprehensive research docs and design rationale
 
 ## Quick Start
 
@@ -35,20 +44,15 @@ model.fit(X_train, y_train)
 predictions = model.predict(X_test)
 ```
 
-## Documentation
+## Links
 
-For comprehensive documentation, tutorials, and API reference, visit the official documentation site:
+- **📚 [Documentation](https://egordmitriev.dev/boosters/)** - Full docs, tutorials, and API reference
+- **🐙 [GitHub Repository](https://github.com/egordm/boosters/)** - Source code and issue tracker
+- **🔬 [Research](https://egordmitriev.dev/boosters/research/index.html)** - Theory and algorithm deep-dives
+- **🏗️ [Design RFCs](https://egordmitriev.dev/boosters/design/rfcs.html)** - Implementation decisions
 
-**📚 [Documentation →](https://egordmitriev.dev/boosters/)**
+## Related Posts
 
-## Source Code
-
-The project is open source and available on GitHub:
-
-**🐙 [GitHub Repository →](https://github.com/egordm/boosters/)**
-
-## Related Blog Posts
-
-Check out related articles about gradient boosting and machine learning:
+Check out related articles about machine learning:
 
 - [[blog/comprehensive-introduction-to-large-language-models/|Introduction to Large Language Models]]

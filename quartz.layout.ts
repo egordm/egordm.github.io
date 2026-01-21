@@ -1,8 +1,7 @@
 import { PageLayout, SharedLayout } from "./quartz/cfg"
 import * as Component from "./quartz/components"
 
-// Custom sort function for explorer: Home first, then Projects, then Blog (collapsed)
-// Within each section, sort alphabetically
+// Custom sort function for explorer: Home first, then Projects, then Blog
 const explorerSortFn = (a: any, b: any) => {
   // Define priority order for top-level items
   const priority: Record<string, number> = {
@@ -33,6 +32,24 @@ const explorerSortFn = (a: any, b: any) => {
   })
 }
 
+// Filter function for explorer - hide individual blog posts, only show main sections
+const explorerFilterFn = (node: any) => {
+  const slug = node.slug as string
+
+  // Always hide tags
+  if (node.slugSegment === "tags") return false
+  // Hide assets folders
+  if (node.slugSegment === "assets") return false
+
+  // Hide individual blog posts - only show the Blog folder itself
+  // Blog folder has slug "blog/index", individual posts have slug "blog/post-name"
+  if (slug && slug.startsWith("blog/") && slug !== "blog/index") {
+    return false
+  }
+
+  return true
+}
+
 // components shared across all pages
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
@@ -45,7 +62,7 @@ export const sharedPageComponents: SharedLayout = {
         limit: 5,
         linkToMore: "blog/" as any,
         showTags: true,
-        filter: (f) => f.slug?.startsWith("blog/") && f.slug !== "blog/index",
+        filter: (f) => (f.slug ?? "").startsWith("blog/") && f.slug !== "blog/index",
       }),
       condition: (page) => page.fileData.slug === "index",
     }),
@@ -62,24 +79,13 @@ export const sharedPageComponents: SharedLayout = {
 // components for pages that display a single page (e.g. a single note)
 export const defaultContentPageLayout: PageLayout = {
   beforeBody: [
-    // Hide breadcrumbs on home page
     Component.ConditionalRender({
       component: Component.Breadcrumbs(),
       condition: (page) => page.fileData.slug !== "index",
     }),
-    // Hide article title and meta on home page (the content has its own title)
-    Component.ConditionalRender({
-      component: Component.ArticleTitle(),
-      condition: (page) => page.fileData.slug !== "index",
-    }),
-    Component.ConditionalRender({
-      component: Component.ContentMeta(),
-      condition: (page) => page.fileData.slug !== "index",
-    }),
-    Component.ConditionalRender({
-      component: Component.TagList(),
-      condition: (page) => page.fileData.slug !== "index",
-    }),
+    Component.ArticleTitle(),
+    Component.ContentMeta(),
+    Component.TagList(),
   ],
   left: [
     Component.PageTitle(),
@@ -95,20 +101,8 @@ export const defaultContentPageLayout: PageLayout = {
       ],
     }),
     Component.Explorer({
-      title: "Navigate",
-      folderDefaultState: "collapsed",  // Keep folders collapsed by default
-      folderClickBehavior: "link",
       sortFn: explorerSortFn,
-      // Filter out individual blog posts from explorer - just show the Blog folder
-      filterFn: (node) => {
-        // Always hide tags
-        if (node.slugSegment === "tags") return false
-        // Hide assets folder
-        if (node.slugSegment === "assets") return false
-        // Show everything at top level (index, blog, projects folders)
-        // For items inside blog folder, only show the folder itself (handled by depth)
-        return true
-      },
+      // filterFn: explorerFilterFn,
     }),
   ],
   right: [
@@ -134,15 +128,8 @@ export const defaultListPageLayout: PageLayout = {
       ],
     }),
     Component.Explorer({
-      title: "Navigate",
-      folderDefaultState: "collapsed",
-      folderClickBehavior: "link",
       sortFn: explorerSortFn,
-      filterFn: (node) => {
-        if (node.slugSegment === "tags") return false
-        if (node.slugSegment === "assets") return false
-        return true
-      },
+      // filterFn: explorerFilterFn,
     }),
   ],
   right: [],

@@ -64,7 +64,7 @@ One exciting integration with OpenLineage is the combination with [Marquez](http
 
 One notable feature of Purview is its integration with Azure Data Factory (ADF). While ADF provides some level of data lineage tracking through job dependencies, Purview enhances this functionality by offering a more unified and visual representation of data lineage across the data ecosystem.
 
-![[MS-Purview-Lineage.png|700]]
+![[blog/assets/MS-Purview-Lineage.png|700]]
 *Data Lineage in Microsoft Purview*
 
 ### Datahub
@@ -72,7 +72,7 @@ One notable feature of Purview is its integration with Azure Data Factory (ADF).
 
 Datahub can handle large-scale data lineage requirements. Data engineers and data analysts can rely on Datahub to trace data paths, identify data inconsistencies, and ensure data quality across their pipelines, making it a one-stop shop data quality tool.
 
-![[datahub-lineage.png|700]]
+![[blog/assets/datahub-lineage.png|700]]
 *Dataset Lineage overview in DataHub*
 
 #### Spline
@@ -80,7 +80,7 @@ If your organization mainly utilizes Apache Spark for data processing, [Spline](
 
 One notable advantage of Spline is its compatibility with OpenLineage ([currently as POC](https://github.com/AbsaOSS/spline-openlineage)). This allows you to leverage OpenLineage's ecosystem to combine lineage across environments for visualization.
 
-![[spline_lineage.jpeg|400]]
+![[blog/assets/spline_lineage.jpeg|400]]
 *Dataset High Level Data Lineage overview in Spline UI*
 
 #### DBT (Data Build Tool) and Dagster
@@ -90,7 +90,7 @@ DBT is a popular data transformation tool that enables data engineers and analys
 
 On the other hand, Dagster is a data orchestration tool designed to facilitate the development and management of data workflows. With Dagster, you can build robust data pipelines that capture data lineage effectively, making it easier to identify and resolve issues in your data processes.
 
-![[dagster-lineage.png|500]]
+![[blog/assets/dagster-lineage.png|500]]
 *Data Graph in Dagster Combining FiveTran, DBT and Tensorflow Assets*
 
 #### Apache Airflow

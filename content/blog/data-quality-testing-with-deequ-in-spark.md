@@ -142,7 +142,7 @@ data/iowa_liquor_sales_lite/
 
 Assuming that we have already conducted exploratory data analysis, we will start building our data quality checks by using the 2022 partition and will consider at the end how the other partitions impact our solution.
 
-![[iowa_liquor_dataset_preview-e1686825218211.png|600]]
+![[blog/assets/iowa_liquor_dataset_preview-e1686825218211.png|600]]
 *Preview of [Iowa Liquor Sales dataset](https://github.com/EgorDm/deequ-spark-example/blob/master/data/iowa_liquor_sales_lite/year%3D2022/iowa_liquor_sales_01.csv).*
 
 
@@ -379,7 +379,7 @@ Another useful feature is [KLL Sketches](https://github.com/awslabs/deequ/blob/m
 ### Incremental Computation of Metrics
 In the realm of ETL workloads, it is rare for data engineers to reprocess the entire dataset. Typically, pipelines are designed to be incremental, processing only new data. However, if your data quality checks rely on metrics computed over the entire dataset, this can lead to a continuous increase in load on your Spark cluster.
 
-![[deequ_aggregated_states.png|500]]
+![[blog/assets/deequ_aggregated_states.png|500]]
 *Instead of repeatedly running the batch computation on growing input data D, incremental computation is supported hat only needs (t) to consume the latest dataset delta ∆D and a state S of the computation. Source: [technical paper](https://www.vldb.org/pvldb/vol11/p1781-schelter.pdf).*
 
 To address this challenge, Deequ introduces a concept of “Algebraic states.” These states store calculated metrics and the corresponding data, enabling their aggregation across multiple pipeline runs. Consequently, only the incremental data needs to be processed, significantly reducing the computational burden.

@@ -1,5 +1,5 @@
 ---
-title: "A Comprehensive Introduction to Large Language Models"
+title: "An Introduction to Large Language Models"
 date: 2023-12-16
 description: "This series of blog posts aims to demystify the associated terminology and concepts, providing a comprehensive guide for individuals looking to comprehend and leverage these powerful models in their projects."
 tags:
@@ -29,14 +29,14 @@ This is where the concept of "tokenization" comes into play. It's all about spli
 
 One of the key properties of tokens is that they belong to a fixed-size set, aptly named the "**vocabulary**". This makes them much easier to work with mathematically. Each token can be represented by its unique ID in the set or as a one-hot vector.
 
-![[Tokenization_and_Embedding.png|500]]
+![[blog/assets/Tokenization_and_Embedding.png|500]]
 *The document is tokenized and one-hot encoded producing a fixed-size matrix of vectors. These vectors are fed through a function that transforms them into embeddings, effectively reducing the dimensionality*
 
 In the olden days, tokenizers were quite lossy. It was common to work on stemmed words and only consider a set of the most common words. Modern tokenizers, instead, have evolved to focus on efficiency and losslessness. Instead of encoding whole words, algorithms such as [Byte Pair Encoding (BPE)](https://huggingface.co/learn/nlp-course/chapter6/5?fw=pt) take a compression-like approach by breaking words apart.
 
 Vocabulary construction is done in a purely data-driven manner, resulting in token splits that make sense semantically, such as the common verb ending "-ing". Words like "working", "eating", and "learning" all share this ending, thus an efficient encoding is to give "-ing" its own token. Some splits don't make sense, producing semantically dissimilar tokens such as "lab-elling" which requires the model to do more work to infer its true meaning.
 
-![[sentence-tokenization.png|600]]
+![[blog/assets/sentence-tokenization.png|600]]
 *OpenAI's `cl100k_base` tokenizer encoding a sentence. In this case, 100k refers to its vocabulary size.*
 
 
@@ -56,7 +56,7 @@ Enter the concept of "**token embeddings**", also known as "word vectors". The s
 
 It's important to note that these two assumptions are distinct. The first is about the context in which words are used, while the second is about the meanings of the words themselves.
 
-![[linear_relationships_in_embeddings.png|600]]
+![[blog/assets/linear_relationships_in_embeddings.png|600]]
 *Demonstration of Linear Relationships Between Words Visualized in Two Dimensional Space. Image from [Google Blog](https://cloud.google.com/blog/products/ai-machine-learning/example-based-explanations-to-build-better-aiml-models)*
 
 At first glance, "similarity" might seem like a subjective concept. But what if we think of words as high-dimensional vectors? Suddenly, similarity becomes a very concrete concept. It could be the L2 distance between vectors, the cosine similarity, the dot product similarity, and so on.
@@ -74,21 +74,21 @@ While methods like Word2Vec are great for creating simple word embeddings, they 
 
 Why? Well, if you encode all the tokens in a sentence into embeddings, you lose all the order of the words. And as anyone who's ever played a game of "[Mad Libs](https://en.wikipedia.org/wiki/Mad_Libs)" knows, word order is crucial when it comes to making sense of a sentence. By losing the order, you also lose the context, which can drastically change the meaning of a word.
 
-![[sentence_encoding_diagram.png|500]]
+![[blog/assets/sentence_encoding_diagram.png|500]]
 *The encoder produces a document embedding by combining the individual word embeddings*
 
 To overcome this limitation, we need an additional model, the "Encoder", which does some neural net math magic to create an embedding that takes both context and order into account.
 
 On the other side of the equation, we have the "Decoder". Its job is to produce a token from the input, which is typically a latent vector.
 
-![[sequence_encoding_diagram.png|600]]
+![[blog/assets/sequence_encoding_diagram.png|600]]
 *Visualization of a encoding a sequence of tokens embeddings into a single latent representation, and decoding it into a sequence of token probabilities.*
 
 The architecture of how Encoders and Decoders work can vary greatly. It can be based on Transformers, LSTMs, or a combination of both. We'll dive deeper into these architectures in a later blog.
 
 One interesting thing to keep in mind is that, since encoders and decoders operate in latent space, their input is not limited to text. They can also take embeddings produced from images, audio, and other modalities. This is thanks to innovations like [CLIP](https://openai.com/research/clip), which are trained on multimodal tasks by introducing an encoder for each data type.
 
-![[next_gpt_multimodal_inference.png|600]]
+![[blog/assets/next_gpt_multimodal_inference.png|600]]
 *Inference process on [NExT-GPT](https://next-gpt.github.io/) with text, image, audio, and video modalities.*
 
 
@@ -107,12 +107,12 @@ On the other hand, Masked Language Models (MLMs) are trained to predict masked t
 
 Unlike CLMs, MLMs typically use a bidirectional architecture, meaning they use the context on both sides of a word. This gives them a broader perspective and generally leads to a better understanding of the relationships between words.
 
-![[llm_attention_comparison.png|800]]
+![[blog/assets/llm_attention_comparison.png|800]]
 *Differences between attention direction. BERT uses a bi-directional Transformer. OpenAI GPT uses a unidirectional left-to-right Transformer*
 
 MLMs are particularly suitable for tasks like text classification, sentiment analysis, and text tagging. [Semantic search](https://www.luminis.eu/blog/search-en/decoding-similarity-search-with-faiss-a-practical-approach/) is driven by LLMs, where the mathematical distance between document embeddings us used as distance. However, they don't add much value for incremental token prediction tasks because of their bidirectional nature. Nor can they fill in an arbitrary amount of words.
 
-![[llm_architecture_comparison.png|800]]
+![[blog/assets/llm_architecture_comparison.png|800]]
 *Comparison between architectures of influential models from different modelling methods. (from left to right) BERT is an MLM, Original Transformer is a Seq2Seq model, and LLaMA is a CLM.*
 
 [BERT (Bidirectional Encoder Representations from Transformers)](https://arxiv.org/abs/1810.04805) model is highly effective in document embedding. Both BERT and [ELMo (Embeddings from Language Models)](https://arxiv.org/abs/1802.05365) have been instrumental in advancing the field of natural language processing and continue to be widely used in a variety of applications.
@@ -124,7 +124,7 @@ Seq2Seq models are typically composed of an encoder-decoder architecture, which 
 
 These models can generally generate coherent, much larger output based on input, making them suitable for tasks like summarization, translation, and question answering.
 
-![[encoder_decoder_diagram.png|600]]
+![[blog/assets/encoder_decoder_diagram.png|600]]
 *Visualization of encoding and decoding flow of an Seq2Seq model.*
 
 A popular example of a Seq2Seq model is [T5 (Text-to-Text Transfer Transformer)](https://arxiv.org/abs/1910.10683) which during training frames all NLP tasks (such as translation, classification, summarization, and more) into text-to-text problems. Doing so, allows it to learn patterns useful for a variety of tasks. Another popular example is [BART (Bidirectional and Auto-Regressive Transformers)](https://arxiv.org/abs/1910.13461) which is pre-trained by corrupting text and forcing it to reconstruct the original, which improves its text comprehension. These models have shown impressive results on a wide range of tasks, with only a fraction of parameters [they can outperform CLMs on various tasks](https://declare-lab.net/instruct-eval/). 
@@ -152,7 +152,7 @@ To counteract this, we can use techniques like **[Retrieval Augmented Generation
 
 This retrieval process can be done through semantic or vector searches, and the exciting part is, that it can be applied to your custom data as well as external systems like Google Search, essentially giving the LLM a searchable "knowledge base" to draw from.
 
-![[RAG_workflow.png|600]]
+![[blog/assets/RAG_workflow.png|600]]
 *Retrieval Augmented Generation workflow. Image from [AWS Sagemaker Docs](https://docs.aws.amazon.com/sagemaker/latest/dg/jumpstart-foundation-models-customize-rag.html)*
 
 LLMs, despite their sophistication, still fall short when it comes to tasks like performing math calculations or executing code. A model won't be able to solve complex mathematical equations or compile and run a piece of Python code without some external help.
@@ -170,7 +170,7 @@ We have all become familiar with LLMs through user-friendly interfaces like Chat
 
 To address the limitation of LLMs being limited to single-turn conversations, **AI agents** are designed as systems consisting of multiple LLM agents, each instructed with their specific task. These agents communicate with each other over a chat interface, moderated by AI. By working together, these LLM agents form a collaborative machine that can work towards completing a certain task. 
 
-![[llm_agent_chat_workflow.png|600]]
+![[blog/assets/llm_agent_chat_workflow.png|600]]
 *An example of a conversation flow between a python code execution agent, progamming agent and the user. (From [AutoGen](https://github.com/microsoft/autogen))*
 
 This concept is explored in-depth in the article [Introduction to Autonomous Agents in AI](https://www.luminis.eu/blog/machine-learning-ai-en/introduction-to-autonomous-agents-in-ai/). This collaborative approach has been implemented in projects like [ChatDev](https://github.com/OpenBMB/ChatDev), which in true spirit of [Conway's law](https://en.wikipedia.org/wiki/Conway%27s_law) models agents as a company designed to tackle specific tasks, and [Autogen](https://github.com/microsoft/autogen) by Microsoft, which provides developer tools to create your agent-based applications.

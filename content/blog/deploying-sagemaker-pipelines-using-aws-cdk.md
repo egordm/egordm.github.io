@@ -39,14 +39,14 @@ However, these components, while individually powerful, need a maestro to orches
 * Integrates with services such as AWS Athena and SageMaker Feature Store gethering the necessary (training) data.
 * Executable from services such as AWS StepFunctions and AWS Lambda using AWS SDK.
 
-![[AWS-Sagemaker-Pipeline-graph.png|500]]
+![[blog/assets/AWS-Sagemaker-Pipeline-graph.png|500]]
 *SageMaker Pipeline Graph*
 
 ## A High Level Overview
 
 Before we delve into the specifics, it is beneficial to understand the overall structure of our deployment. The following diagram illustrates the components involved in this blog:
 
-![[deployment.png|600]]
+![[blog/assets/deployment.png|600]]
 *What we will be building.*
 
 One important aspect to note is that the SageMaker Pipeline does not directly depend on the SageMaker domain. This is correct, the pipeline is a standalone resource, and can be launched programmatically using the AWS SDK or step functions, which is useful in minimal setups.
@@ -202,7 +202,7 @@ cdk deploy
 
 The deployment of a SageMaker pipeline is a complicated process that involves two key tasks. First, we need to generate a pipeline definition using the SageMaker SDK. Then, we deploy this definition using CloudFormation. Let’s delve into the details of each task.
 
-![[diagrams-Deployment-Flow.drawio.png|600]]
+![[blog/assets/diagrams-Deployment-Flow.drawio.png|600]]
 *Deployment Flow*
 
 ### The Pipeline Definition
@@ -381,22 +381,22 @@ After deploying both of the stacks, we can view and run our pipeline in SageMake
 
 Navigate to the SageMaker service in the AWS Management Console and click on “Domains.” Ensure that your SageMaker domain, created as part of the infrastructure stack, is visible.
 
-![[sm-domains.png|600]]
+![[blog/assets/sm-domains.png|600]]
 *Viewing SageMaker Domains*
 
 Inside the SageMaker domain, click on “Launch” near your created user and launch the SageMaker Studio.
 
-![[sm-users.png|600]]
+![[blog/assets/sm-users.png|600]]
 *Viewing SageMaker Users*
 
 In the navigation select “Pipelines” to see a list of deployed pipelines. Confirm that your example pipeline is listed.
 
-![[sm-pipelines.png|600]]
+![[blog/assets/sm-pipelines.png|600]]
 *Viewing SageMaker Pipelines*
 
 Click on the specific pipeline (e.g., “example-pipeline”) to view its details and start an exectution to start and monitor your pipeline.
 
-![[sm-pipeline-2048x1248.png|600]]
+![[blog/assets/sm-pipeline-2048x1248.png|600]]
 *Viewing SageMaker Pipeline Details*
 
 ## Conclusion

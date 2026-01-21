@@ -1,6 +1,38 @@
 import { PageLayout, SharedLayout } from "./quartz/cfg"
 import * as Component from "./quartz/components"
 
+// Custom sort function for explorer: Home first, then Projects, then Blog (collapsed)
+// Within each section, sort alphabetically
+const explorerSortFn = (a: any, b: any) => {
+  // Define priority order for top-level items
+  const priority: Record<string, number> = {
+    "index": 0,      // Home
+    "projects": 1,   // Projects folder
+    "blog": 2,       // Blog folder (last since it has many items)
+  }
+
+  // Get the segment name (folder or file name)
+  const aName = a.slugSegment || a.displayName?.toLowerCase() || ""
+  const bName = b.slugSegment || b.displayName?.toLowerCase() || ""
+
+  const aPriority = priority[aName] ?? 99
+  const bPriority = priority[bName] ?? 99
+
+  if (aPriority !== bPriority) {
+    return aPriority - bPriority
+  }
+
+  // If same priority, folders first, then alphabetical
+  if (a.isFolder !== b.isFolder) {
+    return a.isFolder ? -1 : 1
+  }
+
+  return a.displayName.localeCompare(b.displayName, undefined, {
+    numeric: true,
+    sensitivity: "base",
+  })
+}
+
 // components shared across all pages
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
@@ -64,8 +96,19 @@ export const defaultContentPageLayout: PageLayout = {
     }),
     Component.Explorer({
       title: "Navigate",
-      folderDefaultState: "open",
+      folderDefaultState: "collapsed",  // Keep folders collapsed by default
       folderClickBehavior: "link",
+      sortFn: explorerSortFn,
+      // Filter out individual blog posts from explorer - just show the Blog folder
+      filterFn: (node) => {
+        // Always hide tags
+        if (node.slugSegment === "tags") return false
+        // Hide assets folder
+        if (node.slugSegment === "assets") return false
+        // Show everything at top level (index, blog, projects folders)
+        // For items inside blog folder, only show the folder itself (handled by depth)
+        return true
+      },
     }),
   ],
   right: [
@@ -92,8 +135,14 @@ export const defaultListPageLayout: PageLayout = {
     }),
     Component.Explorer({
       title: "Navigate",
-      folderDefaultState: "open",
+      folderDefaultState: "collapsed",
       folderClickBehavior: "link",
+      sortFn: explorerSortFn,
+      filterFn: (node) => {
+        if (node.slugSegment === "tags") return false
+        if (node.slugSegment === "assets") return false
+        return true
+      },
     }),
   ],
   right: [],

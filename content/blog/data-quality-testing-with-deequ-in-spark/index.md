@@ -1,14 +1,11 @@
-+++
-title = "Data Quality Testing with Deequ in Spark"
-date = 2023-06-20
-description = "In this blog, we explore how to ensure data quality in a Spark Scala ETL (Extract, Transform, Load) job. To achieve this, we leverage Deequ, an open-source library, to define and enforce various data quality checks.."
-
-#[extra]
-#redirect_to = "https://www.luminis.eu/blog/data-quality-testing-with-deequ-in-spark/"
-
-[taxonomies]
-tags = ["data engineering", "spark"]
-+++
+---
+title: "Data Quality Testing with Deequ in Spark"
+date: 2023-06-20
+description: "In this blog, we explore how to ensure data quality in a Spark Scala ETL (Extract, Transform, Load) job. To achieve this, we leverage Deequ, an open-source library, to define and enforce various data quality checks.."
+tags:
+  - "data engineering"
+  - "spark"
+---
 
 <small>
 Originaly published as part of <a href="https://www.luminis.eu/blog/data-quality-testing-with-deequ-in-spark/" target="_blank">Luminis Data Blog</a>.
@@ -145,11 +142,8 @@ data/iowa_liquor_sales_lite/
 
 Assuming that we have already conducted exploratory data analysis, we will start building our data quality checks by using the 2022 partition and will consider at the end how the other partitions impact our solution.
 
-{{ obsidian_image(
-src="@/blog/data-quality-testing-with-deequ-in-spark/images/iowa_liquor_dataset_preview-e1686825218211.png",
-width=600,
-caption="Preview of [Iowa Liquor Sales dataset](https://github.com/EgorDm/deequ-spark-example/blob/master/data/iowa_liquor_sales_lite/year%3D2022/iowa_liquor_sales_01.csv)."
-)}}
+![[iowa_liquor_dataset_preview-e1686825218211.png|600]]
+*Preview of [Iowa Liquor Sales dataset](https://github.com/EgorDm/deequ-spark-example/blob/master/data/iowa_liquor_sales_lite/year%3D2022/iowa_liquor_sales_01.csv).*
 
 
 ## Building Schema Checks
@@ -385,11 +379,8 @@ Another useful feature is [KLL Sketches](https://github.com/awslabs/deequ/blob/m
 ### Incremental Computation of Metrics
 In the realm of ETL workloads, it is rare for data engineers to reprocess the entire dataset. Typically, pipelines are designed to be incremental, processing only new data. However, if your data quality checks rely on metrics computed over the entire dataset, this can lead to a continuous increase in load on your Spark cluster.
 
-{{ obsidian_image(
-src="@/blog/data-quality-testing-with-deequ-in-spark/images/deequ_aggregated_states.png",
-width=500,
-caption="Instead of repeatedly running the batch computation on growing input data D, incremental computation is supported hat only needs (t) to consume the latest dataset delta ∆D and a state S of the computation. Source: [technical paper](https://www.vldb.org/pvldb/vol11/p1781-schelter.pdf)."
-)}}
+![[deequ_aggregated_states.png|500]]
+*Instead of repeatedly running the batch computation on growing input data D, incremental computation is supported hat only needs (t) to consume the latest dataset delta ∆D and a state S of the computation. Source: [technical paper](https://www.vldb.org/pvldb/vol11/p1781-schelter.pdf).*
 
 To address this challenge, Deequ introduces a concept of “Algebraic states.” These states store calculated metrics and the corresponding data, enabling their aggregation across multiple pipeline runs. Consequently, only the incremental data needs to be processed, significantly reducing the computational burden.
 

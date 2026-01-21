@@ -1,14 +1,11 @@
-+++
-title = "Overview of Data Lineage"
-date = 2023-08-13
-description = "This article explores the importance of data lineage, which tracks the flow and transformations of data from source to destination, playing a vital role in ensuring data integrity and transparency in data processes."
-
-#[extra]
-#redirect_to = "https://www.luminis.eu/blog/data-quality-series-part-3-overview-of-data-lineage/"
-
-[taxonomies]
-tags = ["data engineering", "dataops"]
-+++
+---
+title: "Overview of Data Lineage"
+date: 2023-08-13
+description: "This article explores the importance of data lineage, which tracks the flow and transformations of data from source to destination, playing a vital role in ensuring data integrity and transparency in data processes."
+tags:
+  - "data engineering"
+  - "dataops"
+---
 
 <small>
 Originaly published as part of <a href="https://www.luminis.eu/blog/data-quality-series-part-3-overview-of-data-lineage/" target="_blank">Luminis Data Blog</a>.
@@ -67,33 +64,24 @@ One exciting integration with OpenLineage is the combination with [Marquez](http
 
 One notable feature of Purview is its integration with Azure Data Factory (ADF). While ADF provides some level of data lineage tracking through job dependencies, Purview enhances this functionality by offering a more unified and visual representation of data lineage across the data ecosystem.
 
-{{ obsidian_image(
-src="@/blog/overview-of-data-lineage/images/MS-Purview-Lineage.png",
-caption="Data Lineage in Microsoft Purview",
-width=700
-)}}
+![[MS-Purview-Lineage.png|700]]
+*Data Lineage in Microsoft Purview*
 
 ### Datahub
 [Datahub](https://github.com/datahub-project/datahub) is a versatile data platform that provides robust data lineage capabilities, among other features. It offers extensive integration support, making it suitable for various data environments. While it is open source, the installation is quite heavy and requires both Kafka and Elasticsearch to operate, making it a tough choice for small projects.
 
 Datahub can handle large-scale data lineage requirements. Data engineers and data analysts can rely on Datahub to trace data paths, identify data inconsistencies, and ensure data quality across their pipelines, making it a one-stop shop data quality tool.
 
-{{ obsidian_image(
-src="@/blog/overview-of-data-lineage/images/datahub-lineage.png",
-caption="Dataset Lineage overview in DataHub",
-width=700
-)}}
+![[datahub-lineage.png|700]]
+*Dataset Lineage overview in DataHub*
 
 #### Spline
 If your organization mainly utilizes Apache Spark for data processing, [Spline](https://absaoss.github.io/spline/) is an excellent tool to consider for data lineage tracking. Spline offers the ability to join lineage across multiple datasets, providing a comprehensive view of how data transformations take place.
 
 One notable advantage of Spline is its compatibility with OpenLineage ([currently as POC](https://github.com/AbsaOSS/spline-openlineage)). This allows you to leverage OpenLineage's ecosystem to combine lineage across environments for visualization.
 
-{{ obsidian_image(
-src="@/blog/overview-of-data-lineage/images/spline_lineage.jpeg",
-caption="Dataset High Level Data Lineage overview in Spline UI",
-width=400
-)}}
+![[spline_lineage.jpeg|400]]
+*Dataset High Level Data Lineage overview in Spline UI*
 
 #### DBT (Data Build Tool) and Dagster
 DBT and Dagster are two powerful data tools that emphasize data-first practices and can significantly contribute to your data lineage efforts.
@@ -102,11 +90,8 @@ DBT is a popular data transformation tool that enables data engineers and analys
 
 On the other hand, Dagster is a data orchestration tool designed to facilitate the development and management of data workflows. With Dagster, you can build robust data pipelines that capture data lineage effectively, making it easier to identify and resolve issues in your data processes.
 
-{{ obsidian_image(
-src="@/blog/overview-of-data-lineage/images/dagster-lineage.png",
-caption="Data Graph in Dagster Combining FiveTran, DBT and Tensorflow Assets",
-width=500
-)}}
+![[dagster-lineage.png|500]]
+*Data Graph in Dagster Combining FiveTran, DBT and Tensorflow Assets*
 
 #### Apache Airflow
 Apache Airflow is a widely used workflow management platform that, while not a strict data lineage tool, supports data lineage indirectly through its connectors and integrations. By utilizing these connectors, you can associate data pipelines with metadata about the data sources, dependencies, and transformations.

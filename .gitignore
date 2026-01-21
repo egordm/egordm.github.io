@@ -1,3 +1,17 @@
+# Quartz
+.DS_Store
+node_modules
 public
+prof
+tsconfig.tsbuildinfo
+.quartz-cache
+private/
+.replit
+replit.nix
+
+# Obsidian
+.obsidian
 content/.obsidian
-static
+
+# Archive
+_archive_zola/

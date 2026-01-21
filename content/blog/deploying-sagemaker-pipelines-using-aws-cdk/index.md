@@ -1,14 +1,12 @@
-+++
-title = "Deploying SageMaker Pipelines Using CloudFormation"
-date = 2024-02-09
-description = "The blog introduces SageMaker as a versatile AWS service for tasks like building data pipelines and deploying machine learning models, addressing common confusion by explaining how to write pipeline definitions and deploy them using AWS CDK into your SageMaker domain."
-
-#[extra]
-#redirect_to = "https://www.luminis.eu/blog/introduction-to-data-quality/"
-
-[taxonomies]
-tags = [ "mlops", "aws", "cloud"]
-+++
+---
+title: "Deploying SageMaker Pipelines Using CloudFormation"
+date: 2024-02-09
+description: "The blog introduces SageMaker as a versatile AWS service for tasks like building data pipelines and deploying machine learning models, addressing common confusion by explaining how to write pipeline definitions and deploy them using AWS CDK into your SageMaker domain."
+tags:
+  - "mlops"
+  - "aws"
+  - "cloud"
+---
 
 <small>
 Originaly published as part of <a href="https://www.luminis.eu/blog/deploying-sagemaker-pipelines-using-aws-cdk/" target="_blank">Luminis AI Blog</a>.
@@ -41,21 +39,15 @@ However, these components, while individually powerful, need a maestro to orches
 * Integrates with services such as AWS Athena and SageMaker Feature Store gethering the necessary (training) data.
 * Executable from services such as AWS StepFunctions and AWS Lambda using AWS SDK.
 
-{{ obsidian_image(
-src="@/blog/deploying-sagemaker-pipelines-using-aws-cdk/image/AWS-Sagemaker-Pipeline-graph.png",
-caption="SageMaker Pipeline Graph",
-width=500
-)}}
+![[AWS-Sagemaker-Pipeline-graph.png|500]]
+*SageMaker Pipeline Graph*
 
 ## A High Level Overview
 
 Before we delve into the specifics, it is beneficial to understand the overall structure of our deployment. The following diagram illustrates the components involved in this blog:
 
-{{ obsidian_image(
-src="@/blog/deploying-sagemaker-pipelines-using-aws-cdk/image/deployment.png",
-caption="What we will be building.",
-width=600
-)}}
+![[deployment.png|600]]
+*What we will be building.*
 
 One important aspect to note is that the SageMaker Pipeline does not directly depend on the SageMaker domain. This is correct, the pipeline is a standalone resource, and can be launched programmatically using the AWS SDK or step functions, which is useful in minimal setups.
 
@@ -210,11 +202,8 @@ cdk deploy
 
 The deployment of a SageMaker pipeline is a complicated process that involves two key tasks. First, we need to generate a pipeline definition using the SageMaker SDK. Then, we deploy this definition using CloudFormation. Let’s delve into the details of each task.
 
-{{ obsidian_image(
-src="@/blog/deploying-sagemaker-pipelines-using-aws-cdk/image/diagrams-Deployment-Flow.drawio.png",
-caption="Deployment Flow",
-width=600
-)}}
+![[diagrams-Deployment-Flow.drawio.png|600]]
+*Deployment Flow*
 
 ### The Pipeline Definition
 
@@ -392,35 +381,23 @@ After deploying both of the stacks, we can view and run our pipeline in SageMake
 
 Navigate to the SageMaker service in the AWS Management Console and click on “Domains.” Ensure that your SageMaker domain, created as part of the infrastructure stack, is visible.
 
-{{ obsidian_image(
-src="@/blog/deploying-sagemaker-pipelines-using-aws-cdk/image/sm-domains.png",
-caption="Viewing SageMaker Domains",
-width=600
-)}}
+![[sm-domains.png|600]]
+*Viewing SageMaker Domains*
 
 Inside the SageMaker domain, click on “Launch” near your created user and launch the SageMaker Studio.
 
-{{ obsidian_image(
-src="@/blog/deploying-sagemaker-pipelines-using-aws-cdk/image/sm-users.png",
-caption="Viewing SageMaker Users",
-width=600
-)}}
+![[sm-users.png|600]]
+*Viewing SageMaker Users*
 
 In the navigation select “Pipelines” to see a list of deployed pipelines. Confirm that your example pipeline is listed.
 
-{{ obsidian_image(
-src="@/blog/deploying-sagemaker-pipelines-using-aws-cdk/image/sm-pipelines.png",
-caption="Viewing SageMaker Pipelines",
-width=600
-)}}
+![[sm-pipelines.png|600]]
+*Viewing SageMaker Pipelines*
 
 Click on the specific pipeline (e.g., “example-pipeline”) to view its details and start an exectution to start and monitor your pipeline.
 
-{{ obsidian_image(
-src="@/blog/deploying-sagemaker-pipelines-using-aws-cdk/image/sm-pipeline-2048x1248.png",
-caption="Viewing SageMaker Pipeline Details",
-width=600
-)}}
+![[sm-pipeline-2048x1248.png|600]]
+*Viewing SageMaker Pipeline Details*
 
 ## Conclusion
 In this blog, we have leaned how to write a simple SageMaker Pipeline in Python and deploy it using AWS CDK. While doing so, we have deployed a SageMaker Domain and discussed how the pipeline code is stored in AWS and shared a few best practices for configuration.

@@ -1,14 +1,11 @@
-+++
-title = "Introduction to Data Quality"
-date = 2023-05-12
-description = "This blog delves into the importance of data quality, and provides insight into how Data and MLOps Engineers can ensure that quality is maintained throughout the system lifecycle."
-
-#[extra]
-#redirect_to = "https://www.luminis.eu/blog/introduction-to-data-quality/"
-
-[taxonomies]
-tags = ["data engineering", "dataops"]
-+++
+---
+title: "Introduction to Data Quality"
+date: 2023-05-12
+description: "This blog delves into the importance of data quality, and provides insight into how Data and MLOps Engineers can ensure that quality is maintained throughout the system lifecycle."
+tags:
+  - "data engineering"
+  - "dataops"
+---
 
 <small>
 Originaly published as part of <a href="https://www.luminis.eu/blog/introduction-to-data-quality/" target="_blank">Luminis Data Blog</a>.
@@ -48,11 +45,8 @@ The five pillars of [data observability](https://www.montecarlodata.com/blog-wha
 * **Schema**: The schema of a dataset defines the structure and type of each field in the data. It is often used in contracts between producers and consumers of the data. Especially when working with raw data sources, schema validation checks can help catch issues such as missing or incorrectly formatted fields, and ensure that any changes to the schema are properly communicated to downstream consumers.
 * **Lineage**: Lineage refers to the record of the origins, movement, and transformation of data throughout the data pipeline. It can answer questions about upstream sources that the data depends on and downstream assets that would be impacted by any change. The data lineage is a critical component during compliance auditing and root cause analysis.
 
-{{ obsidian_image(
-src="@/blog/introduction-to-dataquality/images/data_lineage.png",
-caption="Lineage of Continent Statistics table visualized in Dagster",
-width=350
-)}}
+![[data_lineage.png|350]]
+*Lineage of Continent Statistics table visualized in Dagster*
 
 You can not test for everything, and as things inevitably break, you may be unknowingly making decisions on bad data. There is an exponential relation between lost revenue and how far down the line data issues are diagnosed.
 
@@ -60,29 +54,20 @@ When you write tests for your data, you are testing for “**known unknowns**”
 
 Monitoring the percentage of faulty rows or checking whether the number of days since the last update does not exceed the historical average duration are good examples of proxy measures that can detect “unknown unknowns”.
 
-{{ obsidian_image(
-    src="@/blog/introduction-to-dataquality/images/anomaly_detection.png",
-    caption="Anomaly Detection on Row Count quality metric in [Soda Cloud](https://www.soda.io/resources/time-series-anomaly-detection-with-soda)",
-    width=600
-)}}
+![[anomaly_detection.png|600]]
+*Anomaly Detection on Row Count quality metric in [Soda Cloud](https://www.soda.io/resources/time-series-anomaly-detection-with-soda)*
 
 Performing **data profiling** by defining rule-based sets of metrics to be computed on all columns within your dataset can give you a good starting point when writing tests. Some data processing tools like [OpenRefine](https://openrefine.org/) and [AWS DataBrew](https://aws.amazon.com/glue/features/databrew/) have built-in data profiling to aid in building cleaning transformations. Similarly, it can also be a powerful tool when combined with anomaly detection for building automated monitoring systems.
 
-{{ obsidian_image(
-src="@/blog/introduction-to-dataquality/images/data_profiles.png",
-caption="Data Profiles in [AWS DataBrew](https://www.datanami.com/2020/11/12/aws-launches-visual-data-prep-tool/)",
-width=1000
-)}}
+![[data_profiles.png|1000]]
+*Data Profiles in [AWS DataBrew](https://www.datanami.com/2020/11/12/aws-launches-visual-data-prep-tool/)*
 
 Presenting the data profiles, quality information, and schema as part of a dashboard or data catalog can provide a lot of value for your business. Similarly, setting the right governance structure where the issues and alerts reach the appropriate team is an important aspect of maintaining high data reliability.
 
 For additional guidelines on improving data reliability, consider reviewing [AWS Well-Architected Data Analytics Lens](https://docs.aws.amazon.com/wellarchitected/latest/analytics-lens).
 
-{{ obsidian_image(
-src="@/blog/introduction-to-dataquality/images/data_quality_scorecards.png",
-caption="Data Quality Score Cards in [Monte Carlo's Data Reliability Dashboard](https://www.montecarlodata.com/blog-announcing-monte-carlos-data-reliability-dashboard-a-better-way-understand-the-health-of-your-data/)",
-width=600
-)}}
+![[data_quality_scorecards.png|600]]
+*Data Quality Score Cards in [Monte Carlo's Data Reliability Dashboard](https://www.montecarlodata.com/blog-announcing-monte-carlos-data-reliability-dashboard-a-better-way-understand-the-health-of-your-data/)*
 
 ## Data Testing Patterns
 When it comes to designing reliable data systems, it's essential to handle errors gracefully both during data quality testing and transformation. Depending on your environment, there are various testing approaches you can take. A common first concern is determining when and where to run data quality checks.

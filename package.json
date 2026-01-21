@@ -13,9 +13,12 @@
   },
   "scripts": {
     "quartz": "./quartz/bootstrap-cli.mjs",
-    "docs": "npx quartz build --serve -d docs",
-    "check": "tsc --noEmit && npx prettier . --check",
-    "format": "npx prettier . --write",
+    "dev": "bun run quartz build --serve",
+    "build": "bun run quartz build",
+    "serve": "bun run quartz build --serve --port 8080",
+    "docs": "bun run quartz build --serve -d docs",
+    "check": "tsc --noEmit && bunx prettier . --check",
+    "format": "bunx prettier . --write",
     "test": "tsx --test",
     "profile": "0x -D prof ./quartz/bootstrap-cli.mjs build --concurrency=1"
   },

@@ -1,0 +1,106 @@
+<svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      /* 3Blue1Brown-inspired dark theme */
+      .bg { fill: #1C1C1C; }
+      .node-box { fill: rgba(49, 130, 189, 0.15); stroke: #3182BD; stroke-width: 2; }
+      .node-box.left { fill: rgba(49, 163, 84, 0.15); stroke: #31A354; }
+      .node-box.right { fill: rgba(251, 106, 74, 0.15); stroke: #FB6A4A; }
+      .text { fill: #ECECEC; font-family: 'Inter', -apple-system, sans-serif; font-size: 13px; }
+      .text-small { fill: #969696; font-family: 'Inter', -apple-system, sans-serif; font-size: 11px; }
+      .text-label { fill: #969696; font-family: 'Inter', -apple-system, sans-serif; font-size: 12px; font-weight: 500; }
+      .text-math { fill: #ECECEC; font-family: 'Times New Roman', serif; font-size: 14px; font-style: italic; }
+      .arrow { stroke: #969696; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .gradient-pos { fill: #31A354; }
+      .gradient-neg { fill: #FB6A4A; }
+      .gradient-circle { stroke-width: 1.5; }
+    </style>
+    
+    <!-- Arrow marker -->
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#969696"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect class="bg" width="100%" height="100%" rx="8"/>
+
+  <!-- Title -->
+  <text class="text-label" text-anchor="middle" x="350" y="28">How a split organizes gradients to maximize gain</text>
+
+  <!-- Parent Node (center-top) -->
+  <g transform="translate(350, 90)">
+    <rect class="node-box" x="-90" y="-40" width="180" height="80" rx="8"/>
+    <text class="text-label" text-anchor="middle" y="-22">Parent Node</text>
+    
+    <!-- Mixed gradients -->
+    <g transform="translate(-50, 10)">
+      <circle class="gradient-circle gradient-pos" cx="0" cy="0" r="10"/>
+      <text class="text" text-anchor="middle" dominant-baseline="middle" x="0" y="1">+</text>
+    </g>
+    <g transform="translate(-20, 10)">
+      <circle class="gradient-circle gradient-neg" cx="0" cy="0" r="10"/>
+      <text class="text" text-anchor="middle" dominant-baseline="middle" x="0" y="1">−</text>
+    </g>
+    <g transform="translate(10, 10)">
+      <circle class="gradient-circle gradient-pos" cx="0" cy="0" r="10"/>
+      <text class="text" text-anchor="middle" dominant-baseline="middle" x="0" y="1">+</text>
+    </g>
+    <g transform="translate(40, 10)">
+      <circle class="gradient-circle gradient-neg" cx="0" cy="0" r="10"/>
+      <text class="text" text-anchor="middle" dominant-baseline="middle" x="0" y="1">−</text>
+    </g>
+    <g transform="translate(70, 10)">
+      <circle class="gradient-circle gradient-pos" cx="0" cy="0" r="10"/>
+      <text class="text" text-anchor="middle" dominant-baseline="middle" x="0" y="1">+</text>
+    </g>
+  </g>
+
+  <!-- Arrows -->
+  <path class="arrow" d="M 280,140 L 180,180"/>
+  <path class="arrow" d="M 420,140 L 520,180"/>
+  
+  <!-- Split condition -->
+  <text class="text-small" text-anchor="middle" x="350" y="160">Feature &lt; threshold?</text>
+
+  <!-- Left Child (positive gradients) -->
+  <g transform="translate(150, 245)">
+    <rect class="node-box left" x="-90" y="-40" width="180" height="80" rx="8"/>
+    <text class="text-label" text-anchor="middle" y="-22" style="fill: #31A354">Left Child</text>
+    
+    <!-- Mostly positive gradients -->
+    <g transform="translate(-40, 10)">
+      <circle class="gradient-circle gradient-pos" cx="0" cy="0" r="10"/>
+      <text class="text" text-anchor="middle" dominant-baseline="middle" x="0" y="1">+</text>
+    </g>
+    <g transform="translate(0, 10)">
+      <circle class="gradient-circle gradient-pos" cx="0" cy="0" r="10"/>
+      <text class="text" text-anchor="middle" dominant-baseline="middle" x="0" y="1">+</text>
+    </g>
+    <g transform="translate(40, 10)">
+      <circle class="gradient-circle gradient-pos" cx="0" cy="0" r="10"/>
+      <text class="text" text-anchor="middle" dominant-baseline="middle" x="0" y="1">+</text>
+    </g>
+  </g>
+
+  <!-- Right Child (negative gradients) -->
+  <g transform="translate(550, 245)">
+    <rect class="node-box right" x="-90" y="-40" width="180" height="80" rx="8"/>
+    <text class="text-label" text-anchor="middle" y="-22" style="fill: #FB6A4A">Right Child</text>
+    
+    <!-- Mostly negative gradients -->
+    <g transform="translate(-20, 10)">
+      <circle class="gradient-circle gradient-neg" cx="0" cy="0" r="10"/>
+      <text class="text" text-anchor="middle" dominant-baseline="middle" x="0" y="1">−</text>
+    </g>
+    <g transform="translate(20, 10)">
+      <circle class="gradient-circle gradient-neg" cx="0" cy="0" r="10"/>
+      <text class="text" text-anchor="middle" dominant-baseline="middle" x="0" y="1">−</text>
+    </g>
+  </g>
+
+  <!-- Math annotations -->
+  <text class="text-math" text-anchor="middle" x="150" y="308">G<tspan baseline-shift="sub" font-size="10">L</tspan> = Σg<tspan baseline-shift="sub" font-size="10">i</tspan> &gt; 0</text>
+  <text class="text-math" text-anchor="middle" x="550" y="308">G<tspan baseline-shift="sub" font-size="10">R</tspan> = Σg<tspan baseline-shift="sub" font-size="10">i</tspan> &lt; 0</text>
+
+</svg>

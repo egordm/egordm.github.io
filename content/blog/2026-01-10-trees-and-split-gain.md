@@ -15,13 +15,6 @@ series: "Inside Gradient Boosting"
 series_order: 3
 ---
 
-> [!abstract] Inside Gradient Boosting, Part 3 of 9
-> This series explains gradient boosting from first principles to advanced implementation details.
->
-> **Previous:** [[gb-part-2|Functional Gradient Descent]]
-> **In this post:** Why trees are the standard weak learner, and how we derive optimal splits.
-> **Next:** [[gb-part-4|Histogram-Based Split Finding]]
-
 In [[gb-part-2|Part 2]], we saw that gradient boosting works by fitting weak learners to pseudo-residuals. At each round, we train a function $h$ that approximates the negative gradient of the loss.
 
 But we left something unspecified: what kind of function is $h$? In principle, it could be anything. In practice, it's almost always a **decision tree**.

@@ -1,0 +1,63 @@
+// Home header - vertical stack for homepage
+.home-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--lightgray);
+
+    .page-title {
+        font-size: 2rem;
+        margin: 0 0 0.5rem;
+
+        a {
+            color: var(--dark);
+            text-decoration: none;
+
+            &:hover {
+                color: var(--secondary);
+            }
+        }
+    }
+
+    .bio-description {
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: var(--darkgray);
+        margin: 0 0 1rem;
+    }
+
+    .bio-social {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+}
+
+// Social links
+.social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    background: var(--lightgray);
+    color: var(--darkgray);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: var(--highlight);
+        color: var(--secondary);
+    }
+
+    svg {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+    }
+}
+
+.search {
+    max-width: 100%;
+}

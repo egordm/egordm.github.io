@@ -15,13 +15,6 @@ series: "Inside Gradient Boosting"
 series_order: 2
 ---
 
-> [!abstract] Inside Gradient Boosting, Part 2 of 9
-> This series explains gradient boosting from first principles to advanced implementation details.
->
-> **Previous:** [[gb-part-1|What is Gradient Boosting?]]
-> **In this post:** The mathematical framework behind boosting: optimizing in function space.
-> **Next:** [[gb-part-3|Trees and the Split Gain Formula]]
-
 In [[gb-part-1|Part 1]], we built the intuition: gradient boosting trains weak learners sequentially, each one correcting the errors of the previous ensemble. We saw that for squared error, the "correction" is just the residual.
 
 But where does the "gradient" in gradient boosting come from? Why does training on residuals work? And how do we extend this to classification, ranking, and other tasks?

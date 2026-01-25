@@ -15,12 +15,6 @@ series: "Inside Gradient Boosting"
 series_order: 1
 ---
 
-> [!abstract] Inside Gradient Boosting, Part 1 of 9
-> This series explains gradient boosting from first principles to advanced implementation details.
->
-> **In this post:** Intuition for gradient boosting without heavy math.
-> **Next:** [[gb-part-2|Functional Gradient Descent]]
-
 If you've spent any time with tabular machine learning, you've encountered gradient boosting. XGBoost, LightGBM, CatBoost: these libraries dominate Kaggle competitions and power countless production systems. But what's actually happening under the hood?
 
 This post builds the intuition for gradient boosting from scratch. We'll start with a simple question (why would you ever want a "weak" model?) and work our way to the core boosting algorithm. No heavy math yet; that comes in Part 2. Here, we focus on understanding *why* this approach works.

@@ -15,13 +15,6 @@ series: "Inside Gradient Boosting"
 series_order: 5
 ---
 
-> [!abstract] Inside Gradient Boosting, Part 5 of 9
-> This series explains gradient boosting from first principles to advanced implementation details.
->
-> **Previous:** [[gb-part-4|Histogram-Based Split Finding]]
-> **In this post:** Two tree growth strategies and when each one wins.
-> **Next:** [[gb-part-6|Gradient-Based Sampling (GOSS)]]
-
 In [[gb-part-4|Part 4]], we saw how histogram-based training makes split finding fast. But we left one question unanswered: **in what order should we split nodes?**
 
 This turns out to matter a lot. Given a budget of $L$ leaves, different node orderings produce different trees with different accuracies. This post explores the two main strategies: **depth-wise** (XGBoost's default) and **leaf-wise** (LightGBM's default).

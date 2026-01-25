@@ -1,0 +1,81 @@
+// Series Banner for multi-part blog posts - Compact version
+.series-banner {
+    margin: 1rem 0 1.5rem;
+
+    .series-toc {
+        padding: 0.6rem 0.9rem;
+        border-radius: 8px;
+        border: 1px solid var(--lightgray);
+        background: transparent;
+
+        summary {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            list-style: none;
+
+            &::-webkit-details-marker {
+                display: none;
+            }
+
+            &::before {
+                content: "▶";
+                font-size: 0.6rem;
+                color: var(--darkgray);
+                transition: transform 0.2s ease;
+            }
+
+            .series-icon {
+                font-size: 0.9rem;
+            }
+
+            .series-name {
+                color: var(--secondary);
+                text-decoration: none;
+                flex: 1;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+
+            .series-position {
+                font-size: 0.75rem;
+                color: var(--darkgray);
+                font-weight: 400;
+            }
+        }
+
+        &[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        .series-list {
+            margin: 0.6rem 0 0 1.25rem;
+            padding: 0;
+
+            li {
+                margin: 0.25rem 0;
+                font-size: 0.85rem;
+
+                a {
+                    color: var(--secondary);
+                    text-decoration: none;
+
+                    &:hover {
+                        text-decoration: underline;
+                    }
+                }
+
+                &.current {
+                    .current-post {
+                        color: var(--dark);
+                        font-weight: 600;
+                    }
+                }
+            }
+        }
+    }
+}

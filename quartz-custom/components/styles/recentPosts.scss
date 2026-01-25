@@ -1,0 +1,80 @@
+// Recent Posts component for homepage
+.recent-posts {
+    margin-top: 1.5rem;
+
+    >h2 {
+        margin-bottom: 1.25rem;
+        font-size: 1.3rem;
+        color: var(--dark);
+    }
+
+    .post-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        .post-item {
+            margin-bottom: 1.75rem;
+
+            .post-title {
+                color: var(--secondary);
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 1.1rem;
+                line-height: 1.3;
+                display: block;
+                background: none;
+                padding: 0;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+
+            .post-meta {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 0.35rem;
+                font-size: 0.8rem;
+                color: var(--gray);
+                margin-top: 0.25rem;
+
+                .meta-sep {
+                    color: var(--gray);
+                }
+
+                .post-series-link {
+                    color: var(--secondary);
+                    text-decoration: none;
+                    font-weight: 500;
+
+                    &:hover {
+                        text-decoration: underline;
+                    }
+                }
+            }
+
+            .post-description {
+                font-size: 0.9rem;
+                color: var(--darkgray);
+                margin: 0.4rem 0 0;
+                line-height: 1.5;
+            }
+        }
+    }
+
+    .browse-all {
+        margin-top: 1.5rem;
+
+        a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 500;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+}

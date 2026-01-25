@@ -15,13 +15,6 @@ series: "Inside Gradient Boosting"
 series_order: 6
 ---
 
-> [!abstract] Inside Gradient Boosting, Part 6 of 9
-> This series explains gradient boosting from first principles to advanced implementation details.
->
-> **Previous:** [[gb-part-5|Depth-Wise vs Leaf-Wise Tree Growth]]
-> **In this post:** Sampling strategies that speed up training while preserving accuracy.
-> **Next:** [[gb-part-7|Exclusive Feature Bundling and Categorical Features]]
-
 Building histograms is the dominant cost in gradient boosting. With a million samples, every tree must iterate over all of them to build gradient statistics. Can we do better?
 
 The answer is **sampling**. Instead of using all samples to build each tree, we can train on a subset. This post explores two approaches: random subsampling and LightGBM's smarter alternative, GOSS (Gradient-based One-Side Sampling).

@@ -1,23 +1,12 @@
 import { PageLayout, SharedLayout } from "./quartz/cfg"
 import * as Component from "./quartz/components"
-import { FileTrieNode } from "./quartz/util/fileTrie"
+import * as CustomComponent from "./quartz-custom/components"
 
 // components shared across all pages
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
   header: [],
   afterBody: [
-    // Show recent notes only on the home page
-    Component.ConditionalRender({
-      component: Component.RecentNotes({
-        title: "Recent Blog Posts",
-        limit: 5,
-        linkToMore: "blog/" as any,
-        showTags: true,
-        filter: (f) => (f.slug ?? "").startsWith("blog/") && f.slug !== "blog/index",
-      }),
-      condition: (page) => page.fileData.slug === "index",
-    }),
     Component.Darkmode(),
   ],
   footer: Component.Footer({
@@ -32,35 +21,66 @@ export const sharedPageComponents: SharedLayout = {
 // components for pages that display a single page (e.g. a single note)
 export const defaultContentPageLayout: PageLayout = {
   beforeBody: [
+    // Show HomeHeader only on homepage (includes title + bio)
+    CustomComponent.HomeHeader(),
+    Component.ConditionalRender({
+      component: Component.Search(),
+      condition: (page) => page.fileData.slug === "index",
+    }),
+    // Show breadcrumbs on content pages
     Component.ConditionalRender({
       component: Component.Breadcrumbs(),
       condition: (page) => page.fileData.slug !== "index",
     }),
-    Component.ArticleTitle(),
-    Component.ContentMeta(),
+    // Show article title on content pages
+    Component.ConditionalRender({
+      component: Component.ArticleTitle(),
+      condition: (page) => page.fileData.slug !== "index",
+    }),
+    // Show content meta on content pages
+    Component.ConditionalRender({
+      component: Component.ContentMeta(),
+      condition: (page) => page.fileData.slug !== "index",
+    }),
     Component.TagList(),
+    // Show series banner for blog posts that are part of a series
+    CustomComponent.SeriesBanner(),
   ],
   left: [
-    Component.PageTitle(),
-    Component.MobileOnly(Component.Spacer()),
-    Component.Flex({
-      components: [
-        {
-          Component: Component.Search(),
-          grow: true,
-        },
-        { Component: Component.ReaderMode() },
-      ],
+    Component.ConditionalRender({
+      component: Component.PageTitle(),
+      condition: (page) => page.fileData.slug !== "index",
     }),
-    Component.Explorer({
-      folderDefaultState: "collapsed",
-      sortFn: explorerSortFn,
+    Component.MobileOnly(Component.Spacer()),
+    Component.ConditionalRender({
+      component: Component.Search(),
+      condition: (page) => page.fileData.slug !== "index",
+    }),
+    Component.ConditionalRender({
+      component: Component.DesktopOnly(
+        Component.RecentNotes({
+          title: "Recent Posts",
+          limit: 4,
+          filter: (f) => f.slug!.startsWith("blog/") && f.slug! !== "blog/index" && !f.frontmatter?.draft,
+          linkToMore: "blog/" as any,
+          showTags: false,
+        }),
+      ),
+      condition: (page) => page.fileData.slug !== "index",
     }),
   ],
   right: [
-    Component.Graph(),
-    Component.DesktopOnly(Component.TableOfContents()),
-    Component.Backlinks(),
+    // Hide TOC on homepage
+    Component.ConditionalRender({
+      component: Component.DesktopOnly(Component.TableOfContents()),
+      condition: (page) => page.fileData.slug !== "index",
+    }),
+  ],
+  afterBody: [
+    // Show recent posts on homepage (automated)
+    CustomComponent.RecentPosts({ limit: 15 }),
+    // Show prev/next navigation for blog posts
+    CustomComponent.PrevNextNav(),
   ],
 }
 
@@ -68,52 +88,27 @@ export const defaultContentPageLayout: PageLayout = {
 export const defaultListPageLayout: PageLayout = {
   beforeBody: [Component.Breadcrumbs(), Component.ArticleTitle(), Component.ContentMeta()],
   left: [
-    Component.PageTitle(),
-    Component.MobileOnly(Component.Spacer()),
-    Component.Flex({
-      components: [
-        {
-          Component: Component.Search(),
-          grow: true,
-        },
-      ],
+    Component.ConditionalRender({
+      component: Component.PageTitle(),
+      condition: (page) => page.fileData.slug !== "index",
     }),
-    Component.Explorer({
-      folderDefaultState: "collapsed",
-      sortFn: explorerSortFn,
+    Component.MobileOnly(Component.Spacer()),
+    Component.ConditionalRender({
+      component: Component.Search(),
+      condition: (page) => page.fileData.slug !== "index",
+    }),
+    Component.ConditionalRender({
+      component: Component.DesktopOnly(
+        Component.RecentNotes({
+          title: "Recent Posts",
+          limit: 4,
+          filter: (f) => f.slug!.startsWith("blog/") && f.slug! !== "blog/index" && !f.frontmatter?.draft,
+          linkToMore: "blog/" as any,
+          showTags: false,
+        }),
+      ),
+      condition: (page) => page.fileData.slug !== "index",
     }),
   ],
   right: [],
-}
-
-export function explorerSortFn(a: FileTrieNode, b: FileTrieNode) {
-  const nameA = (a.displayName || "").toLowerCase()
-  const nameB = (b.displayName || "").toLowerCase()
-
-  // Sort order: folders first, then files. Sort folders and files alphabetically
-  if ((!a.isFolder && !b.isFolder) || (a.isFolder && b.isFolder)) {
-    // specific order for top-level folders: projects then blog
-    if (nameA === "projects" && nameB === "blog") return -1
-    if (nameA === "blog" && nameB === "projects") return 1
-
-    // specific order for blog posts: by date descending
-    if (a.slug.startsWith("blog/") && b.slug.startsWith("blog/")) {
-      const dateA = a.data?.date ? new Date(a.data.date) : new Date(0)
-      const dateB = b.data?.date ? new Date(b.data.date) : new Date(0)
-      if (dateA.getTime() !== dateB.getTime()) {
-        return dateB.getTime() - dateA.getTime()
-      }
-    }
-
-    return a.displayName.localeCompare(b.displayName, undefined, {
-      numeric: true,
-      sensitivity: "base",
-    })
-  }
-
-  if (!a.isFolder && b.isFolder) {
-    return 1
-  } else {
-    return -1
-  }
 }

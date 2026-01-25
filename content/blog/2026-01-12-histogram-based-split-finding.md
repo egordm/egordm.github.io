@@ -15,13 +15,6 @@ series: "Inside Gradient Boosting"
 series_order: 4
 ---
 
-> [!abstract] Inside Gradient Boosting, Part 4 of 9
-> This series explains gradient boosting from first principles to advanced implementation details.
->
-> **Previous:** [[gb-part-3|Trees and the Split Gain Formula]]
-> **In this post:** The algorithmic innovation that makes modern GBDTs practical.
-> **Next:** [[gb-part-5|Depth-Wise vs Leaf-Wise Tree Growth]]
-
 In [[gb-part-3|Part 3]], we derived the split gain formula. To find the best split, we evaluate every feature and every possible threshold, then pick the one with highest gain.
 
 But "every possible threshold" is the problem. With a million samples, each feature might have hundreds of thousands of unique values. Evaluating all of them is prohibitively slow.

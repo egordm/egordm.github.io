@@ -1,6 +1,6 @@
-// Default to dark mode unless the user has explicitly chosen light
-const currentTheme = localStorage.getItem("theme") ?? "dark"
-document.documentElement.setAttribute("saved-theme", currentTheme)
+// Always use dark mode - no toggle, no system preference
+document.documentElement.setAttribute("saved-theme", "dark")
+localStorage.setItem("theme", "dark")
 
 const emitThemeChangeEvent = (theme: "light" | "dark") => {
   const event: CustomEventMap["themechange"] = new CustomEvent("themechange", {
@@ -9,29 +9,6 @@ const emitThemeChangeEvent = (theme: "light" | "dark") => {
   document.dispatchEvent(event)
 }
 
-document.addEventListener("nav", () => {
-  const switchTheme = () => {
-    const newTheme =
-      document.documentElement.getAttribute("saved-theme") === "dark" ? "light" : "dark"
-    document.documentElement.setAttribute("saved-theme", newTheme)
-    localStorage.setItem("theme", newTheme)
-    emitThemeChangeEvent(newTheme)
-  }
+// Emit initial theme
+emitThemeChangeEvent("dark")
 
-  const themeChange = (e: MediaQueryListEvent) => {
-    const newTheme = e.matches ? "dark" : "light"
-    document.documentElement.setAttribute("saved-theme", newTheme)
-    localStorage.setItem("theme", newTheme)
-    emitThemeChangeEvent(newTheme)
-  }
-
-  for (const darkmodeButton of document.getElementsByClassName("darkmode")) {
-    darkmodeButton.addEventListener("click", switchTheme)
-    window.addCleanup(() => darkmodeButton.removeEventListener("click", switchTheme))
-  }
-
-  // Listen for changes in prefers-color-scheme
-  const colorSchemeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
-  colorSchemeMediaQuery.addEventListener("change", themeChange)
-  window.addCleanup(() => colorSchemeMediaQuery.removeEventListener("change", themeChange))
-})

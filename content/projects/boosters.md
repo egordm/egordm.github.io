@@ -53,6 +53,19 @@ predictions = model.predict(X_test)
 
 ## Related Posts
 
-Check out related articles about machine learning:
+This project is accompanied by a 10-part blog series that explains gradient boosting from theory to implementation:
 
+**Inside Gradient Boosting:**
+1. [[gb-part-1|What is Gradient Boosting?]]
+2. [[gb-part-2|Functional Gradient Descent]]
+3. [[gb-part-3|Trees and the Split Gain Formula]]
+4. [[gb-part-4|Histogram-Based Split Finding]]
+5. [[gb-part-5|Depth-Wise vs Leaf-Wise Tree Growth]]
+6. [[gb-part-6|Gradient-Based Sampling (GOSS)]]
+7. [[gb-part-7|EFB and Categorical Features]]
+8. [[gb-part-8|Regularization and Hyperparameter Tuning]]
+9. [[gb-part-9|XGBoost vs LightGBM: A Practical Comparison]]
+10. [[gb-part-10|Building Boosters: From Scratch in Rust]]
+
+**Other ML Articles:**
 - [[blog/comprehensive-introduction-to-large-language-models/|Introduction to Large Language Models]]

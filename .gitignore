@@ -15,3 +15,29 @@ content/.obsidian
 
 # Archive
 _archive_zola/
+# Manim render artifacts
+packages/blog-assets/media/
+
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Common local caches
+.cache/
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.pyright/
+
+.DS_Store
+tmp
+*.so
+
+.coverage
+.coverage.xml
+coverage.xml
+
+# VS Code workspace files (local developer preference)
+*.code-workspace
+.agent

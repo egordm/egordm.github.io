@@ -1,5 +1,6 @@
 import { QuartzConfig } from "./quartz/cfg"
 import * as Plugin from "./quartz/plugins"
+import * as CustomPlugin from "./quartz-custom/plugins"
 
 /**
  * Quartz 4 Configuration
@@ -89,6 +90,7 @@ const config: QuartzConfig = {
       Plugin.CNAME(),
       // Comment out CustomOgImages to speed up build time
       // Plugin.CustomOgImages(),
+      CustomPlugin.RobotsTxt()
     ],
   },
 }

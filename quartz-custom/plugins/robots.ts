@@ -10,6 +10,9 @@ export const RobotsTxt: QuartzEmitterPlugin = () => {
             const base = cfg.baseUrl ?? ""
 
             const robotsTxtContent = `User-agent: *
+Disallow: /BOLD/
+Disallow: /BOLDER/
+Disallow: /notionsci/
 Allow: /
 
 Sitemap: https://${base}/sitemap.xml`

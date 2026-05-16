@@ -36,6 +36,31 @@ export default (() => {
     )
     const ogImageDefaultPath = `https://${cfg.baseUrl}/static/og-image.png`
 
+    // JSON-LD structured data for blog posts
+    const isBlogPost = fileData.slug?.startsWith("blog/") && fileData.frontmatter?.date
+    const jsonLd = isBlogPost
+      ? JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: fileData.frontmatter?.title ?? "",
+          description: description,
+          datePublished: fileData.frontmatter?.date,
+          url: socialUrl,
+          author: {
+            "@type": "Person",
+            name: "Egor Dmitriev",
+            url: `https://${cfg.baseUrl}`,
+          },
+          publisher: {
+            "@type": "Person",
+            name: "Egor Dmitriev",
+          },
+          ...(fileData.frontmatter?.tags && {
+            keywords: (fileData.frontmatter.tags as string[]).join(", "),
+          }),
+        })
+      : null
+
     return (
       <head>
         <title>{title}</title>
@@ -53,9 +78,19 @@ export default (() => {
         <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+        {/* RSS autodiscovery */}
+        {cfg.baseUrl && (
+          <link
+            rel="alternate"
+            type="application/rss+xml"
+            title={cfg.pageTitle}
+            href={`https://${cfg.baseUrl}/index.xml`}
+          />
+        )}
+
         <meta name="og:site_name" content={cfg.pageTitle}></meta>
         <meta property="og:title" content={title} />
-        <meta property="og:type" content="website" />
+        <meta property="og:type" content={isBlogPost ? "article" : "website"} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
@@ -79,12 +114,21 @@ export default (() => {
             <meta property="twitter:domain" content={cfg.baseUrl}></meta>
             <meta property="og:url" content={socialUrl}></meta>
             <meta property="twitter:url" content={socialUrl}></meta>
+            <link rel="canonical" href={socialUrl} />
           </>
         )}
 
         <link rel="icon" href={iconPath} />
         <meta name="description" content={description} />
         <meta name="generator" content="Quartz" />
+
+        {/* JSON-LD structured data for blog posts */}
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: jsonLd }}
+          />
+        )}
 
         {css.map((resource) => CSSResourceToStyleElement(resource, true))}
         {js

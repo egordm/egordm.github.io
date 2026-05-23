@@ -1,5 +1,5 @@
 ---
-title: "CoreML, Partitions, and the 13x Mac Speedup"
+title: "CoreML Deployment on Apple Silicon: Real-Time Vision Models"
 date: 2026-05-18
 draft: false
 tags:
@@ -9,14 +9,16 @@ tags:
   - coreml
   - optimization
   - onnx
-description: "Running the same ONNX models from Part 2 on Apple Silicon. From CoreML being 41% slower than CPU to hitting 28 FPS real-time through format flags, ONNX surgery, compute-unit tuning, and a pipelined runtime."
+  - metal
+  - model-deployment
+description: "Deploying ONNX vision models on Apple Silicon via CoreML. From 41% slower than CPU to 28 FPS real-time through compute-unit tuning, ONNX graph surgery, and a pipelined runtime architecture."
 aliases:
   - "optimizing-samurai-part-3"
 series: "Optimizing SAMURAI"
 series_order: 3
 ---
 
-[Part 2](optimizing-samurai-part-2) ended at 97 FPS on an RTX 4090 using TensorRT with mixed precision and cuda-python. That's 3x real-time on a desktop GPU. But the drone cinematography use case also needs to work on a MacBook in the field, where there's no NVIDIA GPU, no CUDA, and no TensorRT.
+[[optimizing-samurai-part-2|Part 2]] ended at 97 FPS on an RTX 4090 using TensorRT with mixed precision and cuda-python. That's 3x real-time on a desktop GPU. But the drone cinematography use case also needs to work on a MacBook in the field, where there's no NVIDIA GPU, no CUDA, and no TensorRT.
 
 This post covers what happens when you take the same four ONNX modules and run them on an M1 Pro MacBook. The constraints are completely different: a unified memory architecture, three distinct compute units competing for work, and an ML runtime (CoreML) whose op coverage silently determines whether your model runs fast or slow.
 
@@ -344,7 +346,12 @@ The optimization surface on Apple Silicon is fundamentally different from CUDA:
 3. **CPU can beat GPU.** On Apple Silicon, the CPU path (via BNNS/AMX) can outperform GPU dispatch for graphs with many small operations. Per-module compute-unit selection is essential.
 4. **Threading works because the hardware is heterogeneous.** Unlike a single CUDA GPU, Apple Silicon's physically separate compute units enable real concurrent execution from plain Python threads.
 
-**Next up**: [Part 4](optimizing-samurai-part-4) drops Python entirely and rebuilds the pipeline in Rust with `ort` (the Rust ONNX Runtime bindings), targeting both platforms from a single codebase.
+**Next up**: Part 4 drops Python entirely and rebuilds the pipeline in Rust with `ort` (the Rust ONNX Runtime bindings), targeting both platforms from a single codebase.
+
+> [!tip] Full series
+> [[optimizing-samurai-part-1|Part 1: ONNX Export]] → [[optimizing-samurai-part-2|Part 2: CUDA & TensorRT]] → **Part 3: CoreML** → Part 4: Rust (upcoming)
+>
+> For the research context behind the model choice, see [[long-term-visual-tracking-2026|Long-Term Visual Tracking for Drones (2026)]].
 
 ---
 

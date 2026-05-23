@@ -285,7 +285,7 @@ Thread 1: Build histogram for features 25-49
 Thread 2: Build histogram for features 50-74
 Thread 3: Build histogram for features 75-99
 
-No synchronization needed — each thread writes to its own histograms.
+No synchronization needed - each thread writes to its own histograms.
 ```
 
 This is the approach used by LightGBM and XGBoost for multi-core training.

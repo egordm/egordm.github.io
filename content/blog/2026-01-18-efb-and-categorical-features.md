@@ -45,7 +45,7 @@ One-hot encoded:
   Sample 3 (color=green): [0, 0, 1]
 ```
 
-**Observation**: In any row, at most one of these features is non-zero. These features are **mutually exclusive** — meaning they cannot both be "on" at the same time.
+**Observation**: In any row, at most one of these features is non-zero. These features are **mutually exclusive** - meaning they cannot both be "on" at the same time.
 
 The waste is significant:
 - **3× memory**: Three columns instead of one

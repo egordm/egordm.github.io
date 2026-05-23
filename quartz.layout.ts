@@ -58,12 +58,11 @@ export const defaultContentPageLayout: PageLayout = {
     }),
     Component.ConditionalRender({
       component: Component.DesktopOnly(
-        Component.RecentNotes({
+        CustomComponent.SidebarPosts({
           title: "Recent Posts",
           limit: 4,
           filter: (f) => f.slug!.startsWith("blog/") && f.slug! !== "blog/index" && !f.frontmatter?.draft,
           linkToMore: "blog/" as any,
-          showTags: false,
         }),
       ),
       condition: (page) => page.fileData.slug !== "index",
@@ -99,12 +98,11 @@ export const defaultListPageLayout: PageLayout = {
     }),
     Component.ConditionalRender({
       component: Component.DesktopOnly(
-        Component.RecentNotes({
+        CustomComponent.SidebarPosts({
           title: "Recent Posts",
           limit: 4,
           filter: (f) => f.slug!.startsWith("blog/") && f.slug! !== "blog/index" && !f.frontmatter?.draft,
           linkToMore: "blog/" as any,
-          showTags: false,
         }),
       ),
       condition: (page) => page.fileData.slug !== "index",

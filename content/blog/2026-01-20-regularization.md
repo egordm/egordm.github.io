@@ -295,11 +295,11 @@ Note the different philosophies: XGBoost restricts by depth, LightGBM restricts 
 ## Common Mistakes
 
 > [!warning] Mistakes to Avoid
-> 1. **Tuning `n_estimators` directly** — Use early stopping instead
-> 2. **Ignoring validation curves** — Always plot training vs validation loss
-> 3. **Tuning too many parameters at once** — Follow the staged approach
-> 4. **Using defaults for production** — Defaults are for quick exploration
-> 5. **Forgetting to scale learning rate** — When reducing learning rate, increase iterations
+> 1. **Tuning `n_estimators` directly** - Use early stopping instead
+> 2. **Ignoring validation curves** - Always plot training vs validation loss
+> 3. **Tuning too many parameters at once** - Follow the staged approach
+> 4. **Using defaults for production** - Defaults are for quick exploration
+> 5. **Forgetting to scale learning rate** - When reducing learning rate, increase iterations
 
 ---
 

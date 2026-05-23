@@ -1,5 +1,5 @@
 ---
-title: "From Research Checkpoint to ONNX Runtime"
+title: "Optimizing PyTorch Models for Production: ONNX Export with SAM 2"
 date: 2026-05-16
 draft: false
 tags:
@@ -7,23 +7,86 @@ tags:
   - computer-vision
   - onnx
   - optimization
-  - video-segmentation
-description: "A foundation video segmentation model runs at 1.3 FPS. This post covers the first step toward real-time: getting it into ONNX, which sounds simple until you try."
+  - pytorch
+  - model-deployment
+description: "A step-by-step guide to profiling PyTorch inference bottlenecks and exporting vision models to ONNX Runtime. Uses SAM 2 / EfficientTAM as a real-world case study, from 1.3 FPS to the foundation for 97 FPS."
 aliases:
   - "optimizing-samurai-part-1"
 series: "Optimizing SAMURAI"
 series_order: 1
 ---
 
-Visual object tracking has been transformed by foundation models. [SAM 2](https://github.com/facebookresearch/sam2), [SAMURAI](https://github.com/yangchris11/samurai), [EfficientTAM](https://github.com/yformer/EfficientTAM): these models are accurate, robust, and generalize to objects they've never seen. They are also unusably slow for real-time applications. Not because the math is expensive, but because the research code is bound by Python dispatch overhead and memory synchronization.
+> [!abstract] Series context
+> This is Part 1 of the *Optimizing SAMURAI* series. For why SAMURAI / EfficientTAM were chosen over the rest of the 2024-2025 tracking field, see [[long-term-visual-tracking-2026|Long-Term Visual Tracking for Drones (2026)]]. That post maps the full academic landscape; this series is the deployment story.
 
-I'm building a real-time visual tracking system for autonomous drone cinematography. The model needs to run at 30+ FPS on consumer hardware. This series documents the engineering that took the full tracking pipeline on an RTX 4090 from **~20 FPS** (stock SAMURAI, PyTorch, SAM 2 at full resolution) to **97 FPS** (optimized ONNX Runtime with TensorRT). Same GPU, same tracking task, 5x gain from engineering alone.
+You have trained (or downloaded) a neural network that works brilliantly in a Jupyter notebook. It's accurate, it generalizes, it handles edge cases the previous generation couldn't. There's just one problem: it runs at 2 FPS, and you need 30.
 
-Part 1 covers the foundation: understanding the model architecture, profiling where time actually goes, and exporting everything to ONNX. It sounds straightforward. It wasn't.
+This is the universal deployment gap in modern AI. The model itself is fine. Everything *around* it is the problem: Python overhead, memory synchronization stalls, unoptimized operator scheduling, and a runtime designed for research flexibility rather than production throughput. Closing that gap doesn't require retraining, doesn't require changing architectures, and doesn't require specialized hardware. It requires understanding where time actually goes and systematically removing the waste.
+
+I hit this wall building a real-time visual tracking system for autonomous drone cinematography. The model ([SAMURAI](https://github.com/yangchris11/samurai), built on Meta's [SAM 2](https://github.com/facebookresearch/sam2)) needed to run at 30+ FPS on consumer hardware. Stock performance: **~20 FPS** on an RTX 4090 in PyTorch. After the work in this series: **97 FPS**. Same GPU, same model weights, same tracking task. 5x from engineering alone.
+
+This series documents every step of that process. If you've ever stared at a PyTorch model wondering why it's slow and what to do about it, this is for you. The specific model is a visual object tracker, but the techniques (profiling, graph export, runtime optimization, precision tuning) apply to any neural network you want to deploy.
+
+**Part 1** covers the foundation: understanding the model architecture, profiling to find the *actual* bottleneck (spoiler: it's not what you think), and exporting to ONNX. **[[optimizing-samurai-part-2|Part 2]]** takes it to GPU: CUDA execution providers, TensorRT engine compilation, and FP16 precision. **[[optimizing-samurai-part-3|Part 3]]** covers Apple Silicon: CoreML, Metal, and the M-series deployment story.
+
+## The deployment gap
+
+Research code and production code optimize for different things. Research code optimizes for *iteration speed*: try a new loss function, swap a backbone, add an attention layer. Every operation goes through Python, every intermediate result is a first-class tensor you can inspect, every module is a Python object you can monkey-patch. This flexibility has a cost.
+
+Three layers of overhead compound in a typical PyTorch inference loop:
+
+**Python dispatch overhead.** Every operation in PyTorch goes through Python's interpreter before reaching C++/CUDA kernels. For a model with hundreds of operators per forward pass, the cumulative cost of Python function calls, type checking, and autograd bookkeeping is substantial. This is invisible in profiling because it's spread across every operation rather than concentrated in one hot spot.
+
+**Memory synchronization.** GPUs execute asynchronously: the CPU queues work, the GPU processes it in parallel. But certain operations force *synchronization*: the CPU blocks until the GPU finishes all queued work. `torch.nonzero()` (variable-length output), `.item()` (scalar transfer), and shape-dependent Python conditionals all trigger this. A single sync point can stall the entire GPU pipeline.
+
+**Unoptimized operator scheduling.** PyTorch executes operators one at a time as Python encounters them. A specialized runtime can *fuse* sequences of operators (e.g., conv + batch_norm + relu becomes one kernel launch), *reorder* independent operations for better parallelism, and *eliminate* redundant memory copies. The same mathematical computation, scheduled better, runs faster.
+
+The solution to all three is the same idea: **get Python out of the inference path**. Export the computation graph to a format a specialized runtime can optimize and execute without Python. This is where ONNX comes in.
+
+## The ONNX mental model
+
+If you've worked with compiled languages, the analogy is direct:
+
+| Programming | ML Deployment |
+|---|---|
+| Python source code | PyTorch `nn.Module` |
+| Compiler IR (LLVM IR) | ONNX graph |
+| Machine code (x86, ARM) | TensorRT engine, CoreML model |
+| CPU / GPU | Hardware execution |
+
+**ONNX** (Open Neural Network Exchange) is a graph-based intermediate representation for neural networks. It captures the *computation* (which operators run in which order, with which weights) without any of the Python machinery. Think of it as the "assembly language" of neural networks: framework-agnostic, inspectable, optimizable.
+
+**The export step** (`torch.onnx.export()`) traces your model's forward pass with a dummy input and serializes the resulting computation graph into a `.onnx` file. Every tensor operation becomes a node in the graph; every learned parameter becomes a constant. No Python code survives.
+
+**ONNX Runtime** (ORT) is Microsoft's execution engine for ONNX graphs. It reads the graph, applies graph-level optimizations (operator fusion, constant folding, memory planning), and dispatches to hardware-specific backends called **execution providers**:
+
+- **CPU EP**: optimized x86/ARM kernels, vectorized, multi-threaded
+- **CUDA EP**: NVIDIA GPU kernels with operator fusion
+- **TensorRT EP**: NVIDIA's compiler that generates hardware-specific engine files (the maximum-performance path on NVIDIA GPUs)
+- **CoreML EP**: Apple's Neural Engine + GPU + CPU on M-series chips
+- **DirectML EP**: AMD/Intel/Qualcomm GPUs on Windows
+
+The key insight: you export *once* and deploy across all of these. The model doesn't know or care which hardware runs it. And each backend applies optimizations the PyTorch eager runtime cannot: fused kernels, hardware-specific memory layouts, reduced-precision arithmetic where safe.
+
+**The verification pattern** used throughout this series is simple:
+
+```python
+# Feed identical input to both PyTorch and ORT
+torch_out = model(dummy_input)
+ort_out = session.run(None, {"input": dummy_input.numpy()})
+
+# Compare element-wise
+max_abs = np.max(np.abs(torch_out.numpy() - ort_out))
+assert max_abs < 1e-3, f"Drift too large: {max_abs}"
+```
+
+If `max_abs` is small (< 1e-3), the export is faithful. If it's large, something went wrong during tracing: shape-dependent branches got baked as constants, dynamic control flow was flattened incorrectly, or an unsupported operation was silently approximated. This series encounters all three failure modes.
+
+**Why not just use PyTorch's built-in optimizations?** `torch.compile()` (PyTorch 2.x) does offer graph capture and kernel fusion within PyTorch. It's a valid option for NVIDIA GPUs where Triton kernels are mature. But it doesn't give you cross-hardware portability (no CoreML, no edge deployment), its graph capture is fragile on complex models with dynamic control flow, and for our use case (a 4-module recurrent pipeline that needs maximum throughput across NVIDIA *and* Apple hardware), ONNX Runtime with hardware-specific EPs proved more reliable and faster. The ONNX path also produces standalone model files you can ship without a Python environment, which matters for embedded deployment.
 
 ## The model family
 
-Before diving into optimization, it's worth understanding what we're working with. These three models form a lineage:
+With the deployment framework established, let's look at the specific model we need to push through it. These three models form a lineage:
 
 **SAM 2** (Meta, 2024) is a prompted video segmentation model. You give it a bounding box or point on frame 0, and it tracks that object through the entire video. The architecture is a 4-module recurrent pipeline:
 
@@ -111,7 +174,7 @@ The real costs:
 **`nonzero`** (262 ms/frame across 12 calls): SAMURAI's Kalman filter extracts bounding boxes from predicted masks using `torch.nonzero()`. This is the sync killer. Here's why: `nonzero` returns a *variable-length* result (the number of True pixels isn't known until the kernel finishes). The CPU needs to know the output size to allocate the result tensor, so it **blocks until the entire GPU queue drains**. Every other kernel that was running async now becomes effectively synchronous.
 
 ```python
-# SAMURAI's bbox extraction — each nonzero() forces a GPU→CPU sync
+# SAMURAI's bbox extraction, each nonzero() forces a GPU→CPU sync
 mask_pixels = torch.nonzero(predicted_mask)
 # ↑ GPU must finish ALL queued work before this returns
 # because the output tensor size depends on the result
@@ -124,9 +187,7 @@ The fix isn't to optimize `nonzero` itself. It's to move the entire pipeline int
 
 ## ONNX export: the image encoder saga
 
-[ONNX Runtime](https://onnxruntime.ai/) provides exactly what we need: a static computation graph with operator fusion, no Python dispatch, and pluggable execution providers (CPU, CUDA, TensorRT, CoreML). Export each sub-module to ONNX, wire them together in application code, and the sync-forcing Python glue disappears.
-
-The plan: export all four modules. Start with the image encoder (the largest, most complex one). Should take an afternoon.
+With profiling done, the path is clear: export all four sub-modules to ONNX, wire them together in application code, and the sync-forcing Python glue disappears. Start with the image encoder (the largest, most complex one). Should take an afternoon.
 
 It took a week.
 
@@ -161,7 +222,7 @@ Positional encodings match perfectly. The feature outputs are **catastrophically
 The culprit: shape-dependent conditionals in SAM 2's `window_partition` / `window_unpartition` functions. The legacy TorchScript tracer evaluates Python `if` statements at trace time and bakes the result as a constant. Any input whose shape differs from the tracing dummy takes the wrong branch, silently producing garbage.
 
 ```python
-# From sam2/modeling/backbones/utils.py — the problematic pattern
+# From sam2/modeling/backbones/utils.py, the problematic pattern
 def window_unpartition(windows, window_size, pad_hw, hw):
     Hp, Wp = pad_hw
     H, W = hw
@@ -175,7 +236,7 @@ def window_unpartition(windows, window_size, pad_hw, hw):
 def window_unpartition_traceable(windows, window_size, pad_hw, hw):
     Hp, Wp = pad_hw
     H, W = hw
-    # Always slice — when Hp == H and Wp == W this is a no-op
+    # Always slice, when Hp == H and Wp == W this is a no-op
     # but the tracer records it unconditionally
     x = x[:, :H, :W, :].contiguous()
     return x
@@ -187,7 +248,7 @@ I spent two hours writing monkey-patches:
 
 | Attempt | What I changed | max_abs |
 |---|---|---|
-| Baseline (no patch) | — | 1.28e+09 |
+| Baseline (no patch) |, | 1.28e+09 |
 | Window partition rewrite | Unconditional (both branches always false at 1024) | 2.5e-02 |
 | + int casts in attention | Explicit `int()` on shape arithmetic | **4.7e+18** (worse!) |
 | + positional embedding rewrite | Rewrote `_get_pos_embed` | 2.5e-02 (no change) |
@@ -260,7 +321,7 @@ The complex multiply $(a + bi)(c + di) = (ac - bd) + (ad + bc)i$ unrolls to four
 
 ```python
 def apply_rotary_enc(xq, xk, freqs_cis):
-    """Real-valued RoPE — no view_as_complex needed during tracing."""
+    """Real-valued RoPE, no view_as_complex needed during tracing."""
     # freqs_cis is precomputed complex; extract real/imag parts
     cos = freqs_cis.real  # [seq_len, head_dim/2]
     sin = freqs_cis.imag
@@ -322,7 +383,7 @@ EfficientTAM-Ti @ 512, exported as 4 ONNX sub-modules:
 | memory_attention | 5.92M | 32.5 MB | 2.15e-06 | 102 ms |
 | mask_decoder | 4.19M | 16.8 MB | 2.19e-05 | 6 ms |
 | memory_encoder | 1.38M | 5.6 MB | 3.34e-06 | 14 ms |
-| **Total** | **17.65M** | **80.0 MB** | — | **187 ms** |
+| **Total** | **17.65M** | **80.0 MB** |, | **187 ms** |
 
 Every module verified to max_abs < 1e-3 against PyTorch reference. Compare: SAM 2's Hiera encoder produced max_abs in the 5e-2 to 1.5e-1 range (from the window partition issues). EfficientTAM's flat ViT achieves **6.78e-06**, four orders of magnitude tighter, because there are no multi-scale tracing hazards to begin with.
 
@@ -358,7 +419,7 @@ These GPU numbers are what Part 2 will cover in detail (engine building, precisi
 
 One important validation: running a 150-frame tracking chain shows that ONNX export drift is **bounded, not compounding**. The memory bank's recurrent averaging acts as a stabilizer. Small per-frame numerical differences don't accumulate into tracking failure.
 
-**Next up**: [Part 2](optimizing-samurai-part-2) dives into NVIDIA optimization: CUDA execution providers, TensorRT engine building, FP16 precision strategies, and a Softmax numerical overflow that almost derailed the whole approach. Plus: wrapping these modules back into a full tracking pipeline and seeing what the real end-to-end numbers look like.
+**Next up**: [[optimizing-samurai-part-2|Part 2]] dives into NVIDIA optimization: CUDA execution providers, TensorRT engine building, FP16 precision strategies, and a Softmax numerical overflow that almost derailed the whole approach. Plus: wrapping these modules back into a full tracking pipeline and seeing what the real end-to-end numbers look like.
 
 ---
 

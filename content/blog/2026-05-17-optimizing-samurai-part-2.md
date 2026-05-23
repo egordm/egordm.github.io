@@ -1,5 +1,5 @@
 ---
-title: "CUDA, TensorRT, and the FP16 Softmax Overflow"
+title: "TensorRT Optimization: 5x Faster Inference with FP16 Precision"
 date: 2026-05-17
 draft: false
 tags:
@@ -9,14 +9,16 @@ tags:
   - optimization
   - onnx
   - cuda
-description: "Taking ONNX models from 80 FPS (PyTorch CUDA) to 97 FPS (TensorRT mixed-precision), including a deep dive into a known TensorRT fusion bug that produces garbage in FP16."
+  - nvidia
+  - fp16
+description: "Taking ONNX models from PyTorch CUDA to 97 FPS with TensorRT mixed-precision engines. Covers CUDA execution providers, engine building, FP16 precision strategies, and debugging a known TensorRT Softmax fusion bug."
 aliases:
   - "optimizing-samurai-part-2"
 series: "Optimizing SAMURAI"
 series_order: 2
 ---
 
-[Part 1](optimizing-samurai-part-1) left us with 4 ONNX modules (80 MB total, EfficientTAM-Ti @ 512) verified against PyTorch to `max_abs < 1e-3`. On CPU the pipeline runs at 187 ms per frame. The ONNX format was the prerequisite, not the destination.
+[[optimizing-samurai-part-1|Part 1]] left us with 4 ONNX modules (80 MB total, EfficientTAM-Ti @ 512) verified against PyTorch to `max_abs < 1e-3`. On CPU the pipeline runs at 187 ms per frame. The ONNX format was the prerequisite, not the destination.
 
 This post covers what happens when you plug those same `.onnx` files into NVIDIA's execution stack: CUDA EP, TensorRT engine building, FP16 precision, and a bug in TensorRT's fused attention kernel that took days to diagnose and produced eight failed workarounds before I found the fix.
 
@@ -167,11 +169,11 @@ Real-video chained inference (150 frames, RTX 4090):
 The biggest non-model cost was NumPy preprocessing: normalize + transpose was taking 3.9 ms per frame, 40%+ of the total pipeline time. The fix was straightforward: in-place operations instead of allocating new arrays:
 
 ```python
-# Before: 3.91 ms — allocates 3 new arrays
+# Before: 3.91 ms, allocates 3 new arrays
 image = (image / 255.0 - mean) / std
 image = image.transpose(2, 0, 1)  # HWC → CHW
 
-# After: 0.48 ms — in-place ops, single allocation
+# After: 0.48 ms, in-place ops, single allocation
 image = image.astype(np.float32)
 np.subtract(image, mean * 255, out=image)
 np.multiply(image, 1.0 / (std * 255), out=image)
@@ -482,7 +484,7 @@ The gap between isolated modules (388 FPS) and real pipeline (97 FPS) is the eng
 
 97 FPS at 0.800 mIoU exceeds the 30 FPS real-time bar by 3x on an RTX 4090. For the drone cinematography use case, this is more than sufficient on desktop-class hardware.
 
-**Next up**: [Part 3](optimizing-samurai-part-3) takes the same ONNX models to Apple Silicon with CoreML, where the constraints are completely different: no CUDA, no TensorRT, unified memory architecture, and a Neural Engine that only speaks certain graph patterns.
+**Next up**: [[optimizing-samurai-part-3|Part 3]] takes the same ONNX models to Apple Silicon with CoreML, where the constraints are completely different: no CUDA, no TensorRT, unified memory architecture, and a Neural Engine that only speaks certain graph patterns.
 
 ---
 

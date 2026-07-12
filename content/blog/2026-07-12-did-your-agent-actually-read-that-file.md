@@ -15,7 +15,7 @@ aliases:
 
 Your coding agent just read twelve files, ran three shell commands, and confidently told you the server config is wrong. Which of those twelve files did it *actually use* to reach that conclusion? Did the `lsof` output matter? Did it ignore the config file it so dutifully opened?
 
-You can't just ask it; models confabulate justifications. Attention maps feel like the answer but are famously unreliable as explanations. And yet there's a method that answers this question with nothing but forward passes and a linear regression, and it's one of the most elegant tricks I've seen in the LLM tooling space. It's called **ablation attribution**, published as ContextCite by Cohen-Wang et al. (NeurIPS 2024).
+You can't just ask it; models confabulate justifications. Attention maps feel like the answer but are famously unreliable as explanations. And yet there's a method that answers this question with nothing but forward passes and a linear regression, and it's one of the most elegant tricks I've seen in the LLM tooling space. It's called **ablation attribution**, published as [ContextCite](https://arxiv.org/abs/2409.00729) by Cohen-Wang et al. (NeurIPS 2024).
 
 This post builds it from scratch, following the exact path of confusions I went through when learning it. If you make it to the end, you'll also know precisely what the method *cannot* tell you, which is where it gets scientifically interesting.
 
@@ -28,6 +28,9 @@ If you come from classical ML, "attribute the output to the input" sounds like a
 That instinct is half right (this method is a cousin of SHAP), but it needs two corrections, and the second one is the whole trick.
 
 **Correction 1: attribute to sources, not tokens.** We don't care whether input token 4,812 mattered. We care whether *the config file* mattered, whether *the lsof output* mattered. So the context gets partitioned into a handful of **sources**: one file read, one tool result, one instruction block. A real agent trajectory has maybe 5 to 50 sources, not 30,000 tokens. Keep that number $d$ in mind; it's what makes everything affordable.
+
+![[blog/assets/ablation-saliency-vs-sources.png|700]]
+*A saliency map (top) assigns an importance weight to every input token; useful for models, overwhelming for humans. We want the bottom picture: one signed weight per source the agent saw. (Numbers illustrative.)*
 
 **Correction 2: never attribute the generation. Attribute the score of the *frozen* generation.** This one deserves its own section.
 
@@ -81,6 +84,9 @@ score = log(0.02) ≈ −3.9
 
 Stare at this for a second, because it's the crux. Without the lsof output, the model *wants* to say "8080" (93%!). But we never let it say anything. We only read off how much probability it still assigns to the frozen "3000": a miserable 2%. The model is telling us, in one number: *without that tool result, I would not have said what I said.*
 
+![[blog/assets/ablation-grading-softmax.png|700]]
+*Grading, not generating: the softmax at the answer position under both contexts. The red "8080" bar is what the model would rather say; we never let it. Only the "3000" bars are ever read.*
+
 **Ablate A instead:**
 
 ```text
@@ -102,6 +108,8 @@ Collect the experiments into a table: which sources were kept, and what score ca
 | 0       | 0       | −4.2  |
 
 Now fit a linear regression: $\text{score} \approx \text{base} + w_A \cdot A + w_B \cdot B$. Out come the attributions: $w_B \approx +3.9$ (the answer *depended* on the lsof output) and $w_A \approx -0.05$ (the config file was mildly hurting). The weights are **signed**, and negative weights are real findings: a source that actively pushed against the answer.
+
+![[blog/assets/ablation-fitted-weights.png|700]]
 
 There's an elegant reading hiding here: the weights are additive in log space, which means each kept source *multiplies* the answer's probability by its own factor $e^{w_j}$. Independent multiplicative contributions; a natural grammar for probabilities.
 

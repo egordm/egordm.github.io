@@ -1,0 +1,88 @@
+<svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      /* 3Blue1Brown-inspired dark theme */
+      .bg { fill: #1C1C1C; }
+      .node-box { fill: rgba(49, 130, 189, 0.15); stroke: #3182BD; stroke-width: 2; }
+      .node-box.leaf { fill: rgba(49, 163, 84, 0.15); stroke: #31A354; }
+      .node-text { fill: #ECECEC; font-family: 'Inter', -apple-system, sans-serif; font-size: 14px; font-weight: 500; }
+      .edge { stroke: #969696; stroke-width: 2; fill: none; }
+      .edge-label { fill: #969696; font-family: 'Inter', -apple-system, sans-serif; font-size: 12px; }
+      .legend-box { stroke-width: 2; }
+      .legend-box.split { fill: rgba(49, 130, 189, 0.15); stroke: #3182BD; }
+      .legend-box.leaf { fill: rgba(49, 163, 84, 0.15); stroke: #31A354; }
+      .legend-text { fill: #ECECEC; font-family: 'Inter', -apple-system, sans-serif; font-size: 11px; }
+      .annotation { fill: #969696; font-family: 'Inter', -apple-system, sans-serif; font-size: 12px; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect class="bg" width="100%" height="100%" rx="8"/>
+
+  <!-- Legend -->
+  <g transform="translate(480, 20)">
+    <rect class="legend-box split" x="0" y="0" width="20" height="14" rx="3"/>
+    <text class="legend-text" x="28" y="11">Split node</text>
+    
+    <rect class="legend-box leaf" x="0" y="22" width="20" height="14" rx="3"/>
+    <text class="legend-text" x="28" y="33">Leaf (output)</text>
+  </g>
+
+  <!-- Tree structure -->
+  <g transform="translate(300, 60)">
+    
+    <!-- Edges (drawn first so nodes appear on top) -->
+    <!-- Root to Left child -->
+    <path class="edge" d="M 0,25 C 0,55 -140,55 -140,85"/>
+    <text class="edge-label" x="-85" y="52">Yes</text>
+    
+    <!-- Root to Right child -->
+    <path class="edge" d="M 0,25 C 0,55 140,55 140,85"/>
+    <text class="edge-label" x="90" y="52">No</text>
+    
+    <!-- Left child to Left-Left leaf -->
+    <path class="edge" d="M -140,135 C -140,165 -200,165 -200,195"/>
+    <text class="edge-label" x="-182" y="162">Yes</text>
+    
+    <!-- Left child to Left-Right leaf -->
+    <path class="edge" d="M -140,135 C -140,165 -80,165 -80,195"/>
+    <text class="edge-label" x="-98" y="162">No</text>
+
+    <!-- Root node -->
+    <g transform="translate(0, 0)">
+      <rect class="node-box" x="-65" y="-25" width="130" height="50" rx="8"/>
+      <text class="node-text" text-anchor="middle" dominant-baseline="middle" y="0">Age &lt; 30?</text>
+    </g>
+
+    <!-- Left child (internal node) -->
+    <g transform="translate(-140, 110)">
+      <rect class="node-box" x="-70" y="-25" width="140" height="50" rx="8"/>
+      <text class="node-text" text-anchor="middle" dominant-baseline="middle" y="0">Income &gt; 50k?</text>
+    </g>
+
+    <!-- Right child (leaf) -->
+    <g transform="translate(140, 110)">
+      <rect class="node-box leaf" x="-55" y="-25" width="110" height="50" rx="8"/>
+      <text class="node-text" text-anchor="middle" dominant-baseline="middle" y="0">h = +0.8</text>
+    </g>
+
+    <!-- Left-Left leaf -->
+    <g transform="translate(-200, 220)">
+      <rect class="node-box leaf" x="-50" y="-25" width="100" height="50" rx="8"/>
+      <text class="node-text" text-anchor="middle" dominant-baseline="middle" y="0">h = +1.2</text>
+    </g>
+
+    <!-- Left-Right leaf -->
+    <g transform="translate(-80, 220)">
+      <rect class="node-box leaf" x="-50" y="-25" width="100" height="50" rx="8"/>
+      <text class="node-text" text-anchor="middle" dominant-baseline="middle" y="0">h = −0.3</text>
+    </g>
+
+  </g>
+
+  <!-- Annotation -->
+  <text class="annotation" text-anchor="middle" x="300" y="360">
+    Each leaf outputs a correction h(x) added to the ensemble
+  </text>
+
+</svg>

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr"><head><title>Optimizing PyTorch Models for Production: ONNX Export with SAM 2 | egordmitriev.dev</title><meta charset="utf-8"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Inter:ital,wght@0,400;0,600;1,400;1,600&amp;family=JetBrains Mono:wght@400;600&amp;display=swap"/><link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin="anonymous"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="alternate" type="application/rss+xml" title="Egor Dmitriev" href="https://egordmitriev.dev/index.xml"/><meta name="og:site_name" content="Egor Dmitriev"/><meta property="og:title" content="Optimizing PyTorch Models for Production: ONNX Export with SAM 2 | egordmitriev.dev"/><meta property="og:type" content="article"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="Optimizing PyTorch Models for Production: ONNX Export with SAM 2 | egordmitriev.dev"/><meta name="twitter:description" content="A step-by-step guide to profiling PyTorch inference bottlenecks and exporting vision models to ONNX Runtime. Uses SAM 2 / EfficientTAM as a real-world case study, from 1.3 FPS to the foundation for 97 FPS."/><meta property="og:description" content="A step-by-step guide to profiling PyTorch inference bottlenecks and exporting vision models to ONNX Runtime. Uses SAM 2 / EfficientTAM as a real-world case study, from 1.3 FPS to the foundation for 97 FPS."/><meta property="og:image:alt" content="A step-by-step guide to profiling PyTorch inference bottlenecks and exporting vision models to ONNX Runtime. Uses SAM 2 / EfficientTAM as a real-world case study, from 1.3 FPS to the foundation for 97 FPS."/><meta property="og:image" content="https://egordmitriev.dev/static/og-image.png"/><meta property="og:image:url" content="https://egordmitriev.dev/static/og-image.png"/><meta name="twitter:image" content="https://egordmitriev.dev/static/og-image.png"/><meta property="og:image:type" content="image/.png"/><meta property="twitter:domain" content="egordmitriev.dev"/><meta property="og:url" content="https://egordmitriev.dev/blog/2026-05-16-optimizing-samurai-part-1"/><meta property="twitter:url" content="https://egordmitriev.dev/blog/2026-05-16-optimizing-samurai-part-1"/><link rel="canonical" href="https://egordmitriev.dev/blog/2026-05-16-optimizing-samurai-part-1"/><link rel="icon" href="../static/icon.png"/><meta name="description" content="A step-by-step guide to profiling PyTorch inference bottlenecks and exporting vision models to ONNX Runtime. Uses SAM 2 / EfficientTAM as a real-world case study, from 1.3 FPS to the foundation for 97 FPS."/><meta name="generator" content="Quartz"/><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Optimizing PyTorch Models for Production: ONNX Export with SAM 2","description":"A step-by-step guide to profiling PyTorch inference bottlenecks and exporting vision models to ONNX Runtime. Uses SAM 2 / EfficientTAM as a real-world case study, from 1.3 FPS to the foundation for 97 FPS.","datePublished":"2026-05-16","url":"https://egordmitriev.dev/blog/2026-05-16-optimizing-samurai-part-1","author":{"@type":"Person","name":"Egor Dmitriev","url":"https://egordmitriev.dev"},"publisher":{"@type":"Person","name":"Egor Dmitriev"},"keywords":"deep-learning, computer-vision, onnx, optimization, pytorch, model-deployment"}</script><link href="../index.css" rel="stylesheet" type="text/css" data-persist="true"/><style>.expand-button {
+  position: absolute;
+  display: flex;
+  float: right;
+  padding: 0.4rem;
+  margin: 0.3rem;
+  right: 0;
+  color: var(--gray);
+  border-color: var(--dark);
+  background-color: var(--light);
+  border: 1px solid;
+  border-radius: 5px;
+  opacity: 0;
+  transition: 0.2s;
+}
+.expand-button > svg {
+  fill: var(--light);
+  filter: contrast(0.3);
+}
+.expand-button:hover {
+  cursor: pointer;
+  border-color: var(--secondary);
+}
+.expand-button:focus {
+  outline: 0;
+}
+
+pre:hover > .expand-button {
+  opacity: 1;
+  transition: 0.2s;
+}
+
+#mermaid-container {
+  position: fixed;
+  contain: layout;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: none;
+  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.5);
+}
+#mermaid-container.active {
+  display: inline-block;
+}
+#mermaid-container > #mermaid-space {
+  border: 1px solid var(--lightgray);
+  background-color: var(--light);
+  border-radius: 5px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 80vh;
+  width: 80vw;
+  overflow: hidden;
+}
+#mermaid-container > #mermaid-space > .mermaid-content {
+  position: relative;
+  transform-origin: 0 0;
+  transition: transform 0.1s ease;
+  overflow: visible;
+  min-height: 200px;
+  min-width: 200px;
+}
+#mermaid-container > #mermaid-space > .mermaid-content pre {
+  margin: 0;
+  border: none;
+}
+#mermaid-container > #mermaid-space > .mermaid-content svg {
+  max-width: none;
+  height: auto;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: var(--light);
+  border: 1px solid var(--lightgray);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--lightgray);
+  background: var(--light);
+  color: var(--dark);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: var(--bodyFont);
+  transition: all 0.2s ease;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:hover {
+  background: var(--lightgray);
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:active {
+  transform: translateY(1px);
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:nth-child(2) {
+  width: auto;
+  padding: 0 12px;
+  font-size: 14px;
+}
+/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VSb290IjoiL1VzZXJzL2Vnb3JkbS9wcm9qZWN0cy9hcmQvZWdvcmRtLmdpdGh1Yi5pby9xdWFydHovY29tcG9uZW50cy9zdHlsZXMiLCJzb3VyY2VzIjpbIm1lcm1haWQuaW5saW5lLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7O0FBR0Y7RUFDRTtFQUNBOztBQUdGO0VBQ0U7OztBQUtGO0VBQ0U7RUFDQTs7O0FBSUo7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOztBQUVBO0VBQ0U7O0FBR0Y7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7O0FBR0Y7RUFDRTtFQUNBOztBQUlKO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7O0FBRUE7RUFDRTs7QUFHRjtFQUNFOztBQUlGO0VBQ0U7RUFDQTtFQUNBIiwic291cmNlc0NvbnRlbnQiOlsiLmV4cGFuZC1idXR0b24ge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGZsb2F0OiByaWdodDtcbiAgcGFkZGluZzogMC40cmVtO1xuICBtYXJnaW46IDAuM3JlbTtcbiAgcmlnaHQ6IDA7IC8vIE5PVEU6IHJpZ2h0IHdpbGwgYmUgc2V0IGluIG1lcm1haWQuaW5saW5lLnRzXG4gIGNvbG9yOiB2YXIoLS1ncmF5KTtcbiAgYm9yZGVyLWNvbG9yOiB2YXIoLS1kYXJrKTtcbiAgYmFja2dyb3VuZC1jb2xvcjogdmFyKC0tbGlnaHQpO1xuICBib3JkZXI6IDFweCBzb2xpZDtcbiAgYm9yZGVyLXJhZGl1czogNXB4O1xuICBvcGFjaXR5OiAwO1xuICB0cmFuc2l0aW9uOiAwLjJzO1xuXG4gICYgPiBzdmcge1xuICAgIGZpbGw6IHZhcigtLWxpZ2h0KTtcbiAgICBmaWx0ZXI6IGNvbnRyYXN0KDAuMyk7XG4gIH1cblxuICAmOmhvdmVyIHtcbiAgICBjdXJzb3I6IHBvaW50ZXI7XG4gICAgYm9yZGVyLWNvbG9yOiB2YXIoLS1zZWNvbmRhcnkpO1xuICB9XG5cbiAgJjpmb2N1cyB7XG4gICAgb3V0bGluZTogMDtcbiAgfVxufVxuXG5wcmUge1xuICAmOmhvdmVyID4gLmV4cGFuZC1idXR0b24ge1xuICAgIG9wYWNpdHk6IDE7XG4gICAgdHJhbnNpdGlvbjogMC4ycztcbiAgfVxufVxuXG4jbWVybWFpZC1jb250YWluZXIge1xuICBwb3NpdGlvbjogZml4ZWQ7XG4gIGNvbnRhaW46IGxheW91dDtcbiAgei1pbmRleDogOTk5O1xuICBsZWZ0OiAwO1xuICB0b3A6IDA7XG4gIHdpZHRoOiAxMDB2dztcbiAgaGVpZ2h0OiAxMDB2aDtcbiAgb3ZlcmZsb3c6IGhpZGRlbjtcbiAgZGlzcGxheTogbm9uZTtcbiAgYmFja2Ryb3AtZmlsdGVyOiBibHVyKDRweCk7XG4gIGJhY2tncm91bmQ6IHJnYmEoMCwgMCwgMCwgMC41KTtcblxuICAmLmFjdGl2ZSB7XG4gICAgZGlzcGxheTogaW5saW5lLWJsb2NrO1xuICB9XG5cbiAgJiA+ICNtZXJtYWlkLXNwYWNlIHtcbiAgICBib3JkZXI6IDFweCBzb2xpZCB2YXIoLS1saWdodGdyYXkpO1xuICAgIGJhY2tncm91bmQtY29sb3I6IHZhcigtLWxpZ2h0KTtcbiAgICBib3JkZXItcmFkaXVzOiA1cHg7XG4gICAgcG9zaXRpb246IGZpeGVkO1xuICAgIHRvcDogNTAlO1xuICAgIGxlZnQ6IDUwJTtcbiAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZSgtNTAlLCAtNTAlKTtcbiAgICBoZWlnaHQ6IDgwdmg7XG4gICAgd2lkdGg6IDgwdnc7XG4gICAgb3ZlcmZsb3c6IGhpZGRlbjtcblxuICAgICYgPiAubWVybWFpZC1jb250ZW50IHtcbiAgICAgIHBvc2l0aW9uOiByZWxhdGl2ZTtcbiAgICAgIHRyYW5zZm9ybS1vcmlnaW46IDAgMDtcbiAgICAgIHRyYW5zaXRpb246IHRyYW5zZm9ybSAwLjFzIGVhc2U7XG4gICAgICBvdmVyZmxvdzogdmlzaWJsZTtcbiAgICAgIG1pbi1oZWlnaHQ6IDIwMHB4O1xuICAgICAgbWluLXdpZHRoOiAyMDBweDtcblxuICAgICAgcHJlIHtcbiAgICAgICAgbWFyZ2luOiAwO1xuICAgICAgICBib3JkZXI6IG5vbmU7XG4gICAgICB9XG5cbiAgICAgIHN2ZyB7XG4gICAgICAgIG1heC13aWR0aDogbm9uZTtcbiAgICAgICAgaGVpZ2h0OiBhdXRvO1xuICAgICAgfVxuICAgIH1cblxuICAgICYgPiAubWVybWFpZC1jb250cm9scyB7XG4gICAgICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gICAgICBib3R0b206IDIwcHg7XG4gICAgICByaWdodDogMjBweDtcbiAgICAgIGRpc3BsYXk6IGZsZXg7XG4gICAgICBnYXA6IDhweDtcbiAgICAgIHBhZGRpbmc6IDhweDtcbiAgICAgIGJhY2tncm91bmQ6IHZhcigtLWxpZ2h0KTtcbiAgICAgIGJvcmRlcjogMXB4IHNvbGlkIHZhcigtLWxpZ2h0Z3JheSk7XG4gICAgICBib3JkZXItcmFkaXVzOiA2cHg7XG4gICAgICBib3gtc2hhZG93OiAwIDJweCA0cHggcmdiYSgwLCAwLCAwLCAwLjEpO1xuICAgICAgei1pbmRleDogMjtcblxuICAgICAgLm1lcm1haWQtY29udHJvbC1idXR0b24ge1xuICAgICAgICBkaXNwbGF5OiBmbGV4O1xuICAgICAgICBhbGlnbi1pdGVtczogY2VudGVyO1xuICAgICAgICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjtcbiAgICAgICAgd2lkdGg6IDMycHg7XG4gICAgICAgIGhlaWdodDogMzJweDtcbiAgICAgICAgcGFkZGluZzogMDtcbiAgICAgICAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tbGlnaHRncmF5KTtcbiAgICAgICAgYmFja2dyb3VuZDogdmFyKC0tbGlnaHQpO1xuICAgICAgICBjb2xvcjogdmFyKC0tZGFyayk7XG4gICAgICAgIGJvcmRlci1yYWRpdXM6IDRweDtcbiAgICAgICAgY3Vyc29yOiBwb2ludGVyO1xuICAgICAgICBmb250LXNpemU6IDE2cHg7XG4gICAgICAgIGZvbnQtZmFtaWx5OiB2YXIoLS1ib2R5Rm9udCk7XG4gICAgICAgIHRyYW5zaXRpb246IGFsbCAwLjJzIGVhc2U7XG5cbiAgICAgICAgJjpob3ZlciB7XG4gICAgICAgICAgYmFja2dyb3VuZDogdmFyKC0tbGlnaHRncmF5KTtcbiAgICAgICAgfVxuXG4gICAgICAgICY6YWN0aXZlIHtcbiAgICAgICAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZVkoMXB4KTtcbiAgICAgICAgfVxuXG4gICAgICAgIC8vIFN0eWxlIHRoZSByZXNldCBidXR0b24gZGlmZmVyZW50bHlcbiAgICAgICAgJjpudGgtY2hpbGQoMikge1xuICAgICAgICAgIHdpZHRoOiBhdXRvO1xuICAgICAgICAgIHBhZGRpbmc6IDAgMTJweDtcbiAgICAgICAgICBmb250LXNpemU6IDE0cHg7XG4gICAgICAgIH1cbiAgICAgIH1cbiAgICB9XG4gIH1cbn1cbiJdfQ== */</style><link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet" type="text/css" data-persist="true"/><script src="../prescript.js" type="application/javascript" data-persist="true"></script><script type="application/javascript" data-persist="true">const fetchData = fetch("../static/contentIndex.json").then(data => data.json())</script><link rel="alternate" type="application/rss+xml" title="RSS Feed" href="https://egordmitriev.dev/index.xml"/></head><body data-slug="blog/2026-05-16-optimizing-samurai-part-1"><div id="quartz-root" class="page"><div id="quartz-body"><div class="left sidebar"><h2 class="page-title"><a href="..">Egor Dmitriev</a></h2><div class="spacer mobile-only"></div><div class="search"><button class="search-button"><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title>Search</title><g class="search-path" fill="none"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"></path><circle cx="8" cy="8" r="7"></circle></g></svg><p>Search</p></button><div class="search-container"><div class="search-space"><input autocomplete="off" class="search-bar" name="search" type="text" aria-label="Search for something" placeholder="Search for something"/><div class="search-layout" data-preview="true"></div></div></div></div><div class="sidebar-posts desktop-only"><h3>Recent Posts</h3><ul class="sidebar-posts-ul"><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-07-12-did-your-agent-actually-read-that-file" class="internal sidebar-post-title">Did Your Agent Actually Read That File?</a></div><div class="sidebar-post-meta"><span class="sidebar-post-date"><time datetime="2026-07-11T22:00:00.000Z">Jul 12, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-25-long-term-visual-tracking-for-drones-2026" class="internal sidebar-post-title">Long-Term Visual Tracking for Drones: State of the Art, Open Source, and Edge Inference in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-24T22:00:00.000Z">May 25, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-24-vio-drones-2026" class="internal sidebar-post-title">Visual-Inertial Odometry for Drones: State of the Art, Foundation-3D, and the cuVSLAM Squeeze in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-23T22:00:00.000Z">May 24, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-23-drone-to-satellite-localization-2026" class="internal sidebar-post-title">Drone-to-Satellite Visual Geo-Localization: State of the Art, Open Source, and Edge Inference in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-22T22:00:00.000Z">May 23, 2026</time></span></div></li></ul><p class="sidebar-browse"><a href="../blog/">All posts →</a></p></div></div><div class="center"><div class="page-header"><div class="popover-hint"><nav class="breadcrumb-container" aria-label="breadcrumbs"><div class="breadcrumb-element"><a href="../">Home</a><p> ❯ </p></div><div class="breadcrumb-element"><a href="../blog/">Blog</a><p> ❯ </p></div><div class="breadcrumb-element"><a href>Optimizing PyTorch Models for Production: ONNX Export with SAM 2</a></div></nav><h1 class="article-title">Optimizing PyTorch Models for Production: ONNX Export with SAM 2</h1><p show-comma="true" class="content-meta"><time datetime="2026-05-15T22:00:00.000Z">May 16, 2026</time><span>20 min read</span></p><ul class="tags"><li><a href="../tags/deep-learning" class="internal tag-link">deep-learning</a></li><li><a href="../tags/computer-vision" class="internal tag-link">computer-vision</a></li><li><a href="../tags/onnx" class="internal tag-link">onnx</a></li><li><a href="../tags/optimization" class="internal tag-link">optimization</a></li><li><a href="../tags/pytorch" class="internal tag-link">pytorch</a></li><li><a href="../tags/model-deployment" class="internal tag-link">model-deployment</a></li></ul><div class="series-banner"><details class="series-toc"><summary><span class="series-icon">📚</span><a href="/series/optimizing-samurai" class="series-name">Optimizing SAMURAI</a><span class="series-position">Part 1 of 3</span></summary><ol class="series-list"><li class="current"><span class="current-post">Optimizing PyTorch Models for Production: ONNX Export with SAM 2</span></li><li class><a href="/blog/2026-05-17-optimizing-samurai-part-2">TensorRT Optimization: 5x Faster Inference with FP16 Precision</a></li><li class><a href="/blog/2026-05-18-optimizing-samurai-part-3">CoreML Deployment on Apple Silicon: Real-Time Vision Models</a></li></ol></details></div></div></div><article class="popover-hint"><blockquote class="callout abstract" data-callout="abstract">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Series context </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>This is Part 1 of the <em>Optimizing SAMURAI</em> series. For why SAMURAI / EfficientTAM were chosen over the rest of the 2024-2025 tracking field, see <a href="../long-term-visual-tracking-2026" class="internal alias" data-slug="long-term-visual-tracking-2026">Long-Term Visual Tracking for Drones (2026)</a>. That post maps the full academic landscape; this series is the deployment story.</p>
+</div>
+</blockquote>
+<p>You have trained (or downloaded) a neural network that works brilliantly in a Jupyter notebook. It’s accurate, it generalizes, it handles edge cases the previous generation couldn’t. There’s just one problem: it runs at 2 FPS, and you need 30.</p>
+<p>This is the universal deployment gap in modern AI. The model itself is fine. Everything <em>around</em> it is the problem: Python overhead, memory synchronization stalls, unoptimized operator scheduling, and a runtime designed for research flexibility rather than production throughput. Closing that gap doesn’t require retraining, doesn’t require changing architectures, and doesn’t require specialized hardware. It requires understanding where time actually goes and systematically removing the waste.</p>
+<p>I hit this wall building a real-time visual tracking system for autonomous drone cinematography. The model (<a href="https://github.com/yangchris11/samurai" class="external">SAMURAI<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, built on Meta’s <a href="https://github.com/facebookresearch/sam2" class="external">SAM 2<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>) needed to run at 30+ FPS on consumer hardware. Stock performance: <strong>~20 FPS</strong> on an RTX 4090 in PyTorch. After the work in this series: <strong>97 FPS</strong>. Same GPU, same model weights, same tracking task. 5x from engineering alone.</p>
+<p>This series documents every step of that process. If you’ve ever stared at a PyTorch model wondering why it’s slow and what to do about it, this is for you. The specific model is a visual object tracker, but the techniques (profiling, graph export, runtime optimization, precision tuning) apply to any neural network you want to deploy.</p>
+<p><strong>Part 1</strong> covers the foundation: understanding the model architecture, profiling to find the <em>actual</em> bottleneck (spoiler: it’s not what you think), and exporting to ONNX. <strong><a href="../optimizing-samurai-part-2" class="internal alias" data-slug="optimizing-samurai-part-2">Part 2</a></strong> takes it to GPU: CUDA execution providers, TensorRT engine compilation, and FP16 precision. <strong><a href="../optimizing-samurai-part-3" class="internal alias" data-slug="optimizing-samurai-part-3">Part 3</a></strong> covers Apple Silicon: CoreML, Metal, and the M-series deployment story.</p>
+<h2 id="the-deployment-gap">The deployment gap<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-deployment-gap" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>Research code and production code optimize for different things. Research code optimizes for <em>iteration speed</em>: try a new loss function, swap a backbone, add an attention layer. Every operation goes through Python, every intermediate result is a first-class tensor you can inspect, every module is a Python object you can monkey-patch. This flexibility has a cost.</p>
+<p>Three layers of overhead compound in a typical PyTorch inference loop:</p>
+<p><strong>Python dispatch overhead.</strong> Every operation in PyTorch goes through Python’s interpreter before reaching C++/CUDA kernels. For a model with hundreds of operators per forward pass, the cumulative cost of Python function calls, type checking, and autograd bookkeeping is substantial. This is invisible in profiling because it’s spread across every operation rather than concentrated in one hot spot.</p>
+<p><strong>Memory synchronization.</strong> GPUs execute asynchronously: the CPU queues work, the GPU processes it in parallel. But certain operations force <em>synchronization</em>: the CPU blocks until the GPU finishes all queued work. <code>torch.nonzero()</code> (variable-length output), <code>.item()</code> (scalar transfer), and shape-dependent Python conditionals all trigger this. A single sync point can stall the entire GPU pipeline.</p>
+<p><strong>Unoptimized operator scheduling.</strong> PyTorch executes operators one at a time as Python encounters them. A specialized runtime can <em>fuse</em> sequences of operators (e.g., conv + batch_norm + relu becomes one kernel launch), <em>reorder</em> independent operations for better parallelism, and <em>eliminate</em> redundant memory copies. The same mathematical computation, scheduled better, runs faster.</p>
+<p>The solution to all three is the same idea: <strong>get Python out of the inference path</strong>. Export the computation graph to a format a specialized runtime can optimize and execute without Python. This is where ONNX comes in.</p>
+<h2 id="the-onnx-mental-model">The ONNX mental model<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-onnx-mental-model" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>If you’ve worked with compiled languages, the analogy is direct:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Programming</th><th>ML Deployment</th></tr></thead><tbody><tr><td>Python source code</td><td>PyTorch <code>nn.Module</code></td></tr><tr><td>Compiler IR (LLVM IR)</td><td>ONNX graph</td></tr><tr><td>Machine code (x86, ARM)</td><td>TensorRT engine, CoreML model</td></tr><tr><td>CPU / GPU</td><td>Hardware execution</td></tr></tbody></table></div>
+<p><strong>ONNX</strong> (Open Neural Network Exchange) is a graph-based intermediate representation for neural networks. It captures the <em>computation</em> (which operators run in which order, with which weights) without any of the Python machinery. Think of it as the “assembly language” of neural networks: framework-agnostic, inspectable, optimizable.</p>
+<p><strong>The export step</strong> (<code>torch.onnx.export()</code>) traces your model’s forward pass with a dummy input and serializes the resulting computation graph into a <code>.onnx</code> file. Every tensor operation becomes a node in the graph; every learned parameter becomes a constant. No Python code survives.</p>
+<p><strong>ONNX Runtime</strong> (ORT) is Microsoft’s execution engine for ONNX graphs. It reads the graph, applies graph-level optimizations (operator fusion, constant folding, memory planning), and dispatches to hardware-specific backends called <strong>execution providers</strong>:</p>
+<ul>
+<li><strong>CPU EP</strong>: optimized x86/ARM kernels, vectorized, multi-threaded</li>
+<li><strong>CUDA EP</strong>: NVIDIA GPU kernels with operator fusion</li>
+<li><strong>TensorRT EP</strong>: NVIDIA’s compiler that generates hardware-specific engine files (the maximum-performance path on NVIDIA GPUs)</li>
+<li><strong>CoreML EP</strong>: Apple’s Neural Engine + GPU + CPU on M-series chips</li>
+<li><strong>DirectML EP</strong>: AMD/Intel/Qualcomm GPUs on Windows</li>
+</ul>
+<p>The key insight: you export <em>once</em> and deploy across all of these. The model doesn’t know or care which hardware runs it. And each backend applies optimizations the PyTorch eager runtime cannot: fused kernels, hardware-specific memory layouts, reduced-precision arithmetic where safe.</p>
+<p><strong>The verification pattern</strong> used throughout this series is simple:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Feed identical input to both PyTorch and ORT</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">torch_out </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;"> model</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(dummy_input)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">ort_out </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> session.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">run</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">None</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, {</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;input&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: dummy_input.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">numpy</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">()})</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Compare element-wise</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">max_abs </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> np.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">max</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(np.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">abs</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(torch_out.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">numpy</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">() </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> ort_out))</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">assert</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> max_abs </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">&lt;</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;"> 1e-3</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">f</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;Drift too large: </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">{</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">max_abs</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">}</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;</span></span></code></pre></figure>
+<p>If <code>max_abs</code> is small (&lt; 1e-3), the export is faithful. If it’s large, something went wrong during tracing: shape-dependent branches got baked as constants, dynamic control flow was flattened incorrectly, or an unsupported operation was silently approximated. This series encounters all three failure modes.</p>
+<p><strong>Why not just use PyTorch’s built-in optimizations?</strong> <code>torch.compile()</code> (PyTorch 2.x) does offer graph capture and kernel fusion within PyTorch. It’s a valid option for NVIDIA GPUs where Triton kernels are mature. But it doesn’t give you cross-hardware portability (no CoreML, no edge deployment), its graph capture is fragile on complex models with dynamic control flow, and for our use case (a 4-module recurrent pipeline that needs maximum throughput across NVIDIA <em>and</em> Apple hardware), ONNX Runtime with hardware-specific EPs proved more reliable and faster. The ONNX path also produces standalone model files you can ship without a Python environment, which matters for embedded deployment.</p>
+<h2 id="the-model-family">The model family<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-model-family" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>With the deployment framework established, let’s look at the specific model we need to push through it. These three models form a lineage:</p>
+<p><strong>SAM 2</strong> (Meta, 2024) is a prompted video segmentation model. You give it a bounding box or point on frame 0, and it tracks that object through the entire video. The architecture is a 4-module recurrent pipeline:</p>
+<pre><button class="expand-button" aria-label="Expand mermaid diagram" data-view-component="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 1.06L2.56 7h10.88l-2.22-2.22a.75.75 0 011.06-1.06l3.5 3.5a.75.75 0 010 1.06l-3.5 3.5a.75.75 0 11-1.06-1.06l2.22-2.22H2.56l2.22 2.22a.75.75 0 11-1.06 1.06l-3.5-3.5a.75.75 0 010-1.06l3.5-3.5z"></path></svg></button><code class="mermaid" data-clipboard="&quot;graph LR\n    A([Frame N]) --> B[Image Encoder]\n    B --> C[Memory Attention]\n    D[(Memory Bank)] --> C\n    C --> E[Mask Decoder]\n    F([Prompt]) --> E\n    E --> G([Mask])\n    G --> H[Memory Encoder]\n    B --> H\n    H --> D&quot;">graph LR
+    A([Frame N]) --> B[Image Encoder]
+    B --> C[Memory Attention]
+    D[(Memory Bank)] --> C
+    C --> E[Mask Decoder]
+    F([Prompt]) --> E
+    E --> G([Mask])
+    G --> H[Memory Encoder]
+    B --> H
+    H --> D
+</code><div id="mermaid-container" role="dialog"><div id="mermaid-space"><div class="mermaid-content"></div></div></div></pre>
+<p>Each frame runs all four modules in sequence. The <strong>image encoder</strong> (a Hiera-Tiny vision transformer, ~39M params) extracts features. <strong>Memory attention</strong> cross-attends to all previously encoded frames; this is where the model “remembers” what the object looks like. The <strong>mask decoder</strong> produces the segmentation mask, and the <strong>memory encoder</strong> stores the current frame’s representation for future use.</p>
+<p><strong>SAMURAI</strong> (Yang et al., 2024) wraps SAM 2 with a Kalman filter that predicts subject motion and selects which past memory frames to attend to. The core model is identical; SAMURAI is a <em>scheduler</em> for SAM 2’s memory bank. It improves tracking robustness without changing the inference cost.</p>
+<p><strong>EfficientTAM</strong> (2024) is a distilled SAM 2. Two key differences:</p>
+<ul>
+<li>A ViT-Tiny image encoder (~18M params vs Hiera’s ~39M)</li>
+<li>2×2 average-pooled memory keys/values in cross-attention (the <code>_2</code> checkpoint variants), directly targeting the dominant cost center</li>
+</ul>
+<p>Same 4-module pipeline, same interface, same memory protocol. A drop-in replacement.</p>
+<p>Why this matters for optimization: every frame runs all four modules in sequence. Speeding up one has bounded impact; you need to handle all four. And because memory attention cross-attends to a growing set of past frames, its cost scales with sequence length.</p>
+<h2 id="day-one-135-fps">Day one: 1.35 FPS<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#day-one-135-fps" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>First run of SAMURAI on Apple Silicon (M1 Pro, MPS backend): <strong>1.35 FPS</strong>. 734 ms per frame with SAM 2.1 Hiera-Tiny at 1024×1024.</p>
+<p>Getting there required four immediate fixes to the research code:</p>
+<ol>
+<li><strong>Undocumented scipy dependency</strong>: imported but not in requirements</li>
+<li><strong>decord</strong>: the video loader has no arm64 wheels. Dead project. Swapped for OpenCV</li>
+<li><strong>float64 cast</strong>: one line promotes to float64, which crashes MPS (<code>Float64 is not supported on MPS</code>)</li>
+<li><strong>CUDA extension fallback</strong>: custom CUDA kernels fail silently, falling back to a Python loop</li>
+</ol>
+<p>This is research code in the wild: a fork of a fork, validated only on the authors’ A100 cluster. The model itself works beautifully. Everything around it is fragile.</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># The kind of fix you write 4 times on day one</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Original: crashes MPS with &quot;Float64 is not supported&quot;</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># obj_score_logit = obj_score_logit.to(torch.float64)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">obj_score_logit </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> obj_score_logit.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">float</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">()  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># float32 is fine</span></span></code></pre></figure>
+<p>One more lesson from day one: always visualize your outputs. Numeric metrics (IoU scores) can look plausible while the model tracks the wrong object entirely. I caught a meaningless evaluation early by watching the actual output video.</p>
+<h2 id="the-profiling-twist">The profiling twist<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-profiling-twist" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>With SAMURAI running, I profiled to find the bottleneck using <a href="https://pytorch.org/tutorials/recipes/recipes/profiler_recipe.html" class="external">PyTorch Profiler<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> with activity tracing on both CPU and MPS:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">from</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> torch.profiler </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">import</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> profile, ProfilerActivity</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">with</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;"> profile</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">    activities</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">[ProfilerActivity.</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">CPU</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">],</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">    record_shapes</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">True</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">as</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> prof:</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">    # Run 5 frames through the full pipeline</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">    for</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> frame </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">in</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> frames[</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">25</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">:</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">30</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">]:</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">        model.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">track</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(frame)</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Sort by self CPU time to find the real bottlenecks</span></span>
+<span data-line><span style="--shiki-light:#005CC5;--shiki-dark:#56B6C2;">print</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(prof.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">key_averages</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">().</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">table</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">sort_by</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;self_cpu_time_total&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">row_limit</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">15</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">))</span></span></code></pre></figure>
+<p>The expectation: the model’s attention layers dominate. The reality:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Op</th><th>Self CPU %</th><th>Per-call</th><th>Calls/frame</th></tr></thead><tbody><tr><td><code>aten::nonzero</code></td><td>49.9%</td><td>21.8 ms</td><td>12</td></tr><tr><td><code>aten::upsample_nearest2d</code></td><td>39.8%</td><td>204.8 ms</td><td>1</td></tr><tr><td><code>aten::linear</code></td><td>1.3%</td><td>0.05 ms</td><td>149</td></tr><tr><td><code>aten::scaled_dot_product_attention</code></td><td>0.8%</td><td>0.15 ms</td><td>27</td></tr></tbody></table></div>
+<p>Genuine compute (attention + convolution) accounts for <strong>less than 2% of frame time</strong>.</p>
+<p>The real costs:</p>
+<p><strong><code>upsample_nearest2d</code></strong> (205 ms/frame): SAMURAI upsamples the low-resolution mask logits to the original video resolution (1024×1024) on every frame. A single operator copying megabytes of data with no mathematical work.</p>
+<p><strong><code>nonzero</code></strong> (262 ms/frame across 12 calls): SAMURAI’s Kalman filter extracts bounding boxes from predicted masks using <code>torch.nonzero()</code>. This is the sync killer. Here’s why: <code>nonzero</code> returns a <em>variable-length</em> result (the number of True pixels isn’t known until the kernel finishes). The CPU needs to know the output size to allocate the result tensor, so it <strong>blocks until the entire GPU queue drains</strong>. Every other kernel that was running async now becomes effectively synchronous.</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># SAMURAI's bbox extraction, each nonzero() forces a GPU→CPU sync</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">mask_pixels </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> torch.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">nonzero</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(predicted_mask)</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># ↑ GPU must finish ALL queued work before this returns</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># because the output tensor size depends on the result</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">if</span><span style="--shiki-light:#005CC5;--shiki-dark:#56B6C2;"> len</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(mask_pixels) </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">></span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;"> 0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">:</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    bbox </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> [mask_pixels[:, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">].</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">min</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(), mask_pixels[:, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">].</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">min</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(),</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">            mask_pixels[:, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">].</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">max</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(), mask_pixels[:, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">].</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">max</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">()]</span></span></code></pre></figure>
+<p>The fix isn’t to optimize <code>nonzero</code> itself. It’s to move the entire pipeline into a framework where inference stays on-device without Python-level synchronization points. This reframes the optimization entirely: the goal isn’t “make the model smaller” or “quantize to INT8.” It’s <strong>remove the glue</strong>.</p>
+<h2 id="onnx-export-the-image-encoder-saga">ONNX export: the image encoder saga<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#onnx-export-the-image-encoder-saga" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>With profiling done, the path is clear: export all four sub-modules to ONNX, wire them together in application code, and the sync-forcing Python glue disappears. Start with the image encoder (the largest, most complex one). Should take an afternoon.</p>
+<p>It took a week.</p>
+<h3 id="the-catastrophic-first-export">The catastrophic first export<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-catastrophic-first-export" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>Export itself succeeds cleanly: 1.2 seconds, 109 MB <code>.onnx</code> file, no warnings that matter. I run the standard verification: feed the same input to both PyTorch and ORT, compare outputs tensor-by-tensor:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># The verification pattern I use for every export</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">torch_out </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;"> model</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(dummy_input)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">ort_out </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> ort_session.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">run</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">None</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, {</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;input&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: dummy_input.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">numpy</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">()})</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">for</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> name, (t, o) </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">in</span><span style="--shiki-light:#005CC5;--shiki-dark:#56B6C2;"> zip</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(output_names, </span><span style="--shiki-light:#005CC5;--shiki-dark:#56B6C2;">zip</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(torch_out, ort_out)):</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    diff </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> np.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">max</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(np.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">abs</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(t.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">numpy</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">() </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> o))</span></span>
+<span data-line><span style="--shiki-light:#005CC5;--shiki-dark:#56B6C2;">    print</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">f</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">{</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">name</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">}</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">: max_abs = </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">{</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">diff</span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">:.2e</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">}</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span></code></pre></figure>
+<p>Results:</p>
+<pre><code>vision_pos_enc_0: max_abs = 6.19e-08  ✓ (numerical noise)
+vision_pos_enc_1: max_abs = 5.96e-08  ✓
+backbone_fpn_0:   max_abs = 1.28e+09  ✗ (expected magnitude: ~0.05)
+backbone_fpn_1:   max_abs = 4.53e-01  ✗
+backbone_fpn_2:   max_abs = 5.71e-01  ✗
+</code></pre>
+<p>Positional encodings match perfectly. The feature outputs are <strong>catastrophically wrong</strong>, nine orders of magnitude off. The exported graph computes garbage.</p>
+<h3 id="the-monkey-patch-spiral">The monkey-patch spiral<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-monkey-patch-spiral" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The culprit: shape-dependent conditionals in SAM 2’s <code>window_partition</code> / <code>window_unpartition</code> functions. The legacy TorchScript tracer evaluates Python <code>if</code> statements at trace time and bakes the result as a constant. Any input whose shape differs from the tracing dummy takes the wrong branch, silently producing garbage.</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># From sam2/modeling/backbones/utils.py, the problematic pattern</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">def</span><span style="--shiki-light:#6F42C1;--shiki-dark:#61AFEF;"> window_unpartition</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#24292E;--shiki-light-font-style:inherit;--shiki-dark:#D19A66;--shiki-dark-font-style:italic;">windows</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#24292E;--shiki-light-font-style:inherit;--shiki-dark:#D19A66;--shiki-dark-font-style:italic;">window_size</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#24292E;--shiki-light-font-style:inherit;--shiki-dark:#D19A66;--shiki-dark-font-style:italic;">pad_hw</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#24292E;--shiki-light-font-style:inherit;--shiki-dark:#D19A66;--shiki-dark-font-style:italic;">hw</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">):</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    Hp, Wp </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> pad_hw</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    H, W </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> hw</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">    # </span><span style="--shiki-light:#D73A49;--shiki-light-font-style:inherit;--shiki-dark:#C678DD;--shiki-dark-font-style:italic;">BUG</span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">: These conditions are evaluated ONCE during tracing</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">    # and baked as constants in the exported graph!</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">    if</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> Hp </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">></span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> H </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">or</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> Wp </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">></span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> W:</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">        x </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> x[:, :H, :W, :].</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">contiguous</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">()</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">    return</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> x</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># What a tracer-safe version looks like:</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">def</span><span style="--shiki-light:#6F42C1;--shiki-dark:#61AFEF;"> window_unpartition_traceable</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#24292E;--shiki-light-font-style:inherit;--shiki-dark:#D19A66;--shiki-dark-font-style:italic;">windows</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#24292E;--shiki-light-font-style:inherit;--shiki-dark:#D19A66;--shiki-dark-font-style:italic;">window_size</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#24292E;--shiki-light-font-style:inherit;--shiki-dark:#D19A66;--shiki-dark-font-style:italic;">pad_hw</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#24292E;--shiki-light-font-style:inherit;--shiki-dark:#D19A66;--shiki-dark-font-style:italic;">hw</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">):</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    Hp, Wp </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> pad_hw</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    H, W </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> hw</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">    # Always slice, when Hp == H and Wp == W this is a no-op</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">    # but the tracer records it unconditionally</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    x </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> x[:, :H, :W, :].</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">contiguous</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">()</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">    return</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> x</span></span></code></pre></figure>
+<p>The general rule: any Python <code>if</code> that depends on tensor shapes will be constant-folded by <code>torch.jit.trace</code>. Replace with unconditional code that handles both cases (often a slice that becomes a no-op at the expected shape).</p>
+<p>I spent two hours writing monkey-patches:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Attempt</th><th>What I changed</th><th>max_abs</th></tr></thead><tbody><tr><td>Baseline (no patch)</td><td>,</td><td>1.28e+09</td></tr><tr><td>Window partition rewrite</td><td>Unconditional (both branches always false at 1024)</td><td>2.5e-02</td></tr><tr><td>+ int casts in attention</td><td>Explicit <code>int()</code> on shape arithmetic</td><td><strong>4.7e+18</strong> (worse!)</td></tr><tr><td>+ positional embedding rewrite</td><td>Rewrote <code>_get_pos_embed</code></td><td>2.5e-02 (no change)</td></tr><tr><td><strong>Seeded input</strong> (same patches)</td><td>Fixed <code>torch.manual_seed</code> before randn</td><td><strong>3.6e+02</strong></td></tr></tbody></table></div>
+<p>The punchline: my “11 orders of magnitude improvement” was <strong>random input variance</strong>. With unseeded <code>torch.randn</code>, different random inputs produce different max_abs values. The window patch didn’t fix the corruption; it just happened to produce lower numbers for one particular random input.</p>
+<blockquote class="callout warning" data-callout="warning">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Always seed your verification inputs </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>If your dummy input isn’t deterministic, you can’t compare across export runs. The fix is trivial:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">torch.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">manual_seed</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">42</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">dummy </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> torch.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">randn</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">3</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1024</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1024</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span></code></pre></figure>
+<p>Without this, you can spend hours chasing “improvements” that are actually noise.</p>
+</div>
+</blockquote>
+<h3 id="the-samexporter-rescue">The samexporter rescue<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-samexporter-rescue" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>After the patch spiral, I searched for community solutions and found <a href="https://github.com/vietanhdev/samexporter" class="external"><code>vietanhdev/samexporter</code><svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> (407 stars): a purpose-built ONNX export wrapper for SAM 2.</p>
+<p>The problem with tracing SAM 2’s image encoder directly is that you’re asking the tracer to handle the raw Hiera backbone output: a complex multi-scale feature structure that passes through <code>window_partition</code>, multi-scale attention blocks, and then gets reassembled. Each of these stages has shape-dependent logic that the tracer mishandles.</p>
+<p>samexporter sidesteps this by changing <em>what gets traced</em>. Instead of exporting the backbone alone, it wraps the encoder and the Feature Pyramid Network (FPN) neck together as one module:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># What I was doing (tracing too low):</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">onnx.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">export</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(model.image_encoder.trunk, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">...</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># raw Hiera backbone</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># ^ Tracer must handle window_partition, multi-scale outputs, shape conditionals</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># What samexporter does (tracing at the right boundary):</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">class</span><span style="--shiki-light:#6F42C1;--shiki-dark:#E5C07B;"> SAM2ImageEncoder</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#6F42C1;--shiki-dark:#E5C07B;">nn</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#E5C07B;">Module</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">):</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">    def</span><span style="--shiki-light:#6F42C1;--shiki-dark:#61AFEF;"> forward</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#24292E;--shiki-light-font-style:inherit;--shiki-dark:#E5C07B;--shiki-dark-font-style:italic;">self</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#24292E;--shiki-light-font-style:inherit;--shiki-dark:#D19A66;--shiki-dark-font-style:italic;">image</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">):</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">        # Backbone runs inside the trace, but its outputs</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">        # immediately flow into the FPN convolutions</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">        backbone_out </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#E5C07B;"> self</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">image_encoder</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(image)</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">        # FPN merges multi-scale features into 3 clean tensors</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">        feat_s0 </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#E5C07B;"> self</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">conv_s0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(backbone_out[</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">])  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># simple conv2d</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">        feat_s1 </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#E5C07B;"> self</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">conv_s1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(backbone_out[</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">])  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># simple conv2d</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">        return</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> feat_s0, feat_s1, backbone_out[</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">2</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">]</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">onnx.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">export</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">SAM2ImageEncoder</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">...</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">), </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">...</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># trace through backbone + FPN together</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># ^ Same internal operations, but the final outputs are simple conv results</span></span></code></pre></figure>
+<p>The backbone still runs during tracing (with all its window_partition internals), but because the multi-scale outputs immediately get consumed by deterministic convolutions, the tracer produces a graph where the FPN outputs are correct. The corruption in my direct approach was happening at the <em>boundary</em> where I split backbone outputs from FPN processing.</p>
+<p>Result: zero patches needed. max_abs = 2.6e-02 out of the box. Still not perfect (Hiera’s architecture introduces some inherent tracer imprecision), but well within tolerance for downstream tracking.</p>
+<p><strong>The takeaway for your own exports</strong>: when a submodule produces corrupt outputs, try tracing at a higher boundary that includes both the producer and its first consumer. The tracer handles end-to-end data flow better than split boundaries with complex intermediate structures.</p>
+<blockquote class="callout note" data-callout="note">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>The debugging wasn't wasted </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>The monkey-patch spiral taught the diagnostic technique: seed your inputs, compare per-tensor, isolate which output diverges first, trace the divergence back to a specific operator. These skills apply to every model export, including the ones where no community wrapper exists.</p>
+</div>
+</blockquote>
+<h3 id="the-dynamo-dead-end">The dynamo dead end<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-dynamo-dead-end" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>One side path: PyTorch’s newer <code>torch.export.export()</code> (dynamo-based) promises cleaner exports with real graph capture. I tried it on the workstation (RTX 4090): it ran for over an hour without terminating. Single-threaded CPU at 0% GPU utilization the entire time. The dynamo tracer works under <code>FakeTensorMode</code> (meta-tensors, no real compute, only Python-level function dispatch). CUDA doesn’t help, and for complex vision architectures with many custom operators, it simply doesn’t converge in reasonable time. I gave up. The legacy tracer plus careful wrapping remains the practical path.</p>
+<h2 id="exporting-memory-attention-the-boss-fight-that-wasnt">Exporting memory attention: the boss fight that wasn’t<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#exporting-memory-attention-the-boss-fight-that-wasnt" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>SAM 2’s memory attention module uses rotary positional embeddings (RoPE) implemented with <code>torch.view_as_complex</code>. The legacy tracer cannot handle complex number operations at all.</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># The problematic pattern in SAM 2's RoPE</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">freqs_cis </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> torch.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">view_as_complex</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(freqs)  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># tracer: &quot;ScalarType ComplexFloat unexpected&quot;</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">x_rotated </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> x </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">*</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> freqs_cis               </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># complex multiply</span></span></code></pre></figure>
+<p>After the image encoder experience, I went straight to prior art. Found <a href="https://github.com/dxlcnm/segment-anything-2-real-time-onnx" class="external"><code>dxlcnm/segment-anything-2-real-time-onnx</code><svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> and a <a href="https://github.com/facebookresearch/sam2/issues/186" class="external">discussion in sam2#186<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> describing the standard recipe: keep the precomputed <code>freqs_cis</code> as complex (it’s computed once at init, before tracing starts), but rewrite <code>apply_rotary_enc</code> to use real-valued arithmetic at runtime.</p>
+<p>The complex multiply <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">bi</span><span class="mclose">)</span><span class="mopen">(</span><span class="mord mathnormal">c</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">i</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mord mathnormal">c</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">b</span><span class="mord mathnormal">d</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">b</span><span class="mord mathnormal">c</span><span class="mclose">)</span><span class="mord mathnormal">i</span></span></span></span> unrolls to four real multiplies:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">def</span><span style="--shiki-light:#6F42C1;--shiki-dark:#61AFEF;"> apply_rotary_enc</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#24292E;--shiki-light-font-style:inherit;--shiki-dark:#D19A66;--shiki-dark-font-style:italic;">xq</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#24292E;--shiki-light-font-style:inherit;--shiki-dark:#D19A66;--shiki-dark-font-style:italic;">xk</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#24292E;--shiki-light-font-style:inherit;--shiki-dark:#D19A66;--shiki-dark-font-style:italic;">freqs_cis</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">):</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">    &quot;&quot;&quot;Real-valued RoPE, no view_as_complex needed during tracing.&quot;&quot;&quot;</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">    # freqs_cis is precomputed complex; extract real/imag parts</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    cos </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> freqs_cis.real  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># [seq_len, head_dim/2]</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    sin </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> freqs_cis.imag</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">    # Split head_dim into pairs</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    xq_r, xq_i </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> xq[</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">...</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, ::</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">2</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">], xq[</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">...</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">::</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">2</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">]</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    xk_r, xk_i </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> xk[</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">...</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, ::</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">2</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">], xk[</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">...</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">::</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">2</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">]</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">    # Apply rotation: (ac-bd, ad+bc)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    xq_out_r </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> xq_r </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">*</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> cos </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> xq_i </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">*</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> sin</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    xq_out_i </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> xq_r </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">*</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> sin </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">+</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> xq_i </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">*</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> cos</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    xk_out_r </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> xk_r </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">*</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> cos </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> xk_i </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">*</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> sin</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    xk_out_i </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> xk_r </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">*</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> sin </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">+</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> xk_i </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">*</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> cos</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">    # Interleave back</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    xq_out </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> torch.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">stack</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">([xq_out_r, xq_out_i], </span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">dim</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=-</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">).</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">flatten</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">-</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">2</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    xk_out </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> torch.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">stack</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">([xk_out_r, xk_out_i], </span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">dim</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=-</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">).</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">flatten</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">-</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">2</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">    return</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> xq_out, xk_out</span></span></code></pre></figure>
+<p>The key process improvement: I wrote a standalone probe script first, verifying parity across all three call patterns that memory_attention exercises (self-attention, cross-attention with <code>repeat_freqs_k</code>, and the empty-key edge case). Caught a shape bug in the <code>repeat_freqs_k</code> path in 30 seconds. Final parity:</p>
+<ul>
+<li>RoPE-only probe: max_abs <strong>4.77e-07</strong> (all three patterns)</li>
+<li>Full memory_attention module, ORT vs PyTorch: max_abs <strong>4.02e-06</strong></li>
+</ul>
+<p>The memory encoder exported clean on the first attempt: 1.4M params, no complex ops, no tracing hazards. max_abs 2.14e-05, 5.6 MB, 45 ms on CPU.</p>
+<h2 id="choosing-the-backbone">Choosing the backbone<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#choosing-the-backbone" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>With all four sub-modules exportable, the question shifts: which model to export?</p>
+<h3 id="efficienttam-over-sam-2">EfficientTAM over SAM 2<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#efficienttam-over-sam-2" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>Remember the profiling results: memory_attention is 58% of frame time because it cross-attends every frame against the full memory bank. EfficientTAM’s <code>_2</code> variants use 2×2 average pooling on memory keys and values before cross-attention, reducing the token count by 4× in a module with quadratic cost. This is a direct architectural hit on the actual bottleneck.</p>
+<p>I validated across 4 clips from the <a href="https://cis.temple.edu/lasot/" class="external">LaSOT<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> benchmark (150 frames each, MPS FP32):</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Model</th><th>Frame time</th><th>FPS</th><th>mIoU vs SAM 2</th></tr></thead><tbody><tr><td>SAM 2 Hiera-Tiny @ 1024</td><td>654 ms</td><td>1.53</td><td>reference</td></tr><tr><td>EfficientTAM-Ti @ 1024</td><td>263 ms</td><td>3.80</td><td>0.954</td></tr><tr><td>EfficientTAM-Ti @ 512</td><td>66 ms</td><td>15.15</td><td>0.958</td></tr></tbody></table></div>
+<p>Every clip scored ≥ 0.90 mIoU individually. The worst single-frame IoU was 0.713 (a heavy occlusion frame), acceptable for tracking.</p>
+<h3 id="a-note-on-resolution">A note on resolution<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#a-note-on-resolution" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>Halving input resolution from 1024 to 512 gives a dramatic speedup (15× for memory_attention alone, because both sequence dimensions shrink and cross-attention cost is quadratic). But this deserves honest framing: <strong>it’s not a model optimization</strong>. It’s a deployment trade-off. You could skip every optimization in this series, keep the original SAM 2 at 512×512, and get similar raw speedups. No engineering required.</p>
+<p>The interesting optimizations, the ones that let you keep resolution <em>and</em> go faster, come from runtime execution (CUDA EP, TensorRT, precision tuning). Those are Parts 2 and 3. Resolution is a knob you turn based on your application requirements, and for many tracking scenarios 512×512 is sufficient. I use it going forward because my use case (drone footage, tracking a person-sized subject) doesn’t need 1024-pixel spatial precision.</p>
+<h3 id="the-final-onnx-bundle">The final ONNX bundle<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-final-onnx-bundle" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>EfficientTAM-Ti @ 512, exported as 4 ONNX sub-modules:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Module</th><th>Params</th><th>ONNX size</th><th>max_abs</th><th>ORT CPU</th></tr></thead><tbody><tr><td>image_encoder</td><td>6.16M</td><td>25.1 MB</td><td>6.78e-06</td><td>65 ms</td></tr><tr><td>memory_attention</td><td>5.92M</td><td>32.5 MB</td><td>2.15e-06</td><td>102 ms</td></tr><tr><td>mask_decoder</td><td>4.19M</td><td>16.8 MB</td><td>2.19e-05</td><td>6 ms</td></tr><tr><td>memory_encoder</td><td>1.38M</td><td>5.6 MB</td><td>3.34e-06</td><td>14 ms</td></tr><tr><td><strong>Total</strong></td><td><strong>17.65M</strong></td><td><strong>80.0 MB</strong></td><td>,</td><td><strong>187 ms</strong></td></tr></tbody></table></div>
+<p>Every module verified to max_abs &lt; 1e-3 against PyTorch reference. Compare: SAM 2’s Hiera encoder produced max_abs in the 5e-2 to 1.5e-1 range (from the window partition issues). EfficientTAM’s flat ViT achieves <strong>6.78e-06</strong>, four orders of magnitude tighter, because there are no multi-scale tracing hazards to begin with.</p>
+<h2 id="where-we-landed">Where we landed<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#where-we-landed" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>This blog covers two distinct optimizations:</p>
+<ol>
+<li><strong>Model choice</strong>: switching from SAM 2 Hiera-Tiny (39M params) to EfficientTAM-Ti (17.6M params), and choosing 512×512 resolution for our use case</li>
+<li><strong>Runtime format</strong>: exporting to ONNX, which eliminates Python dispatch overhead and unlocks hardware-specific execution providers</li>
+</ol>
+<p>Here’s what each contributed (all numbers on the same Apple Silicon M1 Pro):</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Configuration</th><th>Per-frame</th><th>What changed</th></tr></thead><tbody><tr><td>PyTorch MPS, SAM 2 Hiera-Tiny @ 1024</td><td>661 ms / 1.5 FPS</td><td>Baseline</td></tr><tr><td>PyTorch MPS, EfficientTAM-Ti @ 512</td><td>66 ms / 15 FPS</td><td>Model + resolution</td></tr><tr><td>ORT CPU, EfficientTAM-Ti @ 512</td><td>187 ms / 5.3 FPS</td><td>ONNX export (CPU only)</td></tr></tbody></table></div>
+<p>Wait, the ONNX CPU numbers are <em>worse</em> than PyTorch MPS? Yes, but that’s an apples-to-oranges comparison. PyTorch MPS uses Apple’s GPU (Metal Performance Shaders). ORT’s CPU execution provider runs on CPU only. The fair Apple Silicon comparison (ORT with CoreML, which uses the same Apple GPU) is Part 3 of this series. The CPU number here serves as a portable baseline that runs identically on any machine.</p>
+<p>The real comparison is on the same hardware class. On the RTX 4090, here’s what vanilla PyTorch gets vs what ONNX Runtime achieves with the exact same model weights:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Configuration</th><th>Per-frame (module sum)</th><th>What changed</th></tr></thead><tbody><tr><td>PyTorch CUDA, FP32 (RTX 4090)</td><td>12.4 ms</td><td>Same model, GPU, vanilla PyTorch</td></tr><tr><td>ORT CUDA EP, FP32 (RTX 4090)</td><td>6.59 ms</td><td>ONNX + operator fusion (1.9x over PyTorch)</td></tr><tr><td>ORT TensorRT EP, FP16 (RTX 4090)</td><td>2.39 ms</td><td>TRT engines + half precision (5.2x over PyTorch)</td></tr></tbody></table></div>
+<p>These GPU numbers are what Part 2 will cover in detail (engine building, precision strategies, the FP16 overflow saga). They’re here as a preview to show <em>why</em> the ONNX export work in this post matters: it’s the prerequisite that makes everything in Parts 2-4 possible.</p>
+<blockquote class="callout info" data-callout="info">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>These are module inference times only </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>The numbers above measure running the 4 ONNX sub-models in isolation. A complete tracking pipeline adds memory management, prompt conditioning, frame I/O, and pre/post-processing. End-to-end throughput in later parts will be lower. The value here is seeing how far the model inference <em>itself</em> can go.</p>
+</div>
+</blockquote>
+<p>One important validation: running a 150-frame tracking chain shows that ONNX export drift is <strong>bounded, not compounding</strong>. The memory bank’s recurrent averaging acts as a stabilizer. Small per-frame numerical differences don’t accumulate into tracking failure.</p>
+<p><strong>Next up</strong>: <a href="../optimizing-samurai-part-2" class="internal alias" data-slug="optimizing-samurai-part-2">Part 2</a> dives into NVIDIA optimization: CUDA execution providers, TensorRT engine building, FP16 precision strategies, and a Softmax numerical overflow that almost derailed the whole approach. Plus: wrapping these modules back into a full tracking pipeline and seeing what the real end-to-end numbers look like.</p>
+<hr/>
+<h2 id="references">References<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#references" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<ul>
+<li><a href="https://github.com/facebookresearch/sam2" class="external">SAM 2<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, Meta AI (Ravi et al., 2024). <a href="https://arxiv.org/abs/2408.00714" class="external">Paper<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></li>
+<li><a href="https://github.com/yangchris11/samurai" class="external">SAMURAI<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, Yang et al., 2024. <a href="https://arxiv.org/abs/2411.11922" class="external">Paper<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></li>
+<li><a href="https://github.com/yformer/EfficientTAM" class="external">EfficientTAM<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, 2024</li>
+<li><a href="https://github.com/vietanhdev/samexporter" class="external">samexporter<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, vietanhdev. SAM/SAM2 ONNX export utility</li>
+<li><a href="https://github.com/dxlcnm/segment-anything-2-real-time-onnx" class="external">segment-anything-2-real-time-onnx<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, dxlcnm. RoPE rewrite reference</li>
+<li><a href="https://github.com/facebookresearch/sam2/issues/186" class="external">sam2 issue #186<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, ComplexFloat export discussion</li>
+<li><a href="https://onnxruntime.ai/" class="external">ONNX Runtime<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, Microsoft</li>
+<li><a href="https://cis.temple.edu/lasot/" class="external">LaSOT<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, Large-scale Single Object Tracking benchmark</li>
+</ul></article><hr/><div class="page-footer"><nav class="prev-next-nav"><div class="prev-next-links"><div class="nav-link nav-prev"><a href="/blog/2026-01-25-boosters" rel="prev"><span class="nav-direction">← Older</span><span class="nav-title">Building Boosters: A Gradient Boosting Library from Scratch</span></a></div><div class="nav-link nav-next"><a href="/blog/2026-05-17-optimizing-samurai-part-2" rel="next"><span class="nav-direction">Newer →</span><span class="nav-title">TensorRT Optimization: 5x Faster Inference with FP16 Precision</span></a></div></div></nav></div></div><div class="right sidebar"><div class="toc desktop-only"><button type="button" class="toc-header" aria-controls="toc-15" aria-expanded="true"><h3>Table of Contents</h3><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="fold"><polyline points="6 9 12 15 18 9"></polyline></svg></button><ul id="list-0" class="toc-content overflow"><li class="depth-0"><a href="#the-deployment-gap" data-for="the-deployment-gap">The deployment gap</a></li><li class="depth-0"><a href="#the-onnx-mental-model" data-for="the-onnx-mental-model">The ONNX mental model</a></li><li class="depth-0"><a href="#the-model-family" data-for="the-model-family">The model family</a></li><li class="depth-0"><a href="#day-one-135-fps" data-for="day-one-135-fps">Day one: 1.35 FPS</a></li><li class="depth-0"><a href="#the-profiling-twist" data-for="the-profiling-twist">The profiling twist</a></li><li class="depth-0"><a href="#onnx-export-the-image-encoder-saga" data-for="onnx-export-the-image-encoder-saga">ONNX export: the image encoder saga</a></li><li class="depth-1"><a href="#the-catastrophic-first-export" data-for="the-catastrophic-first-export">The catastrophic first export</a></li><li class="depth-1"><a href="#the-monkey-patch-spiral" data-for="the-monkey-patch-spiral">The monkey-patch spiral</a></li><li class="depth-1"><a href="#the-samexporter-rescue" data-for="the-samexporter-rescue">The samexporter rescue</a></li><li class="depth-1"><a href="#the-dynamo-dead-end" data-for="the-dynamo-dead-end">The dynamo dead end</a></li><li class="depth-0"><a href="#exporting-memory-attention-the-boss-fight-that-wasnt" data-for="exporting-memory-attention-the-boss-fight-that-wasnt">Exporting memory attention: the boss fight that wasn’t</a></li><li class="depth-0"><a href="#choosing-the-backbone" data-for="choosing-the-backbone">Choosing the backbone</a></li><li class="depth-1"><a href="#efficienttam-over-sam-2" data-for="efficienttam-over-sam-2">EfficientTAM over SAM 2</a></li><li class="depth-1"><a href="#a-note-on-resolution" data-for="a-note-on-resolution">A note on resolution</a></li><li class="depth-1"><a href="#the-final-onnx-bundle" data-for="the-final-onnx-bundle">The final ONNX bundle</a></li><li class="depth-0"><a href="#where-we-landed" data-for="where-we-landed">Where we landed</a></li><li class="depth-0"><a href="#references" data-for="references">References</a></li><li class="overflow-end"></li></ul></div></div><footer class><ul><li><a href="https://github.com/egordm/">GitHub</a></li><li><a href="https://www.linkedin.com/in/egor-dmitriev/">LinkedIn</a></li><li><a href="/index.xml">RSS Feed</a></li></ul></footer></div></div></body><script type="application/javascript" data-persist="true">function n(){let t=this.parentElement;t.classList.toggle("is-collapsed");let e=t.getElementsByClassName("callout-content")[0];if(!e)return;let l=t.classList.contains("is-collapsed");e.style.gridTemplateRows=l?"0fr":"1fr"}function c(){let t=document.getElementsByClassName("callout is-collapsible");for(let e of t){let l=e.getElementsByClassName("callout-title")[0],s=e.getElementsByClassName("callout-content")[0];if(!l||!s)continue;l.addEventListener("click",n),window.addCleanup(()=>l.removeEventListener("click",n));let o=e.classList.contains("is-collapsed");s.style.gridTemplateRows=o?"0fr":"1fr"}}document.addEventListener("nav",c);
+</script><script type="module" data-persist="true">function E(a,e){if(!a)return;function t(o){o.target===this&&(o.preventDefault(),o.stopPropagation(),e())}function n(o){o.key.startsWith("Esc")&&(o.preventDefault(),e())}a?.addEventListener("click",t),window.addCleanup(()=>a?.removeEventListener("click",t)),document.addEventListener("keydown",n),window.addCleanup(()=>document.removeEventListener("keydown",n))}function f(a){for(;a.firstChild;)a.removeChild(a.firstChild)}var m=class{constructor(e,t){this.container=e;this.content=t;this.setupEventListeners(),this.setupNavigationControls(),this.resetTransform()}isDragging=!1;startPan={x:0,y:0};currentPan={x:0,y:0};scale=1;MIN_SCALE=.5;MAX_SCALE=3;cleanups=[];setupEventListeners(){let e=this.onMouseDown.bind(this),t=this.onMouseMove.bind(this),n=this.onMouseUp.bind(this),o=this.onTouchStart.bind(this),r=this.onTouchMove.bind(this),i=this.onTouchEnd.bind(this),s=this.resetTransform.bind(this);this.container.addEventListener("mousedown",e),document.addEventListener("mousemove",t),document.addEventListener("mouseup",n),this.container.addEventListener("touchstart",o,{passive:!1}),document.addEventListener("touchmove",r,{passive:!1}),document.addEventListener("touchend",i),window.addEventListener("resize",s),this.cleanups.push(()=>this.container.removeEventListener("mousedown",e),()=>document.removeEventListener("mousemove",t),()=>document.removeEventListener("mouseup",n),()=>this.container.removeEventListener("touchstart",o),()=>document.removeEventListener("touchmove",r),()=>document.removeEventListener("touchend",i),()=>window.removeEventListener("resize",s))}cleanup(){for(let e of this.cleanups)e()}setupNavigationControls(){let e=document.createElement("div");e.className="mermaid-controls";let t=this.createButton("+",()=>this.zoom(.1)),n=this.createButton("-",()=>this.zoom(-.1)),o=this.createButton("Reset",()=>this.resetTransform());e.appendChild(n),e.appendChild(o),e.appendChild(t),this.container.appendChild(e)}createButton(e,t){let n=document.createElement("button");return n.textContent=e,n.className="mermaid-control-button",n.addEventListener("click",t),window.addCleanup(()=>n.removeEventListener("click",t)),n}onMouseDown(e){e.button===0&&(this.isDragging=!0,this.startPan={x:e.clientX-this.currentPan.x,y:e.clientY-this.currentPan.y},this.container.style.cursor="grabbing")}onMouseMove(e){this.isDragging&&(e.preventDefault(),this.currentPan={x:e.clientX-this.startPan.x,y:e.clientY-this.startPan.y},this.updateTransform())}onMouseUp(){this.isDragging=!1,this.container.style.cursor="grab"}onTouchStart(e){if(e.touches.length!==1)return;this.isDragging=!0;let t=e.touches[0];this.startPan={x:t.clientX-this.currentPan.x,y:t.clientY-this.currentPan.y}}onTouchMove(e){if(!this.isDragging||e.touches.length!==1)return;e.preventDefault();let t=e.touches[0];this.currentPan={x:t.clientX-this.startPan.x,y:t.clientY-this.startPan.y},this.updateTransform()}onTouchEnd(){this.isDragging=!1}zoom(e){let t=Math.min(Math.max(this.scale+e,this.MIN_SCALE),this.MAX_SCALE),n=this.content.getBoundingClientRect(),o=n.width/2,r=n.height/2,i=t-this.scale;this.currentPan.x-=o*i,this.currentPan.y-=r*i,this.scale=t,this.updateTransform()}updateTransform(){this.content.style.transform=`translate(${this.currentPan.x}px, ${this.currentPan.y}px) scale(${this.scale})`}resetTransform(){let t=this.content.querySelector("svg").getBoundingClientRect(),n=t.width/this.scale,o=t.height/this.scale;this.scale=1,this.currentPan={x:(this.container.clientWidth-n)/2,y:(this.container.clientHeight-o)/2},this.updateTransform()}},T=["--secondary","--tertiary","--gray","--light","--lightgray","--highlight","--dark","--darkgray","--codeFont"],y;document.addEventListener("nav",async()=>{let e=document.querySelector(".center").querySelectorAll("code.mermaid");if(e.length===0)return;y||=await import("https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.4.0/mermaid.esm.min.mjs");let t=y.default,n=new WeakMap;for(let r of e)n.set(r,r.innerText);async function o(){for(let s of e){s.removeAttribute("data-processed");let c=n.get(s);c&&(s.innerHTML=c)}let r=T.reduce((s,c)=>(s[c]=window.getComputedStyle(document.documentElement).getPropertyValue(c),s),{}),i=document.documentElement.getAttribute("saved-theme")==="dark";t.initialize({startOnLoad:!1,securityLevel:"loose",theme:i?"dark":"base",themeVariables:{fontFamily:r["--codeFont"],primaryColor:r["--light"],primaryTextColor:r["--darkgray"],primaryBorderColor:r["--tertiary"],lineColor:r["--darkgray"],secondaryColor:r["--secondary"],tertiaryColor:r["--tertiary"],clusterBkg:r["--light"],edgeLabelBackground:r["--highlight"]}}),await t.run({nodes:e})}await o(),document.addEventListener("themechange",o),window.addCleanup(()=>document.removeEventListener("themechange",o));for(let r=0;r<e.length;r++){let v=function(){let g=l.querySelector("#mermaid-space"),h=l.querySelector(".mermaid-content");if(!h)return;f(h);let w=i.querySelector("svg").cloneNode(!0);h.appendChild(w),l.classList.add("active"),g.style.cursor="grab",u=new m(g,h)},M=function(){l.classList.remove("active"),u?.cleanup(),u=null},i=e[r],s=i.parentElement,c=s.querySelector(".clipboard-button"),d=s.querySelector(".expand-button"),p=window.getComputedStyle(c),L=c.offsetWidth+parseFloat(p.marginLeft||"0")+parseFloat(p.marginRight||"0");d.style.right=`calc(${L}px + 0.3rem)`,s.prepend(d);let l=s.querySelector("#mermaid-container");if(!l)return;let u=null;d.addEventListener("click",v),E(l,M),window.addCleanup(()=>{u?.cleanup(),d.removeEventListener("click",v)})}});
+</script><script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/copy-tex.min.js" type="application/javascript" data-persist="true"></script><script src="../postscript.js" type="module" data-persist="true"></script></html>

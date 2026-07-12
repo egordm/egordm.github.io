@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr"><head><title>Depth-Wise vs Leaf-Wise Tree Growth | egordmitriev.dev</title><meta charset="utf-8"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Inter:ital,wght@0,400;0,600;1,400;1,600&amp;family=JetBrains Mono:wght@400;600&amp;display=swap"/><link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin="anonymous"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="alternate" type="application/rss+xml" title="Egor Dmitriev" href="https://egordmitriev.dev/index.xml"/><meta name="og:site_name" content="Egor Dmitriev"/><meta property="og:title" content="Depth-Wise vs Leaf-Wise Tree Growth | egordmitriev.dev"/><meta property="og:type" content="article"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="Depth-Wise vs Leaf-Wise Tree Growth | egordmitriev.dev"/><meta name="twitter:description" content="XGBoost grows trees level-by-level, LightGBM splits the best leaf. Learn when each strategy wins and how num_leaves relates to max_depth."/><meta property="og:description" content="XGBoost grows trees level-by-level, LightGBM splits the best leaf. Learn when each strategy wins and how num_leaves relates to max_depth."/><meta property="og:image:alt" content="XGBoost grows trees level-by-level, LightGBM splits the best leaf. Learn when each strategy wins and how num_leaves relates to max_depth."/><meta property="og:image" content="https://egordmitriev.dev/static/og-image.png"/><meta property="og:image:url" content="https://egordmitriev.dev/static/og-image.png"/><meta name="twitter:image" content="https://egordmitriev.dev/static/og-image.png"/><meta property="og:image:type" content="image/.png"/><meta property="twitter:domain" content="egordmitriev.dev"/><meta property="og:url" content="https://egordmitriev.dev/blog/2026-01-14-depth-wise-vs-leaf-wise"/><meta property="twitter:url" content="https://egordmitriev.dev/blog/2026-01-14-depth-wise-vs-leaf-wise"/><link rel="canonical" href="https://egordmitriev.dev/blog/2026-01-14-depth-wise-vs-leaf-wise"/><link rel="icon" href="../static/icon.png"/><meta name="description" content="XGBoost grows trees level-by-level, LightGBM splits the best leaf. Learn when each strategy wins and how num_leaves relates to max_depth."/><meta name="generator" content="Quartz"/><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Depth-Wise vs Leaf-Wise Tree Growth","description":"XGBoost grows trees level-by-level, LightGBM splits the best leaf. Learn when each strategy wins and how num_leaves relates to max_depth.","datePublished":"2026-01-14","url":"https://egordmitriev.dev/blog/2026-01-14-depth-wise-vs-leaf-wise","author":{"@type":"Person","name":"Egor Dmitriev","url":"https://egordmitriev.dev"},"publisher":{"@type":"Person","name":"Egor Dmitriev"},"keywords":"machine-learning, gradient-boosting, algorithms, decision-trees"}</script><link href="../index.css" rel="stylesheet" type="text/css" data-persist="true"/><style>.expand-button {
+  position: absolute;
+  display: flex;
+  float: right;
+  padding: 0.4rem;
+  margin: 0.3rem;
+  right: 0;
+  color: var(--gray);
+  border-color: var(--dark);
+  background-color: var(--light);
+  border: 1px solid;
+  border-radius: 5px;
+  opacity: 0;
+  transition: 0.2s;
+}
+.expand-button > svg {
+  fill: var(--light);
+  filter: contrast(0.3);
+}
+.expand-button:hover {
+  cursor: pointer;
+  border-color: var(--secondary);
+}
+.expand-button:focus {
+  outline: 0;
+}
+
+pre:hover > .expand-button {
+  opacity: 1;
+  transition: 0.2s;
+}
+
+#mermaid-container {
+  position: fixed;
+  contain: layout;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: none;
+  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.5);
+}
+#mermaid-container.active {
+  display: inline-block;
+}
+#mermaid-container > #mermaid-space {
+  border: 1px solid var(--lightgray);
+  background-color: var(--light);
+  border-radius: 5px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 80vh;
+  width: 80vw;
+  overflow: hidden;
+}
+#mermaid-container > #mermaid-space > .mermaid-content {
+  position: relative;
+  transform-origin: 0 0;
+  transition: transform 0.1s ease;
+  overflow: visible;
+  min-height: 200px;
+  min-width: 200px;
+}
+#mermaid-container > #mermaid-space > .mermaid-content pre {
+  margin: 0;
+  border: none;
+}
+#mermaid-container > #mermaid-space > .mermaid-content svg {
+  max-width: none;
+  height: auto;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: var(--light);
+  border: 1px solid var(--lightgray);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--lightgray);
+  background: var(--light);
+  color: var(--dark);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: var(--bodyFont);
+  transition: all 0.2s ease;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:hover {
+  background: var(--lightgray);
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:active {
+  transform: translateY(1px);
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:nth-child(2) {
+  width: auto;
+  padding: 0 12px;
+  font-size: 14px;
+}
+/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VSb290IjoiL1VzZXJzL2Vnb3JkbS9wcm9qZWN0cy9hcmQvZWdvcmRtLmdpdGh1Yi5pby9xdWFydHovY29tcG9uZW50cy9zdHlsZXMiLCJzb3VyY2VzIjpbIm1lcm1haWQuaW5saW5lLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7O0FBR0Y7RUFDRTtFQUNBOztBQUdGO0VBQ0U7OztBQUtGO0VBQ0U7RUFDQTs7O0FBSUo7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOztBQUVBO0VBQ0U7O0FBR0Y7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7O0FBR0Y7RUFDRTtFQUNBOztBQUlKO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7O0FBRUE7RUFDRTs7QUFHRjtFQUNFOztBQUlGO0VBQ0U7RUFDQTtFQUNBIiwic291cmNlc0NvbnRlbnQiOlsiLmV4cGFuZC1idXR0b24ge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGZsb2F0OiByaWdodDtcbiAgcGFkZGluZzogMC40cmVtO1xuICBtYXJnaW46IDAuM3JlbTtcbiAgcmlnaHQ6IDA7IC8vIE5PVEU6IHJpZ2h0IHdpbGwgYmUgc2V0IGluIG1lcm1haWQuaW5saW5lLnRzXG4gIGNvbG9yOiB2YXIoLS1ncmF5KTtcbiAgYm9yZGVyLWNvbG9yOiB2YXIoLS1kYXJrKTtcbiAgYmFja2dyb3VuZC1jb2xvcjogdmFyKC0tbGlnaHQpO1xuICBib3JkZXI6IDFweCBzb2xpZDtcbiAgYm9yZGVyLXJhZGl1czogNXB4O1xuICBvcGFjaXR5OiAwO1xuICB0cmFuc2l0aW9uOiAwLjJzO1xuXG4gICYgPiBzdmcge1xuICAgIGZpbGw6IHZhcigtLWxpZ2h0KTtcbiAgICBmaWx0ZXI6IGNvbnRyYXN0KDAuMyk7XG4gIH1cblxuICAmOmhvdmVyIHtcbiAgICBjdXJzb3I6IHBvaW50ZXI7XG4gICAgYm9yZGVyLWNvbG9yOiB2YXIoLS1zZWNvbmRhcnkpO1xuICB9XG5cbiAgJjpmb2N1cyB7XG4gICAgb3V0bGluZTogMDtcbiAgfVxufVxuXG5wcmUge1xuICAmOmhvdmVyID4gLmV4cGFuZC1idXR0b24ge1xuICAgIG9wYWNpdHk6IDE7XG4gICAgdHJhbnNpdGlvbjogMC4ycztcbiAgfVxufVxuXG4jbWVybWFpZC1jb250YWluZXIge1xuICBwb3NpdGlvbjogZml4ZWQ7XG4gIGNvbnRhaW46IGxheW91dDtcbiAgei1pbmRleDogOTk5O1xuICBsZWZ0OiAwO1xuICB0b3A6IDA7XG4gIHdpZHRoOiAxMDB2dztcbiAgaGVpZ2h0OiAxMDB2aDtcbiAgb3ZlcmZsb3c6IGhpZGRlbjtcbiAgZGlzcGxheTogbm9uZTtcbiAgYmFja2Ryb3AtZmlsdGVyOiBibHVyKDRweCk7XG4gIGJhY2tncm91bmQ6IHJnYmEoMCwgMCwgMCwgMC41KTtcblxuICAmLmFjdGl2ZSB7XG4gICAgZGlzcGxheTogaW5saW5lLWJsb2NrO1xuICB9XG5cbiAgJiA+ICNtZXJtYWlkLXNwYWNlIHtcbiAgICBib3JkZXI6IDFweCBzb2xpZCB2YXIoLS1saWdodGdyYXkpO1xuICAgIGJhY2tncm91bmQtY29sb3I6IHZhcigtLWxpZ2h0KTtcbiAgICBib3JkZXItcmFkaXVzOiA1cHg7XG4gICAgcG9zaXRpb246IGZpeGVkO1xuICAgIHRvcDogNTAlO1xuICAgIGxlZnQ6IDUwJTtcbiAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZSgtNTAlLCAtNTAlKTtcbiAgICBoZWlnaHQ6IDgwdmg7XG4gICAgd2lkdGg6IDgwdnc7XG4gICAgb3ZlcmZsb3c6IGhpZGRlbjtcblxuICAgICYgPiAubWVybWFpZC1jb250ZW50IHtcbiAgICAgIHBvc2l0aW9uOiByZWxhdGl2ZTtcbiAgICAgIHRyYW5zZm9ybS1vcmlnaW46IDAgMDtcbiAgICAgIHRyYW5zaXRpb246IHRyYW5zZm9ybSAwLjFzIGVhc2U7XG4gICAgICBvdmVyZmxvdzogdmlzaWJsZTtcbiAgICAgIG1pbi1oZWlnaHQ6IDIwMHB4O1xuICAgICAgbWluLXdpZHRoOiAyMDBweDtcblxuICAgICAgcHJlIHtcbiAgICAgICAgbWFyZ2luOiAwO1xuICAgICAgICBib3JkZXI6IG5vbmU7XG4gICAgICB9XG5cbiAgICAgIHN2ZyB7XG4gICAgICAgIG1heC13aWR0aDogbm9uZTtcbiAgICAgICAgaGVpZ2h0OiBhdXRvO1xuICAgICAgfVxuICAgIH1cblxuICAgICYgPiAubWVybWFpZC1jb250cm9scyB7XG4gICAgICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gICAgICBib3R0b206IDIwcHg7XG4gICAgICByaWdodDogMjBweDtcbiAgICAgIGRpc3BsYXk6IGZsZXg7XG4gICAgICBnYXA6IDhweDtcbiAgICAgIHBhZGRpbmc6IDhweDtcbiAgICAgIGJhY2tncm91bmQ6IHZhcigtLWxpZ2h0KTtcbiAgICAgIGJvcmRlcjogMXB4IHNvbGlkIHZhcigtLWxpZ2h0Z3JheSk7XG4gICAgICBib3JkZXItcmFkaXVzOiA2cHg7XG4gICAgICBib3gtc2hhZG93OiAwIDJweCA0cHggcmdiYSgwLCAwLCAwLCAwLjEpO1xuICAgICAgei1pbmRleDogMjtcblxuICAgICAgLm1lcm1haWQtY29udHJvbC1idXR0b24ge1xuICAgICAgICBkaXNwbGF5OiBmbGV4O1xuICAgICAgICBhbGlnbi1pdGVtczogY2VudGVyO1xuICAgICAgICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjtcbiAgICAgICAgd2lkdGg6IDMycHg7XG4gICAgICAgIGhlaWdodDogMzJweDtcbiAgICAgICAgcGFkZGluZzogMDtcbiAgICAgICAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tbGlnaHRncmF5KTtcbiAgICAgICAgYmFja2dyb3VuZDogdmFyKC0tbGlnaHQpO1xuICAgICAgICBjb2xvcjogdmFyKC0tZGFyayk7XG4gICAgICAgIGJvcmRlci1yYWRpdXM6IDRweDtcbiAgICAgICAgY3Vyc29yOiBwb2ludGVyO1xuICAgICAgICBmb250LXNpemU6IDE2cHg7XG4gICAgICAgIGZvbnQtZmFtaWx5OiB2YXIoLS1ib2R5Rm9udCk7XG4gICAgICAgIHRyYW5zaXRpb246IGFsbCAwLjJzIGVhc2U7XG5cbiAgICAgICAgJjpob3ZlciB7XG4gICAgICAgICAgYmFja2dyb3VuZDogdmFyKC0tbGlnaHRncmF5KTtcbiAgICAgICAgfVxuXG4gICAgICAgICY6YWN0aXZlIHtcbiAgICAgICAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZVkoMXB4KTtcbiAgICAgICAgfVxuXG4gICAgICAgIC8vIFN0eWxlIHRoZSByZXNldCBidXR0b24gZGlmZmVyZW50bHlcbiAgICAgICAgJjpudGgtY2hpbGQoMikge1xuICAgICAgICAgIHdpZHRoOiBhdXRvO1xuICAgICAgICAgIHBhZGRpbmc6IDAgMTJweDtcbiAgICAgICAgICBmb250LXNpemU6IDE0cHg7XG4gICAgICAgIH1cbiAgICAgIH1cbiAgICB9XG4gIH1cbn1cbiJdfQ== */</style><link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet" type="text/css" data-persist="true"/><script src="../prescript.js" type="application/javascript" data-persist="true"></script><script type="application/javascript" data-persist="true">const fetchData = fetch("../static/contentIndex.json").then(data => data.json())</script><link rel="alternate" type="application/rss+xml" title="RSS Feed" href="https://egordmitriev.dev/index.xml"/></head><body data-slug="blog/2026-01-14-depth-wise-vs-leaf-wise"><div id="quartz-root" class="page"><div id="quartz-body"><div class="left sidebar"><h2 class="page-title"><a href="..">Egor Dmitriev</a></h2><div class="spacer mobile-only"></div><div class="search"><button class="search-button"><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title>Search</title><g class="search-path" fill="none"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"></path><circle cx="8" cy="8" r="7"></circle></g></svg><p>Search</p></button><div class="search-container"><div class="search-space"><input autocomplete="off" class="search-bar" name="search" type="text" aria-label="Search for something" placeholder="Search for something"/><div class="search-layout" data-preview="true"></div></div></div></div><div class="sidebar-posts desktop-only"><h3>Recent Posts</h3><ul class="sidebar-posts-ul"><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-07-12-did-your-agent-actually-read-that-file" class="internal sidebar-post-title">Did Your Agent Actually Read That File?</a></div><div class="sidebar-post-meta"><span class="sidebar-post-date"><time datetime="2026-07-11T22:00:00.000Z">Jul 12, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-25-long-term-visual-tracking-for-drones-2026" class="internal sidebar-post-title">Long-Term Visual Tracking for Drones: State of the Art, Open Source, and Edge Inference in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-24T22:00:00.000Z">May 25, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-24-vio-drones-2026" class="internal sidebar-post-title">Visual-Inertial Odometry for Drones: State of the Art, Foundation-3D, and the cuVSLAM Squeeze in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-23T22:00:00.000Z">May 24, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-23-drone-to-satellite-localization-2026" class="internal sidebar-post-title">Drone-to-Satellite Visual Geo-Localization: State of the Art, Open Source, and Edge Inference in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-22T22:00:00.000Z">May 23, 2026</time></span></div></li></ul><p class="sidebar-browse"><a href="../blog/">All posts →</a></p></div></div><div class="center"><div class="page-header"><div class="popover-hint"><nav class="breadcrumb-container" aria-label="breadcrumbs"><div class="breadcrumb-element"><a href="../">Home</a><p> ❯ </p></div><div class="breadcrumb-element"><a href="../blog/">Blog</a><p> ❯ </p></div><div class="breadcrumb-element"><a href>Depth Wise vs Leaf Wise Tree Growth</a></div></nav><h1 class="article-title">Depth-Wise vs Leaf-Wise Tree Growth</h1><p show-comma="true" class="content-meta"><time datetime="2026-01-13T23:00:00.000Z">Jan 14, 2026</time><span>8 min read</span></p><ul class="tags"><li><a href="../tags/machine-learning" class="internal tag-link">machine-learning</a></li><li><a href="../tags/gradient-boosting" class="internal tag-link">gradient-boosting</a></li><li><a href="../tags/algorithms" class="internal tag-link">algorithms</a></li><li><a href="../tags/decision-trees" class="internal tag-link">decision-trees</a></li></ul><div class="series-banner"><details class="series-toc"><summary><span class="series-icon">📚</span><a href="/series/inside-gradient-boosting" class="series-name">Inside Gradient Boosting</a><span class="series-position">Part 5 of 10</span></summary><ol class="series-list"><li class><a href="/blog/2026-01-06-what-is-gradient-boosting">What is Gradient Boosting?</a></li><li class><a href="/blog/2026-01-08-functional-gradient-descent">Functional Gradient Descent</a></li><li class><a href="/blog/2026-01-10-trees-and-split-gain">Trees and the Split Gain Formula</a></li><li class><a href="/blog/2026-01-12-histogram-based-split-finding">Histogram-Based Split Finding</a></li><li class="current"><span class="current-post">Depth-Wise vs Leaf-Wise Tree Growth</span></li><li class><a href="/blog/2026-01-16-gradient-based-sampling">Gradient-Based Sampling (GOSS)</a></li><li class><a href="/blog/2026-01-18-efb-and-categorical-features">Exclusive Feature Bundling and Categorical Features</a></li><li class><a href="/blog/2026-01-20-regularization">Regularization and Hyperparameter Tuning</a></li><li class><a href="/blog/2026-01-22-xgboost-vs-lightgbm">XGBoost vs LightGBM: A Practical Comparison</a></li><li class><a href="/blog/2026-01-25-boosters">Building Boosters: A Gradient Boosting Library from Scratch</a></li></ol></details></div></div></div><article class="popover-hint"><p>In <a href="../gb-part-4" class="internal alias" data-slug="gb-part-4">Part 4</a>, we saw how histogram-based training makes split finding fast. But we left one question unanswered: <strong>in what order should we split nodes?</strong></p>
+<p>This turns out to matter a lot. Given a budget of <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">L</span></span></span></span> leaves, different node orderings produce different trees with different accuracies. This post explores the two main strategies: <strong>depth-wise</strong> (XGBoost’s default) and <strong>leaf-wise</strong> (LightGBM’s default).</p>
+<hr/>
+<h2 id="the-question-which-node-to-split-next">The Question: Which Node to Split Next?<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-question-which-node-to-split-next" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>After the first split, we have two candidate nodes. We can:</p>
+<ol>
+<li>Split both before going deeper (depth-wise)</li>
+<li>Split whichever has higher potential gain (leaf-wise)</li>
+</ol>
+<p>With a fixed leaf budget, these choices lead to very different trees:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="text" data-theme="github-light one-dark-pro"><code data-language="text" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span>Depth-wise (balanced):        Leaf-wise (unbalanced):</span></span>
+<span data-line><span>       [root]                        [root]</span></span>
+<span data-line><span>        /  \                          /  \</span></span>
+<span data-line><span>      [A]  [B]                      [A]  [B]</span></span>
+<span data-line><span>      / \   / \                     / \    |</span></span>
+<span data-line><span>    [C][D][E][F]                  [C][D]  [B]</span></span>
+<span data-line><span>                                  / \</span></span>
+<span data-line><span>                                [G][H]</span></span></code></pre></figure>
+<p>Which is better? It depends on your data, dataset size, and overfitting risk tolerance.</p>
+<hr/>
+<h2 id="depth-wise-growth">Depth-Wise Growth<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#depth-wise-growth" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>Depth-wise growth splits all nodes at each level before moving deeper. This is the traditional approach, used by XGBoost by default.</p>
+<blockquote class="callout tip" data-callout="tip">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Algorithm: Depth-Wise Tree Growth </p></div>
+                  
+                </div>
+<div class="callout-content">
+<pre><code>Input: Training data, max_depth
+
+1. Create root node with all samples
+
+2. For depth = 0 to max_depth - 1:
+   a. For each leaf at current depth:
+      - Build histogram
+      - Find best split
+      - If gain > 0: create two children
+   b. If no splits made, stop early
+
+3. Assign leaf weights to all terminal nodes
+
+Output: Balanced decision tree
+</code></pre>
+</div>
+</blockquote>
+<p><strong>Key characteristic</strong>: All leaves are at the same depth (or one level apart if some nodes stopped early).</p>
+<h3 id="advantages">Advantages<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#advantages" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p><strong>Balanced structure</strong>: Every path from root to leaf has similar length. This makes the tree more interpretable and reduces the risk of overfitting to specific data paths.</p>
+<p><strong>Easy parallelism</strong>: All nodes at the same level are independent. You can build histograms and find splits for the entire level in parallel:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="text" data-theme="github-light one-dark-pro"><code data-language="text" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span>Level 2: [C] [D] [E] [F]</span></span>
+<span data-line><span>         ↓   ↓   ↓   ↓   ← Process all four simultaneously</span></span></code></pre></figure>
+<p>This level-synchronous approach is particularly valuable in distributed settings.</p>
+<p><strong>Predictable memory</strong>: At depth <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span>, you have at most <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8491em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span></span></span></span></span></span></span></span> nodes. Memory usage is bounded and predictable.</p>
+<h3 id="disadvantages">Disadvantages<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#disadvantages" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p><strong>Wasted splits</strong>: Depth-wise splits all nodes at a level, even low-gain ones. If node [E] has gain 0.1 while node [A] has gain 10.0, we still spend compute on [E].</p>
+<p><strong>Less efficient for a fixed leaf budget</strong>: With <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">L</span></span></span></span> leaves, depth-wise may not allocate them optimally.</p>
+<hr/>
+<h2 id="leaf-wise-growth">Leaf-Wise Growth<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#leaf-wise-growth" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>Leaf-wise growth always splits the leaf with the highest potential gain, regardless of depth. This is LightGBM’s default.</p>
+<blockquote class="callout tip" data-callout="tip">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Algorithm: Leaf-Wise Tree Growth </p></div>
+                  
+                </div>
+<div class="callout-content">
+<pre><code>Input: Training data, num_leaves
+
+1. Create root node, add to priority queue
+
+2. While number of leaves &lt; num_leaves:
+   a. Pop the leaf with highest gain from queue
+   b. Build histogram, find best split
+   c. If gain > 0:
+      - Split into two children
+      - Estimate potential gains for children
+      - Add both children to queue
+   d. Else: discard (can't split profitably)
+
+3. Assign leaf weights to all terminal nodes
+
+Output: Possibly unbalanced decision tree
+</code></pre>
+</div>
+</blockquote>
+<p><strong>Key characteristic</strong>: Leaves can be at very different depths. The tree “grows toward” regions of high uncertainty.</p>
+<blockquote class="callout info" data-callout="info">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Priority Queue </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>A priority queue keeps items sorted by a key (here, potential gain). “Pop” returns the item with the highest key. This ensures we always split the most promising leaf next.</p>
+</div>
+</blockquote>
+<h3 id="advantages-1">Advantages<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#advantages-1" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p><strong>Optimal split allocation</strong>: Given a budget of <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">L</span></span></span></span> leaves, leaf-wise (greedily) picks the <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">L</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> best splits. It never wastes a split on a low-gain node when a high-gain alternative exists.</p>
+<p><strong>Faster training</strong>: By focusing on high-gain nodes, leaf-wise often achieves the same loss reduction with fewer total splits.</p>
+<p><strong>Better accuracy for fixed leaf count</strong>: Empirically, leaf-wise trees with <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">L</span></span></span></span> leaves often outperform depth-wise trees with <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">L</span></span></span></span> leaves.</p>
+<h3 id="disadvantages-1">Disadvantages<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#disadvantages-1" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p><strong>Overfitting risk</strong>: Leaf-wise can create very deep paths chasing outliers. A single unusual data point might cause the tree to grow 20 levels deep in one region.</p>
+<p><strong>More complex implementation</strong>: Requires a priority queue to track candidate leaves, and gains may need recomputation after sibling splits.</p>
+<p><strong>Less parallelism-friendly</strong>: The “best leaf” is a global decision, harder to distribute.</p>
+<hr/>
+<h2 id="visual-comparison">Visual Comparison<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#visual-comparison" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>Consider a dataset where one region has much more structure than another:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="text" data-theme="github-light one-dark-pro"><code data-language="text" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span>Data: 8 samples</span></span>
+<span data-line><span>- 4 samples in Region A (high variance, needs more splits)</span></span>
+<span data-line><span>- 4 samples in Region B (low variance, one split suffices)</span></span>
+<span data-line> </span>
+<span data-line><span>Depth-wise (max_depth=3, 8 leaves):</span></span>
+<span data-line><span>           [root]</span></span>
+<span data-line><span>          /      \</span></span>
+<span data-line><span>       [A:4]    [B:4]</span></span>
+<span data-line><span>       /   \    /   \</span></span>
+<span data-line><span>     [2]  [2] [2]  [2]   ← Equal splits in both regions</span></span>
+<span data-line><span>     /\   /\  /\   /\</span></span>
+<span data-line><span>    1 1  1 1 1 1  1 1</span></span>
+<span data-line> </span>
+<span data-line><span>Leaf-wise (num_leaves=5):</span></span>
+<span data-line><span>           [root]</span></span>
+<span data-line><span>          /      \</span></span>
+<span data-line><span>       [A:4]    [B:4]     ← B stays as leaf (low gain)</span></span>
+<span data-line><span>       /   \       </span></span>
+<span data-line><span>     [2]  [2]             ← A gets all the splits</span></span>
+<span data-line><span>     /\   /\</span></span>
+<span data-line><span>    1 1  1 1</span></span></code></pre></figure>
+<p>The numbers show sample counts. With the same leaf budget, leaf-wise concentrates splits where they reduce loss most.</p>
+<hr/>
+<h2 id="the-num_leaves-vs-max_depth-relationship">The num_leaves vs max_depth Relationship<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-num_leaves-vs-max_depth-relationship" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>These aren’t equivalent parameterizations:</p>
+<ul>
+<li>A <strong>full</strong> tree of depth <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span> has <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8491em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span></span></span></span></span></span></span></span> leaves</li>
+<li>But depth-wise trees may have fewer leaves (if some splits are skipped)</li>
+<li>And leaf-wise trees may be deeper than <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.06em;vertical-align:-0.31em;"></span><span class="mop"><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.207em;"><span style="top:-2.4559em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2441em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord text"><span class="mord">num_leaves</span></span><span class="mclose">)</span></span></span></span></li>
+</ul>
+<blockquote class="callout note" data-callout="note">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Rough Equivalence </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>For similar model complexity:</p>
+<ul>
+<li><code>max_depth = 6</code> (depth-wise) ≈ <code>num_leaves = 63</code> (leaf-wise)</li>
+<li><code>max_depth = 8</code> ≈ <code>num_leaves = 255</code></li>
+</ul>
+<p>But leaf-wise typically achieves better accuracy with the same leaf count.</p>
+</div>
+</blockquote>
+<p>This is why LightGBM defaults to <code>num_leaves = 31</code> rather than specifying depth.</p>
+<hr/>
+<h2 id="when-to-use-which">When to Use Which<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#when-to-use-which" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Criterion</th><th>Use Depth-Wise</th><th>Use Leaf-Wise</th></tr></thead><tbody><tr><td>Dataset size</td><td>Small (&lt; 10k)</td><td>Large (> 100k)</td></tr><tr><td>Overfitting risk</td><td>Higher concern</td><td>Lower concern</td></tr><tr><td>Tree depth needed</td><td>Shallow (≤ 6)</td><td>Deep</td></tr><tr><td>Hardware</td><td>GPU, distributed</td><td>Single-machine CPU</td></tr><tr><td>Priority</td><td>Stability</td><td>Speed + accuracy</td></tr></tbody></table></div>
+<h3 id="depth-wise-is-safer-when">Depth-Wise is Safer When…<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#depth-wise-is-safer-when" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p><strong>Small datasets</strong>: With few samples, the risk of overfitting to noise is high. Depth-wise’s balanced structure provides implicit regularization.</p>
+<p><strong>Distributed training</strong>: Level-synchronous computation maps naturally to distributed systems. XGBoost’s distributed mode works best with depth-wise.</p>
+<p><strong>GPU training</strong>: Uniform tree structure allows more efficient GPU memory access patterns. When all trees have the same shape, kernel launches can be batched more effectively.</p>
+<h3 id="leaf-wise-wins-when">Leaf-Wise Wins When…<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#leaf-wise-wins-when" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p><strong>Large datasets</strong>: With millions of samples, overfitting is less of a concern, and efficiency matters more.</p>
+<p><strong>Training speed matters</strong>: Leaf-wise typically converges faster for the same accuracy target.</p>
+<p><strong>Deep trees are beneficial</strong>: When your features have complex interactions requiring many splits, leaf-wise can build deep paths where needed.</p>
+<hr/>
+<h2 id="hybrid-leaf-wise-with-max_depth">Hybrid: Leaf-Wise with max_depth<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#hybrid-leaf-wise-with-max_depth" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>LightGBM lets you combine both constraints:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="text" data-theme="github-light one-dark-pro"><code data-language="text" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span># Leaf-wise with depth limit</span></span>
+<span data-line><span>num_leaves = 31      # Primary constraint</span></span>
+<span data-line><span>max_depth = 8        # Safety constraint (optional)</span></span></code></pre></figure>
+<p>This gives you leaf-wise efficiency with depth-based regularization. If a leaf-wise path would go deeper than <code>max_depth</code>, that branch stops growing even if it has high gain.</p>
+<blockquote class="callout note" data-callout="note">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>LightGBM Default </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>By default, <code>max_depth = -1</code> (no limit). Set it explicitly if you’re concerned about overfitting or want more interpretable trees.</p>
+</div>
+</blockquote>
+<h3 id="xgboosts-loss-guide-mode">XGBoost’s Loss-Guide Mode<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#xgboosts-loss-guide-mode" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>XGBoost can also do leaf-wise:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="text" data-theme="github-light one-dark-pro"><code data-language="text" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span># Enable leaf-wise in XGBoost</span></span>
+<span data-line><span>grow_policy = 'lossguide'   # Instead of 'depthwise'</span></span>
+<span data-line><span>max_leaves = 31             # Leaf budget</span></span></code></pre></figure>
+<p>This makes XGBoost behave more like LightGBM.</p>
+<hr/>
+<h2 id="stopping-criteria">Stopping Criteria<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#stopping-criteria" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>Both strategies use similar stopping conditions; they just differ in which splits are <em>prioritized</em>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Criterion</th><th>Description</th></tr></thead><tbody><tr><td><code>max_depth</code></td><td>Don’t grow beyond this depth</td></tr><tr><td><code>num_leaves</code> / <code>max_leaves</code></td><td>Maximum leaf count</td></tr><tr><td><code>min_child_weight</code></td><td>Minimum Hessian sum in child</td></tr><tr><td><code>min_split_gain</code></td><td>Minimum gain to accept split</td></tr><tr><td><code>min_data_in_leaf</code></td><td>Minimum samples per leaf</td></tr></tbody></table></div>
+<p>These constraints work the same way regardless of growth strategy.</p>
+<hr/>
+<h2 id="practical-recommendations">Practical Recommendations<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#practical-recommendations" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<blockquote class="callout note" data-callout="note">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Starting Configuration </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p><strong>For most problems, try leaf-wise first</strong> (LightGBM defaults):</p>
+<ul>
+<li><code>num_leaves = 31</code></li>
+<li><code>max_depth = -1</code> (no limit) or <code>max_depth = 8</code> (for safety)</li>
+</ul>
+<p>Switch to depth-wise if:</p>
+<ul>
+<li>You’re seeing overfitting on a small dataset</li>
+<li>You need distributed or GPU training</li>
+<li>You want more uniform tree structures</li>
+</ul>
+</div>
+</blockquote>
+<h3 id="tuning-num_leaves">Tuning num_leaves<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#tuning-num_leaves" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>Start with <code>num_leaves = 31</code> and adjust:</p>
+<ul>
+<li><strong>Signs of underfitting</strong>: training and validation loss both high, model too simple</li>
+<li><strong>Signs of overfitting</strong>: training loss low but validation loss high, or validation loss increases</li>
+</ul>
+<p>Adjustments:</p>
+<ul>
+<li><strong>Underfitting</strong>: Increase <code>num_leaves</code> to 63, 127, 255</li>
+<li><strong>Overfitting</strong>: Decrease <code>num_leaves</code> to 15, 7</li>
+<li><strong>Each doubling</strong> roughly corresponds to adding one depth level</li>
+</ul>
+<hr/>
+<h2 id="whats-next">What’s Next<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#whats-next" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>We’ve covered how trees are built and how split finding works. But building histograms over all samples is still expensive. Can we do better?</p>
+<p>The next post, <a href="../gb-part-6" class="internal alias" data-slug="gb-part-6">Gradient-Based Sampling (GOSS)</a>, explains how LightGBM samples data intelligently: keeping high-gradient samples (where the model is wrong) and subsampling low-gradient ones.</p>
+<hr/>
+<h2 id="summary">Summary<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#summary" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p><strong>Depth-wise growth</strong> splits all nodes at each level before going deeper:</p>
+<ul>
+<li>Produces balanced trees</li>
+<li>Better for small datasets, distributed/GPU training</li>
+<li>XGBoost default (<code>grow_policy = 'depthwise'</code>)</li>
+</ul>
+<p><strong>Leaf-wise growth</strong> always splits the highest-gain leaf:</p>
+<ul>
+<li>Produces unbalanced trees optimized for loss reduction</li>
+<li>Better for large datasets, single-machine training</li>
+<li>LightGBM default</li>
+</ul>
+<p>Key insight: for a fixed leaf budget, leaf-wise allocates splits more efficiently. But this efficiency comes with higher overfitting risk on small datasets.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Strategy</th><th>Controls</th><th>Default In</th></tr></thead><tbody><tr><td>Depth-wise</td><td><code>max_depth</code></td><td>XGBoost</td></tr><tr><td>Leaf-wise</td><td><code>num_leaves</code></td><td>LightGBM</td></tr></tbody></table></div>
+<hr/>
+<h2 id="references">References<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#references" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<ol>
+<li>
+<p>Ke, G. et al. (2017). “LightGBM: A Highly Efficient Gradient Boosting Decision Tree”. <em>NeurIPS 2017</em>. <a href="https://proceedings.neurips.cc/paper/2017/file/6449f44a102fde848669bdd9eb6b76fa-Paper.pdf" class="external">PDF<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></p>
+</li>
+<li>
+<p>Chen, T. &amp; Guestrin, C. (2016). “XGBoost: A Scalable Tree Boosting System”. <em>KDD 2016</em>. <a href="https://arxiv.org/abs/1603.02754" class="external">arXiv<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></p>
+</li>
+</ol></article><hr/><div class="page-footer"><nav class="prev-next-nav"><div class="prev-next-links"><div class="nav-link nav-prev"><a href="/blog/2026-01-12-histogram-based-split-finding" rel="prev"><span class="nav-direction">← Older</span><span class="nav-title">Histogram-Based Split Finding</span></a></div><div class="nav-link nav-next"><a href="/blog/2026-01-16-gradient-based-sampling" rel="next"><span class="nav-direction">Newer →</span><span class="nav-title">Gradient-Based Sampling (GOSS)</span></a></div></div></nav></div></div><div class="right sidebar"><div class="toc desktop-only"><button type="button" class="toc-header" aria-controls="toc-9" aria-expanded="true"><h3>Table of Contents</h3><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="fold"><polyline points="6 9 12 15 18 9"></polyline></svg></button><ul id="list-0" class="toc-content overflow"><li class="depth-0"><a href="#the-question-which-node-to-split-next" data-for="the-question-which-node-to-split-next">The Question: Which Node to Split Next?</a></li><li class="depth-0"><a href="#depth-wise-growth" data-for="depth-wise-growth">Depth-Wise Growth</a></li><li class="depth-1"><a href="#advantages" data-for="advantages">Advantages</a></li><li class="depth-1"><a href="#disadvantages" data-for="disadvantages">Disadvantages</a></li><li class="depth-0"><a href="#leaf-wise-growth" data-for="leaf-wise-growth">Leaf-Wise Growth</a></li><li class="depth-1"><a href="#advantages-1" data-for="advantages-1">Advantages</a></li><li class="depth-1"><a href="#disadvantages-1" data-for="disadvantages-1">Disadvantages</a></li><li class="depth-0"><a href="#visual-comparison" data-for="visual-comparison">Visual Comparison</a></li><li class="depth-0"><a href="#the-num_leaves-vs-max_depth-relationship" data-for="the-num_leaves-vs-max_depth-relationship">The num_leaves vs max_depth Relationship</a></li><li class="depth-0"><a href="#when-to-use-which" data-for="when-to-use-which">When to Use Which</a></li><li class="depth-1"><a href="#depth-wise-is-safer-when" data-for="depth-wise-is-safer-when">Depth-Wise is Safer When…</a></li><li class="depth-1"><a href="#leaf-wise-wins-when" data-for="leaf-wise-wins-when">Leaf-Wise Wins When…</a></li><li class="depth-0"><a href="#hybrid-leaf-wise-with-max_depth" data-for="hybrid-leaf-wise-with-max_depth">Hybrid: Leaf-Wise with max_depth</a></li><li class="depth-1"><a href="#xgboosts-loss-guide-mode" data-for="xgboosts-loss-guide-mode">XGBoost’s Loss-Guide Mode</a></li><li class="depth-0"><a href="#stopping-criteria" data-for="stopping-criteria">Stopping Criteria</a></li><li class="depth-0"><a href="#practical-recommendations" data-for="practical-recommendations">Practical Recommendations</a></li><li class="depth-1"><a href="#tuning-num_leaves" data-for="tuning-num_leaves">Tuning num_leaves</a></li><li class="depth-0"><a href="#whats-next" data-for="whats-next">What’s Next</a></li><li class="depth-0"><a href="#summary" data-for="summary">Summary</a></li><li class="depth-0"><a href="#references" data-for="references">References</a></li><li class="overflow-end"></li></ul></div></div><footer class><ul><li><a href="https://github.com/egordm/">GitHub</a></li><li><a href="https://www.linkedin.com/in/egor-dmitriev/">LinkedIn</a></li><li><a href="/index.xml">RSS Feed</a></li></ul></footer></div></div></body><script type="application/javascript" data-persist="true">function n(){let t=this.parentElement;t.classList.toggle("is-collapsed");let e=t.getElementsByClassName("callout-content")[0];if(!e)return;let l=t.classList.contains("is-collapsed");e.style.gridTemplateRows=l?"0fr":"1fr"}function c(){let t=document.getElementsByClassName("callout is-collapsible");for(let e of t){let l=e.getElementsByClassName("callout-title")[0],s=e.getElementsByClassName("callout-content")[0];if(!l||!s)continue;l.addEventListener("click",n),window.addCleanup(()=>l.removeEventListener("click",n));let o=e.classList.contains("is-collapsed");s.style.gridTemplateRows=o?"0fr":"1fr"}}document.addEventListener("nav",c);
+</script><script type="module" data-persist="true">function E(a,e){if(!a)return;function t(o){o.target===this&&(o.preventDefault(),o.stopPropagation(),e())}function n(o){o.key.startsWith("Esc")&&(o.preventDefault(),e())}a?.addEventListener("click",t),window.addCleanup(()=>a?.removeEventListener("click",t)),document.addEventListener("keydown",n),window.addCleanup(()=>document.removeEventListener("keydown",n))}function f(a){for(;a.firstChild;)a.removeChild(a.firstChild)}var m=class{constructor(e,t){this.container=e;this.content=t;this.setupEventListeners(),this.setupNavigationControls(),this.resetTransform()}isDragging=!1;startPan={x:0,y:0};currentPan={x:0,y:0};scale=1;MIN_SCALE=.5;MAX_SCALE=3;cleanups=[];setupEventListeners(){let e=this.onMouseDown.bind(this),t=this.onMouseMove.bind(this),n=this.onMouseUp.bind(this),o=this.onTouchStart.bind(this),r=this.onTouchMove.bind(this),i=this.onTouchEnd.bind(this),s=this.resetTransform.bind(this);this.container.addEventListener("mousedown",e),document.addEventListener("mousemove",t),document.addEventListener("mouseup",n),this.container.addEventListener("touchstart",o,{passive:!1}),document.addEventListener("touchmove",r,{passive:!1}),document.addEventListener("touchend",i),window.addEventListener("resize",s),this.cleanups.push(()=>this.container.removeEventListener("mousedown",e),()=>document.removeEventListener("mousemove",t),()=>document.removeEventListener("mouseup",n),()=>this.container.removeEventListener("touchstart",o),()=>document.removeEventListener("touchmove",r),()=>document.removeEventListener("touchend",i),()=>window.removeEventListener("resize",s))}cleanup(){for(let e of this.cleanups)e()}setupNavigationControls(){let e=document.createElement("div");e.className="mermaid-controls";let t=this.createButton("+",()=>this.zoom(.1)),n=this.createButton("-",()=>this.zoom(-.1)),o=this.createButton("Reset",()=>this.resetTransform());e.appendChild(n),e.appendChild(o),e.appendChild(t),this.container.appendChild(e)}createButton(e,t){let n=document.createElement("button");return n.textContent=e,n.className="mermaid-control-button",n.addEventListener("click",t),window.addCleanup(()=>n.removeEventListener("click",t)),n}onMouseDown(e){e.button===0&&(this.isDragging=!0,this.startPan={x:e.clientX-this.currentPan.x,y:e.clientY-this.currentPan.y},this.container.style.cursor="grabbing")}onMouseMove(e){this.isDragging&&(e.preventDefault(),this.currentPan={x:e.clientX-this.startPan.x,y:e.clientY-this.startPan.y},this.updateTransform())}onMouseUp(){this.isDragging=!1,this.container.style.cursor="grab"}onTouchStart(e){if(e.touches.length!==1)return;this.isDragging=!0;let t=e.touches[0];this.startPan={x:t.clientX-this.currentPan.x,y:t.clientY-this.currentPan.y}}onTouchMove(e){if(!this.isDragging||e.touches.length!==1)return;e.preventDefault();let t=e.touches[0];this.currentPan={x:t.clientX-this.startPan.x,y:t.clientY-this.startPan.y},this.updateTransform()}onTouchEnd(){this.isDragging=!1}zoom(e){let t=Math.min(Math.max(this.scale+e,this.MIN_SCALE),this.MAX_SCALE),n=this.content.getBoundingClientRect(),o=n.width/2,r=n.height/2,i=t-this.scale;this.currentPan.x-=o*i,this.currentPan.y-=r*i,this.scale=t,this.updateTransform()}updateTransform(){this.content.style.transform=`translate(${this.currentPan.x}px, ${this.currentPan.y}px) scale(${this.scale})`}resetTransform(){let t=this.content.querySelector("svg").getBoundingClientRect(),n=t.width/this.scale,o=t.height/this.scale;this.scale=1,this.currentPan={x:(this.container.clientWidth-n)/2,y:(this.container.clientHeight-o)/2},this.updateTransform()}},T=["--secondary","--tertiary","--gray","--light","--lightgray","--highlight","--dark","--darkgray","--codeFont"],y;document.addEventListener("nav",async()=>{let e=document.querySelector(".center").querySelectorAll("code.mermaid");if(e.length===0)return;y||=await import("https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.4.0/mermaid.esm.min.mjs");let t=y.default,n=new WeakMap;for(let r of e)n.set(r,r.innerText);async function o(){for(let s of e){s.removeAttribute("data-processed");let c=n.get(s);c&&(s.innerHTML=c)}let r=T.reduce((s,c)=>(s[c]=window.getComputedStyle(document.documentElement).getPropertyValue(c),s),{}),i=document.documentElement.getAttribute("saved-theme")==="dark";t.initialize({startOnLoad:!1,securityLevel:"loose",theme:i?"dark":"base",themeVariables:{fontFamily:r["--codeFont"],primaryColor:r["--light"],primaryTextColor:r["--darkgray"],primaryBorderColor:r["--tertiary"],lineColor:r["--darkgray"],secondaryColor:r["--secondary"],tertiaryColor:r["--tertiary"],clusterBkg:r["--light"],edgeLabelBackground:r["--highlight"]}}),await t.run({nodes:e})}await o(),document.addEventListener("themechange",o),window.addCleanup(()=>document.removeEventListener("themechange",o));for(let r=0;r<e.length;r++){let v=function(){let g=l.querySelector("#mermaid-space"),h=l.querySelector(".mermaid-content");if(!h)return;f(h);let w=i.querySelector("svg").cloneNode(!0);h.appendChild(w),l.classList.add("active"),g.style.cursor="grab",u=new m(g,h)},M=function(){l.classList.remove("active"),u?.cleanup(),u=null},i=e[r],s=i.parentElement,c=s.querySelector(".clipboard-button"),d=s.querySelector(".expand-button"),p=window.getComputedStyle(c),L=c.offsetWidth+parseFloat(p.marginLeft||"0")+parseFloat(p.marginRight||"0");d.style.right=`calc(${L}px + 0.3rem)`,s.prepend(d);let l=s.querySelector("#mermaid-container");if(!l)return;let u=null;d.addEventListener("click",v),E(l,M),window.addCleanup(()=>{u?.cleanup(),d.removeEventListener("click",v)})}});
+</script><script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/copy-tex.min.js" type="application/javascript" data-persist="true"></script><script src="../postscript.js" type="module" data-persist="true"></script></html>

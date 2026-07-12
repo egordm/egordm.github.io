@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr"><head><title>Long-Term Visual Tracking for Drones: State of the Art, Open Source, and Edge Inference in 2026 | egordmitriev.dev</title><meta charset="utf-8"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Inter:ital,wght@0,400;0,600;1,400;1,600&amp;family=JetBrains Mono:wght@400;600&amp;display=swap"/><link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin="anonymous"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="alternate" type="application/rss+xml" title="Egor Dmitriev" href="https://egordmitriev.dev/index.xml"/><meta name="og:site_name" content="Egor Dmitriev"/><meta property="og:title" content="Long-Term Visual Tracking for Drones: State of the Art, Open Source, and Edge Inference in 2026 | egordmitriev.dev"/><meta property="og:type" content="article"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="Long-Term Visual Tracking for Drones: State of the Art, Open Source, and Edge Inference in 2026 | egordmitriev.dev"/><meta name="twitter:description" content="A May 2026 survey of long-term single-object visual tracking for autonomous cinematography drones: what DJI and Skydio quietly ship, what CVPR 2024-2025 published, what SAM 2 / SAMURAI changed, and what actually fits on a Jetson Orin."/><meta property="og:description" content="A May 2026 survey of long-term single-object visual tracking for autonomous cinematography drones: what DJI and Skydio quietly ship, what CVPR 2024-2025 published, what SAM 2 / SAMURAI changed, and what actually fits on a Jetson Orin."/><meta property="og:image:alt" content="A May 2026 survey of long-term single-object visual tracking for autonomous cinematography drones: what DJI and Skydio quietly ship, what CVPR 2024-2025 published, what SAM 2 / SAMURAI changed, and what actually fits on a Jetson Orin."/><meta property="og:image" content="https://egordmitriev.dev/static/og-image.png"/><meta property="og:image:url" content="https://egordmitriev.dev/static/og-image.png"/><meta name="twitter:image" content="https://egordmitriev.dev/static/og-image.png"/><meta property="og:image:type" content="image/.png"/><meta property="twitter:domain" content="egordmitriev.dev"/><meta property="og:url" content="https://egordmitriev.dev/blog/2026-05-25-long-term-visual-tracking-for-drones-2026"/><meta property="twitter:url" content="https://egordmitriev.dev/blog/2026-05-25-long-term-visual-tracking-for-drones-2026"/><link rel="canonical" href="https://egordmitriev.dev/blog/2026-05-25-long-term-visual-tracking-for-drones-2026"/><link rel="icon" href="../static/icon.png"/><meta name="description" content="A May 2026 survey of long-term single-object visual tracking for autonomous cinematography drones: what DJI and Skydio quietly ship, what CVPR 2024-2025 published, what SAM 2 / SAMURAI changed, and what actually fits on a Jetson Orin."/><meta name="generator" content="Quartz"/><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Long-Term Visual Tracking for Drones: State of the Art, Open Source, and Edge Inference in 2026","description":"A May 2026 survey of long-term single-object visual tracking for autonomous cinematography drones: what DJI and Skydio quietly ship, what CVPR 2024-2025 published, what SAM 2 / SAMURAI changed, and what actually fits on a Jetson Orin.","datePublished":"2026-05-25","url":"https://egordmitriev.dev/blog/2026-05-25-long-term-visual-tracking-for-drones-2026","author":{"@type":"Person","name":"Egor Dmitriev","url":"https://egordmitriev.dev"},"publisher":{"@type":"Person","name":"Egor Dmitriev"},"keywords":"computer-vision, drones, tracking, foundation-models, segmentation, deep-learning, robotics, survey"}</script><link href="../index.css" rel="stylesheet" type="text/css" data-persist="true"/><style>.expand-button {
+  position: absolute;
+  display: flex;
+  float: right;
+  padding: 0.4rem;
+  margin: 0.3rem;
+  right: 0;
+  color: var(--gray);
+  border-color: var(--dark);
+  background-color: var(--light);
+  border: 1px solid;
+  border-radius: 5px;
+  opacity: 0;
+  transition: 0.2s;
+}
+.expand-button > svg {
+  fill: var(--light);
+  filter: contrast(0.3);
+}
+.expand-button:hover {
+  cursor: pointer;
+  border-color: var(--secondary);
+}
+.expand-button:focus {
+  outline: 0;
+}
+
+pre:hover > .expand-button {
+  opacity: 1;
+  transition: 0.2s;
+}
+
+#mermaid-container {
+  position: fixed;
+  contain: layout;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: none;
+  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.5);
+}
+#mermaid-container.active {
+  display: inline-block;
+}
+#mermaid-container > #mermaid-space {
+  border: 1px solid var(--lightgray);
+  background-color: var(--light);
+  border-radius: 5px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 80vh;
+  width: 80vw;
+  overflow: hidden;
+}
+#mermaid-container > #mermaid-space > .mermaid-content {
+  position: relative;
+  transform-origin: 0 0;
+  transition: transform 0.1s ease;
+  overflow: visible;
+  min-height: 200px;
+  min-width: 200px;
+}
+#mermaid-container > #mermaid-space > .mermaid-content pre {
+  margin: 0;
+  border: none;
+}
+#mermaid-container > #mermaid-space > .mermaid-content svg {
+  max-width: none;
+  height: auto;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: var(--light);
+  border: 1px solid var(--lightgray);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--lightgray);
+  background: var(--light);
+  color: var(--dark);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: var(--bodyFont);
+  transition: all 0.2s ease;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:hover {
+  background: var(--lightgray);
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:active {
+  transform: translateY(1px);
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:nth-child(2) {
+  width: auto;
+  padding: 0 12px;
+  font-size: 14px;
+}
+/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VSb290IjoiL1VzZXJzL2Vnb3JkbS9wcm9qZWN0cy9hcmQvZWdvcmRtLmdpdGh1Yi5pby9xdWFydHovY29tcG9uZW50cy9zdHlsZXMiLCJzb3VyY2VzIjpbIm1lcm1haWQuaW5saW5lLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7O0FBR0Y7RUFDRTtFQUNBOztBQUdGO0VBQ0U7OztBQUtGO0VBQ0U7RUFDQTs7O0FBSUo7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOztBQUVBO0VBQ0U7O0FBR0Y7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7O0FBR0Y7RUFDRTtFQUNBOztBQUlKO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7O0FBRUE7RUFDRTs7QUFHRjtFQUNFOztBQUlGO0VBQ0U7RUFDQTtFQUNBIiwic291cmNlc0NvbnRlbnQiOlsiLmV4cGFuZC1idXR0b24ge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGZsb2F0OiByaWdodDtcbiAgcGFkZGluZzogMC40cmVtO1xuICBtYXJnaW46IDAuM3JlbTtcbiAgcmlnaHQ6IDA7IC8vIE5PVEU6IHJpZ2h0IHdpbGwgYmUgc2V0IGluIG1lcm1haWQuaW5saW5lLnRzXG4gIGNvbG9yOiB2YXIoLS1ncmF5KTtcbiAgYm9yZGVyLWNvbG9yOiB2YXIoLS1kYXJrKTtcbiAgYmFja2dyb3VuZC1jb2xvcjogdmFyKC0tbGlnaHQpO1xuICBib3JkZXI6IDFweCBzb2xpZDtcbiAgYm9yZGVyLXJhZGl1czogNXB4O1xuICBvcGFjaXR5OiAwO1xuICB0cmFuc2l0aW9uOiAwLjJzO1xuXG4gICYgPiBzdmcge1xuICAgIGZpbGw6IHZhcigtLWxpZ2h0KTtcbiAgICBmaWx0ZXI6IGNvbnRyYXN0KDAuMyk7XG4gIH1cblxuICAmOmhvdmVyIHtcbiAgICBjdXJzb3I6IHBvaW50ZXI7XG4gICAgYm9yZGVyLWNvbG9yOiB2YXIoLS1zZWNvbmRhcnkpO1xuICB9XG5cbiAgJjpmb2N1cyB7XG4gICAgb3V0bGluZTogMDtcbiAgfVxufVxuXG5wcmUge1xuICAmOmhvdmVyID4gLmV4cGFuZC1idXR0b24ge1xuICAgIG9wYWNpdHk6IDE7XG4gICAgdHJhbnNpdGlvbjogMC4ycztcbiAgfVxufVxuXG4jbWVybWFpZC1jb250YWluZXIge1xuICBwb3NpdGlvbjogZml4ZWQ7XG4gIGNvbnRhaW46IGxheW91dDtcbiAgei1pbmRleDogOTk5O1xuICBsZWZ0OiAwO1xuICB0b3A6IDA7XG4gIHdpZHRoOiAxMDB2dztcbiAgaGVpZ2h0OiAxMDB2aDtcbiAgb3ZlcmZsb3c6IGhpZGRlbjtcbiAgZGlzcGxheTogbm9uZTtcbiAgYmFja2Ryb3AtZmlsdGVyOiBibHVyKDRweCk7XG4gIGJhY2tncm91bmQ6IHJnYmEoMCwgMCwgMCwgMC41KTtcblxuICAmLmFjdGl2ZSB7XG4gICAgZGlzcGxheTogaW5saW5lLWJsb2NrO1xuICB9XG5cbiAgJiA+ICNtZXJtYWlkLXNwYWNlIHtcbiAgICBib3JkZXI6IDFweCBzb2xpZCB2YXIoLS1saWdodGdyYXkpO1xuICAgIGJhY2tncm91bmQtY29sb3I6IHZhcigtLWxpZ2h0KTtcbiAgICBib3JkZXItcmFkaXVzOiA1cHg7XG4gICAgcG9zaXRpb246IGZpeGVkO1xuICAgIHRvcDogNTAlO1xuICAgIGxlZnQ6IDUwJTtcbiAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZSgtNTAlLCAtNTAlKTtcbiAgICBoZWlnaHQ6IDgwdmg7XG4gICAgd2lkdGg6IDgwdnc7XG4gICAgb3ZlcmZsb3c6IGhpZGRlbjtcblxuICAgICYgPiAubWVybWFpZC1jb250ZW50IHtcbiAgICAgIHBvc2l0aW9uOiByZWxhdGl2ZTtcbiAgICAgIHRyYW5zZm9ybS1vcmlnaW46IDAgMDtcbiAgICAgIHRyYW5zaXRpb246IHRyYW5zZm9ybSAwLjFzIGVhc2U7XG4gICAgICBvdmVyZmxvdzogdmlzaWJsZTtcbiAgICAgIG1pbi1oZWlnaHQ6IDIwMHB4O1xuICAgICAgbWluLXdpZHRoOiAyMDBweDtcblxuICAgICAgcHJlIHtcbiAgICAgICAgbWFyZ2luOiAwO1xuICAgICAgICBib3JkZXI6IG5vbmU7XG4gICAgICB9XG5cbiAgICAgIHN2ZyB7XG4gICAgICAgIG1heC13aWR0aDogbm9uZTtcbiAgICAgICAgaGVpZ2h0OiBhdXRvO1xuICAgICAgfVxuICAgIH1cblxuICAgICYgPiAubWVybWFpZC1jb250cm9scyB7XG4gICAgICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gICAgICBib3R0b206IDIwcHg7XG4gICAgICByaWdodDogMjBweDtcbiAgICAgIGRpc3BsYXk6IGZsZXg7XG4gICAgICBnYXA6IDhweDtcbiAgICAgIHBhZGRpbmc6IDhweDtcbiAgICAgIGJhY2tncm91bmQ6IHZhcigtLWxpZ2h0KTtcbiAgICAgIGJvcmRlcjogMXB4IHNvbGlkIHZhcigtLWxpZ2h0Z3JheSk7XG4gICAgICBib3JkZXItcmFkaXVzOiA2cHg7XG4gICAgICBib3gtc2hhZG93OiAwIDJweCA0cHggcmdiYSgwLCAwLCAwLCAwLjEpO1xuICAgICAgei1pbmRleDogMjtcblxuICAgICAgLm1lcm1haWQtY29udHJvbC1idXR0b24ge1xuICAgICAgICBkaXNwbGF5OiBmbGV4O1xuICAgICAgICBhbGlnbi1pdGVtczogY2VudGVyO1xuICAgICAgICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjtcbiAgICAgICAgd2lkdGg6IDMycHg7XG4gICAgICAgIGhlaWdodDogMzJweDtcbiAgICAgICAgcGFkZGluZzogMDtcbiAgICAgICAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tbGlnaHRncmF5KTtcbiAgICAgICAgYmFja2dyb3VuZDogdmFyKC0tbGlnaHQpO1xuICAgICAgICBjb2xvcjogdmFyKC0tZGFyayk7XG4gICAgICAgIGJvcmRlci1yYWRpdXM6IDRweDtcbiAgICAgICAgY3Vyc29yOiBwb2ludGVyO1xuICAgICAgICBmb250LXNpemU6IDE2cHg7XG4gICAgICAgIGZvbnQtZmFtaWx5OiB2YXIoLS1ib2R5Rm9udCk7XG4gICAgICAgIHRyYW5zaXRpb246IGFsbCAwLjJzIGVhc2U7XG5cbiAgICAgICAgJjpob3ZlciB7XG4gICAgICAgICAgYmFja2dyb3VuZDogdmFyKC0tbGlnaHRncmF5KTtcbiAgICAgICAgfVxuXG4gICAgICAgICY6YWN0aXZlIHtcbiAgICAgICAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZVkoMXB4KTtcbiAgICAgICAgfVxuXG4gICAgICAgIC8vIFN0eWxlIHRoZSByZXNldCBidXR0b24gZGlmZmVyZW50bHlcbiAgICAgICAgJjpudGgtY2hpbGQoMikge1xuICAgICAgICAgIHdpZHRoOiBhdXRvO1xuICAgICAgICAgIHBhZGRpbmc6IDAgMTJweDtcbiAgICAgICAgICBmb250LXNpemU6IDE0cHg7XG4gICAgICAgIH1cbiAgICAgIH1cbiAgICB9XG4gIH1cbn1cbiJdfQ== */</style><link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet" type="text/css" data-persist="true"/><script src="../prescript.js" type="application/javascript" data-persist="true"></script><script type="application/javascript" data-persist="true">const fetchData = fetch("../static/contentIndex.json").then(data => data.json())</script><link rel="alternate" type="application/rss+xml" title="RSS Feed" href="https://egordmitriev.dev/index.xml"/></head><body data-slug="blog/2026-05-25-long-term-visual-tracking-for-drones-2026"><div id="quartz-root" class="page"><div id="quartz-body"><div class="left sidebar"><h2 class="page-title"><a href="..">Egor Dmitriev</a></h2><div class="spacer mobile-only"></div><div class="search"><button class="search-button"><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title>Search</title><g class="search-path" fill="none"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"></path><circle cx="8" cy="8" r="7"></circle></g></svg><p>Search</p></button><div class="search-container"><div class="search-space"><input autocomplete="off" class="search-bar" name="search" type="text" aria-label="Search for something" placeholder="Search for something"/><div class="search-layout" data-preview="true"></div></div></div></div><div class="sidebar-posts desktop-only"><h3>Recent Posts</h3><ul class="sidebar-posts-ul"><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-07-12-did-your-agent-actually-read-that-file" class="internal sidebar-post-title">Did Your Agent Actually Read That File?</a></div><div class="sidebar-post-meta"><span class="sidebar-post-date"><time datetime="2026-07-11T22:00:00.000Z">Jul 12, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-25-long-term-visual-tracking-for-drones-2026" class="internal sidebar-post-title">Long-Term Visual Tracking for Drones: State of the Art, Open Source, and Edge Inference in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-24T22:00:00.000Z">May 25, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-24-vio-drones-2026" class="internal sidebar-post-title">Visual-Inertial Odometry for Drones: State of the Art, Foundation-3D, and the cuVSLAM Squeeze in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-23T22:00:00.000Z">May 24, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-23-drone-to-satellite-localization-2026" class="internal sidebar-post-title">Drone-to-Satellite Visual Geo-Localization: State of the Art, Open Source, and Edge Inference in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-22T22:00:00.000Z">May 23, 2026</time></span></div></li></ul><p class="sidebar-browse"><a href="../blog/">All posts →</a></p></div></div><div class="center"><div class="page-header"><div class="popover-hint"><nav class="breadcrumb-container" aria-label="breadcrumbs"><div class="breadcrumb-element"><a href="../">Home</a><p> ❯ </p></div><div class="breadcrumb-element"><a href="../blog/">Blog</a><p> ❯ </p></div><div class="breadcrumb-element"><a href>Long Term Visual Tracking for Drones: State of the Art, Open Source, and Edge Inference in 2026</a></div></nav><h1 class="article-title">Long-Term Visual Tracking for Drones: State of the Art, Open Source, and Edge Inference in 2026</h1><p show-comma="true" class="content-meta"><time datetime="2026-05-24T22:00:00.000Z">May 25, 2026</time><span>37 min read</span></p><ul class="tags"><li><a href="../tags/computer-vision" class="internal tag-link">computer-vision</a></li><li><a href="../tags/drones" class="internal tag-link">drones</a></li><li><a href="../tags/tracking" class="internal tag-link">tracking</a></li><li><a href="../tags/foundation-models" class="internal tag-link">foundation-models</a></li><li><a href="../tags/segmentation" class="internal tag-link">segmentation</a></li><li><a href="../tags/deep-learning" class="internal tag-link">deep-learning</a></li><li><a href="../tags/robotics" class="internal tag-link">robotics</a></li><li><a href="../tags/survey" class="internal tag-link">survey</a></li></ul><div class="series-banner"><details class="series-toc"><summary><span class="series-icon">📚</span><a href="/series/research-passes" class="series-name">Research Passes</a><span class="series-position">Part 3 of 3</span></summary><ol class="series-list"><li class><a href="/blog/2026-05-23-drone-to-satellite-localization-2026">Drone-to-Satellite Visual Geo-Localization: State of the Art, Open Source, and Edge Inference in 2026</a></li><li class><a href="/blog/2026-05-24-vio-drones-2026">Visual-Inertial Odometry for Drones: State of the Art, Foundation-3D, and the cuVSLAM Squeeze in 2026</a></li><li class="current"><span class="current-post">Long-Term Visual Tracking for Drones: State of the Art, Open Source, and Edge Inference in 2026</span></li></ol></details></div></div></div><article class="popover-hint"><p>Long-term single-object visual tracking is the task of taking a clicked subject in frame 0 of a video, and returning where that subject is in every subsequent frame, through partial and full occlusions, scale and viewpoint changes, motion blur, exposure shifts, and the presence of other objects of the same class. Done well, it gives an autonomous cinematography drone the only piece of perception it really needs from the camera: a bounding box and mask of the person it is supposed to be following, plus an honest signal for when it has lost them.</p>
+<p>It is also a task where the gap between <em>publishable result on LaSOT</em> and <em>deployable component on a Jetson Orin</em> is unusually wide. The academic literature is in a quiet plateau: the top of the LaSOT leaderboard moved from ~70 AUC in 2022 to ~75 in 2025, and the differences between the top five methods are dominated by which foundation backbone they fine-tune. The deployment landscape is the opposite, explosive activity from two closed-source vendors (DJI and Skydio) and an under-served open-source middle that is mostly research scripts the authors explicitly warn are not for real-world use.</p>
+<p>I spent the first half of 2026 surveying this space while building <a href="https://github.com/egordm/kubrick" class="external">kubrick-tracking<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, a real-time foundation-model tracker for autonomous drone cinematography. This post is the survey, organized into seven sections: the problem and the canonical pipeline, the academic frontier organized by family rather than by leaderboard rank, the production state of the industry, adjacent fields with reusable architecture, the engineering layer everyone re-invents, edge-inference reality on real hardware, and a discussion of where the most consequential gaps are.</p>
+<p>If you are considering work in this area, treat this post as a starting bibliography rather than a finished position. Every claim links to primary source. Where I make a judgment call, I flag it.</p>
+<blockquote class="callout info" data-callout="info">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Scope and timing </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>All claims are as of May 2026. Some of the deployment numbers come from a measured optimization sprint on SAMURAI documented separately in <a href="../blog/2026-05-16-optimizing-samurai-part-1" class="internal alias" data-slug="blog/2026-05-16-optimizing-samurai-part-1">the Optimizing SAMURAI series</a> (three parts, ending May 18). The field is moving fast enough that some of this will be stale by Q4 2026.</p>
+</div>
+</blockquote>
+<blockquote class="callout info" data-callout="info">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Quick glossary (skim if any of these are unfamiliar) </p></div>
+                  
+                </div>
+<div class="callout-content">
+<ul>
+<li><strong>SOT (Single-Object Tracking)</strong>: given a clicked or boxed subject in frame 0, output its location in every subsequent frame. The task this whole post is about.</li>
+<li><strong>VOS (Video Object Segmentation)</strong>: similar to SOT, but the output is a pixel-precise mask rather than a bounding box. SAM 2 lives here; SOT and VOS are converging fast.</li>
+<li><strong>LaSOT / GOT-10k / UAV123</strong>: the standard benchmarks. LaSOT averages ~83 seconds per clip and is the de-facto long-term reference. UAV123/UAV20L are aerial. GOT-10k tests one-shot generalization to unseen classes.</li>
+<li><strong>Template / search region</strong>: the classical tracking idiom. A <em>template</em> is the cropped subject from frame 0 (and sometimes refreshed); the <em>search region</em> is a larger window around the predicted location in the current frame. The model decides where the template “is” inside the search region.</li>
+<li><strong>One-stream tracker</strong>: a ViT that takes template and search region concatenated as one token sequence and lets self-attention do the cross-talk. Replaced the older two-stream Siamese trackers in 2022.</li>
+<li><strong>Mask propagation / memory bank</strong>: the SAM 2 idiom. Past frames’ features and mask predictions are kept in a fixed-size buffer; the current frame cross-attends to that buffer to predict the next mask. No explicit template/search crop.</li>
+<li><strong>AUC (Area Under the Curve)</strong>: the standard LaSOT success metric. Higher is better; current ceiling ~75.</li>
+<li><strong>AO / SR (GOT-10k)</strong>: Average Overlap and Success Rate, the GOT-10k metrics.</li>
+<li><strong>Re-acquisition / long occlusion</strong>: the open problem. Subject leaves the frame or is fully occluded for several seconds, then reappears. Standard trackers either keep tracking nothing in particular or latch onto a distractor.</li>
+<li><strong>ROS 2</strong>: the de-facto robotics middleware. Trackers that ship into real robots end up as ROS 2 nodes.</li>
+<li><strong>ORT / TRT / CoreML</strong>: ONNX Runtime, NVIDIA TensorRT, Apple’s CoreML, the three deployment runtimes that matter for foundation-model tracking on edge devices.</li>
+</ul>
+</div>
+</blockquote>
+<h2 id="1-the-problem-and-the-canonical-pipeline">1. The problem and the canonical pipeline<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#1-the-problem-and-the-canonical-pipeline" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>Before the leaderboards and benchmarks, it helps to be concrete about what this tracker actually has to do. A camera (drone, gimbal, handheld) hands it a frame and a one-shot initialization: a bounding box, a mask, a click point, or a text prompt. From the next frame onwards, the tracker emits a bounding box, optionally a pixel-precise mask, an explicit state (<code>tracked</code>, <code>occluded</code>, <code>lost</code>, <code>reacquired</code>), and a calibrated confidence. A downstream consumer (autopilot, gimbal, recorder, focus puller) uses those to do something physical: keep the subject centered in the shot, predict where to point the gimbal next, decide whether to keep flying or hover.</p>
+<pre><button class="expand-button" aria-label="Expand mermaid diagram" data-view-component="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 1.06L2.56 7h10.88l-2.22-2.22a.75.75 0 011.06-1.06l3.5 3.5a.75.75 0 010 1.06l-3.5 3.5a.75.75 0 11-1.06-1.06l2.22-2.22H2.56l2.22 2.22a.75.75 0 11-1.06 1.06l-3.5-3.5a.75.75 0 010-1.06l3.5-3.5z"></path></svg></button><code class="mermaid" data-clipboard="&quot;flowchart LR\n    A[Camera frame stream] --> B[Tracker]\n    I[Init: bbox / mask / click / text] --> B\n    B --> O[Per-frame output:&lt;br/>bbox, mask, state,&lt;br/>confidence, embedding]\n    O --> C1[Autopilot / gimbal]\n    O --> C2[Focus puller]\n    O --> C3[Recorder / overlay]\n    O --> C4[ROS 2 topic]&quot;">flowchart LR
+    A[Camera frame stream] --> B[Tracker]
+    I[Init: bbox / mask / click / text] --> B
+    B --> O[Per-frame output:&lt;br/>bbox, mask, state,&lt;br/>confidence, embedding]
+    O --> C1[Autopilot / gimbal]
+    O --> C2[Focus puller]
+    O --> C3[Recorder / overlay]
+    O --> C4[ROS 2 topic]
+</code><div id="mermaid-container" role="dialog"><div id="mermaid-space"><div class="mermaid-content"></div></div></div></pre>
+<p>The contract sounds simple. It is not, because the failure modes are all <em>implicit</em>:</p>
+<ul>
+<li><strong>Short occlusions</strong> (1-2 s, a tree, a passing person) need to be ridden out without latching onto whatever else is in the search region.</li>
+<li><strong>Long occlusions</strong> (5-30 s, subject behind a building, or out of frame as the drone re-positions) need an honest “I have lost them” state and an aggressive re-acquisition path when they reappear.</li>
+<li><strong>Same-class distractors</strong> (the runner is one of 30 in a marathon) need the tracker to disambiguate based on appearance over many frames, not just the current crop.</li>
+<li><strong>Scale and viewpoint changes</strong> (zoom, drone moves from above to ground level) need a template representation that survives geometric warps.</li>
+<li><strong>Motion blur and exposure shifts</strong> are constant on drones: small platforms vibrate, autoexposure hunts.</li>
+<li><strong>Init failures</strong> (subject is small at takeoff, prompt is ambiguous) need to be detected, not silently turned into garbage tracks.</li>
+</ul>
+<p>The canonical academic pipeline (2022-2025) treats this as a <em>pair-wise</em> search: template features from frame 0 plus search features from frame <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span></span></span></span> go through a transformer, which outputs a bounding box. Roughly:</p>
+<span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord text"><span class="mord">bbox</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.217em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord text"><span class="mord">search</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord text"><span class="mord">template</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.207em;"><span style="top:-2.4559em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2441em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord text"><span class="mord">template</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.967em;"><span style="top:-2.4542em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span><span style="top:-3.1809em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">update</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2458em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span>
+<p>The interesting differences are in how <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">θ</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> is parameterized, whether the template is updated (and if so how), and what historical context beyond the most recent template is preserved. The promptable-segmentation lineage (SAM 2 family, see [[#Promptable foundation-model trackers: SAM \u2192 SAM 2 \u2192 SAMURAI \u2192 EfficientTAM|§2 promptable foundation-model trackers]]) breaks this pattern by replacing template/search with a streaming memory bank of past features and mask predictions, which turns out to handle many of the failure modes above for free.</p>
+<p>Downstream consumers also impose hidden requirements that the academic benchmarks do not measure:</p>
+<ul>
+<li><strong>Latency</strong> has to fit a control loop, typically 30 FPS = 33 ms per frame end-to-end on the target hardware (a Jetson Orin AGX, an iPhone-class NPU, or a Snapdragon-class DSP).</li>
+<li><strong>Explicit failure states</strong> matter more than raw AUC. An autopilot can handle “I have lost them” gracefully; it cannot handle “here is a bbox of a different person, with high confidence”.</li>
+<li><strong>State semantics</strong> must be machine-consumable. The <code>state</code> enum (<code>tracked</code>/<code>occluded</code>/<code>lost</code>/<code>reacquired</code>) and a <em>calibrated</em> confidence (an honest probability, not a raw mask-logit max) are the integration contract.</li>
+</ul>
+<p>Most published trackers ignore both of the second-class consumer requirements. The benchmarks reward AUC; they do not penalize a tracker for silently following the wrong subject. This gap is the recurring theme of the rest of the post.</p>
+<blockquote class="callout info" data-callout="info">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>What this survey does and does not cover </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p><strong>Covers</strong>: long-term single-object tracking with foundation-model components, suitable for autonomous cinematography drones. Both bbox and mask outputs. Open-source and academic state of the art plus production vendors where evidence is visible from outside.</p>
+<p><strong>Does not cover</strong>: multi-object tracking-by-detection (MOT: surveillance, traffic, marathon-finish-line use cases with 10-50 simultaneous tracks). Different problem, different ontology. Briefly cross-referenced in <a href="#adjacent-fields-and-reusable-architecture" class="internal alias">§4 Adjacent fields</a>. Also does not cover 6D pose estimation, scene reconstruction, or visual-inertial odometry; those are <a href="../blog/2026-05-24-vio-drones-2026" class="internal alias" data-slug="blog/2026-05-24-vio-drones-2026">the V2 post</a> and friends.</p>
+</div>
+</blockquote>
+<h2 id="2-academic-frontier">2. Academic frontier<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#2-academic-frontier" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>The current academic frontier divides cleanly into five families, each with its own shared mechanism, its own lineage of incremental work, and its own characteristic failure modes. I cover them in roughly chronological order of when they became the dominant thread.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Family</th><th>Core mechanism</th><th>Headline method (May 2026)</th><th>LaSOT AUC</th></tr></thead><tbody><tr><td><strong>Transformer SOT</strong> (one-stream)</td><td>ViT with concatenated template+search tokens</td><td>SUTrack-L, LoRAT-L</td><td>75.2 / 75.1</td></tr><tr><td><strong>Temporal token propagation</strong></td><td>Compress target into tokens passed frame-to-frame</td><td>ODTrack, HIPTrack</td><td>74.0 / 72.7</td></tr><tr><td><strong>Promptable foundation models</strong></td><td>Streaming memory bank over past frames’ features+masks</td><td>SAMURAI</td><td>~74 zero-shot</td></tr><tr><td><strong>Foundation-feature re-ID</strong></td><td>DINOv2/SAM/CLIP embeddings as instance descriptors</td><td>MASA, LoRAT, CiteTracker</td><td>varies</td></tr><tr><td><strong>Aerial/edge-specific</strong></td><td>View-invariant tiny ViTs with adaptive computation</td><td>AVTrack-MD</td><td>(UAV SOTA)</td></tr></tbody></table></div>
+<p>The first two families are the standard <em>transformer-tracker</em> line and its temporal-modeling refinements. The third, promptable foundation models, is the most consequential development of the last two years; it is what an autonomous cinematography drone built in 2026 actually wants to run. The fourth is the re-identification thread, currently more developed on the MOT side than on SOT but cross-pollinating fast. The fifth is the only thread explicitly thinking about edge deployment on drone-class hardware.</p>
+<h3 id="transformer-sot-trackers-the-one-stream-lineage">Transformer SOT trackers: the one-stream lineage<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#transformer-sot-trackers-the-one-stream-lineage" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The dominant academic thread since 2022 has been the <em>one-stream ViT</em> tracker. The shared mechanism is straightforward: concatenate template-image tokens and search-region tokens into a single sequence, run a standard ViT, decode bounding box from the search-region output.</p>
+<pre><button class="expand-button" aria-label="Expand mermaid diagram" data-view-component="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 1.06L2.56 7h10.88l-2.22-2.22a.75.75 0 011.06-1.06l3.5 3.5a.75.75 0 010 1.06l-3.5 3.5a.75.75 0 11-1.06-1.06l2.22-2.22H2.56l2.22 2.22a.75.75 0 11-1.06 1.06l-3.5-3.5a.75.75 0 010-1.06l3.5-3.5z"></path></svg></button><code class="mermaid" data-clipboard="&quot;flowchart LR\n    T[Template crop frame 0] --> TT[Patchify]\n    S[Search region frame t] --> ST[Patchify]\n    TT --> C[Concat token sequence]\n    ST --> C\n    C --> V[One-stream ViT&lt;br/>self-attention]\n    V --> H[Bbox head]\n    H --> B[bbox t]&quot;">flowchart LR
+    T[Template crop frame 0] --> TT[Patchify]
+    S[Search region frame t] --> ST[Patchify]
+    TT --> C[Concat token sequence]
+    ST --> C
+    C --> V[One-stream ViT&lt;br/>self-attention]
+    V --> H[Bbox head]
+    H --> B[bbox t]
+</code><div id="mermaid-container" role="dialog"><div id="mermaid-space"><div class="mermaid-content"></div></div></div></pre>
+<p>The shared mechanism in one paragraph: the ViT’s self-attention does template-search cross-talk for free, so the older Siamese two-stream design (separate template encoder + separate search encoder + explicit cross-correlation) collapses into a single forward pass. This was the OSTrack contribution; everything since has been variations on the backbone, the head, and what extra signal feeds into the token sequence.</p>
+<p>The lineage:</p>
+<pre><button class="expand-button" aria-label="Expand mermaid diagram" data-view-component="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 1.06L2.56 7h10.88l-2.22-2.22a.75.75 0 011.06-1.06l3.5 3.5a.75.75 0 010 1.06l-3.5 3.5a.75.75 0 11-1.06-1.06l2.22-2.22H2.56l2.22 2.22a.75.75 0 11-1.06 1.06l-3.5-3.5a.75.75 0 010-1.06l3.5-3.5z"></path></svg></button><code class="mermaid" data-clipboard="&quot;flowchart LR\n    OSTrack[\&quot;OSTrack (2022)&lt;br/>one-stream ViT&lt;br/>71.1 AUC\&quot;] --> SeqTrack[\&quot;SeqTrack (2023)&lt;br/>bbox as sequence&lt;br/>72.5\&quot;]\n    OSTrack --> ARTrack[\&quot;ARTrack (2023)&lt;br/>autoregressive bbox&lt;br/>73.1\&quot;]\n    OSTrack --> MixFormer[\&quot;MixFormer (2023)&lt;br/>iterative mixed attn&lt;br/>72.4\&quot;]\n    ARTrack --> ARTrack2[\&quot;ARTrackV2 (2024)&lt;br/>read+retell&lt;br/>73.6\&quot;]\n    OSTrack --> LoRAT[\&quot;LoRAT (ECCV 2024)&lt;br/>DINOv2 + LoRA&lt;br/>75.1\&quot;]\n    OSTrack --> SUTrack[\&quot;SUTrack (AAAI 2025)&lt;br/>HiViT, unified RGB/D/T/E/L&lt;br/>75.2\&quot;]&quot;">flowchart LR
+    OSTrack[&quot;OSTrack (2022)&lt;br/>one-stream ViT&lt;br/>71.1 AUC&quot;] --> SeqTrack[&quot;SeqTrack (2023)&lt;br/>bbox as sequence&lt;br/>72.5&quot;]
+    OSTrack --> ARTrack[&quot;ARTrack (2023)&lt;br/>autoregressive bbox&lt;br/>73.1&quot;]
+    OSTrack --> MixFormer[&quot;MixFormer (2023)&lt;br/>iterative mixed attn&lt;br/>72.4&quot;]
+    ARTrack --> ARTrack2[&quot;ARTrackV2 (2024)&lt;br/>read+retell&lt;br/>73.6&quot;]
+    OSTrack --> LoRAT[&quot;LoRAT (ECCV 2024)&lt;br/>DINOv2 + LoRA&lt;br/>75.1&quot;]
+    OSTrack --> SUTrack[&quot;SUTrack (AAAI 2025)&lt;br/>HiViT, unified RGB/D/T/E/L&lt;br/>75.2&quot;]
+</code><div id="mermaid-container" role="dialog"><div id="mermaid-space"><div class="mermaid-content"></div></div></div></pre>
+<p>Per-method deltas, briefly:</p>
+<ul>
+<li><strong><a href="https://github.com/botaoye/OSTrack" class="external">OSTrack<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (ECCV 2022, MIT) is the <em>one-stream</em> paper that most of the rest builds on. 71.1 AUC. The reference design.</li>
+<li><strong><a href="https://github.com/chenxin-dlut/SeqTrackv2" class="external">SeqTrack<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (CVPR 2023, MIT) reformulates bbox prediction as autoregressive token generation rather than a regression head. 72.5 AUC. Influences ARTrack.</li>
+<li><strong><a href="https://github.com/MIV-XJTU/ARTrack" class="external">ARTrack<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (CVPR 2023, non-commercial) generalizes the autoregressive idea: bbox tokens are <em>generated</em> across frames, not just regressed. ARTrackV2 (CVPR 2024) adds an explicit “retell appearance” step and ships 3.6× faster.</li>
+<li><strong><a href="https://github.com/MCG-NJU/MixFormer" class="external">MixFormer<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (CVPR 2022 / NeurIPS 2023, non-commercial) is the iterative-mixed-attention variant. MixFormerV2 distills it to a very fast student (up to 165 FPS).</li>
+<li><strong><a href="https://github.com/LitingLin/LoRAT" class="external">LoRAT<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (ECCV 2024, Apache-2.0) is the cleanest “scale via foundation backbone + LoRA” result: DINOv2 ViT-L/g, LoRA-tuned on tracking data, 75.1 AUC at 52-119 FPS, ViT-g trained in 25.8 GB VRAM. The interesting result is that with LoRA, the backbone choice (DINOv2 vs MAE vs random init) explains most of the variance.</li>
+<li><strong><a href="https://github.com/chenxin-dlut/SUTrack" class="external">SUTrack<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (AAAI 2025, non-commercial) tops the leaderboard at 75.2 AUC with a HiViT backbone and a single model unified across RGB, RGB-D, RGB-T, RGB-E (event), and RGB-L (LiDAR).</li>
+</ul>
+<p><img src="../blog/assets/research-passes/v1/lorat-architecture.png" width="auto" height="auto" alt/>
+<em>LoRAT architecture (Liting Lin et al., ECCV 2024). Template and search patches enter a frozen DINOv2 ViT; only LoRA adapters and the MLP head are trained.</em></p>
+<p>The story this family tells: by 2024-2025, the <strong>architecture of the head and the training recipe stopped mattering much</strong>. The gains are coming from <em>which pretrained backbone you LoRA-tune</em>. LoRAT and SUTrack agree to within 0.1 AUC despite very different head designs. LaSOT-ext, where LoRAT-L leads at 56.6 vs SUTrack-L at 53.6, is the harder benchmark where backbone choice matters more.</p>
+<h3 id="temporal-token-propagation-escaping-the-pair-wise-paradigm">Temporal token propagation: escaping the pair-wise paradigm<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#temporal-token-propagation-escaping-the-pair-wise-paradigm" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The transformer SOT family above all share a structural blind spot: prediction at frame <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span></span></span></span> depends on the template (from frame 0, plus an optional updated template) and the search region at frame <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span></span></span></span>. <em>Nothing in between</em> contributes signal. Distinct works in 2024 escape this by adding explicit temporal state.</p>
+<p>Shared mechanism: a compact representation of the target (tokens, learnable queries, or a “historical prompt”) is propagated from frame to frame and made available to the tracker at every step. This is different from template <em>update</em>, which is point-in-time refresh; this is <em>running memory</em>.</p>
+<p>The methods:</p>
+<ul>
+<li><strong><a href="https://github.com/GXNU-ZhongLab/ODTrack" class="external">ODTrack<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (AAAI 2024, non-commercial) compresses the target into tokens and passes them frame-to-frame, much like a low-bandwidth video codec. 74.0 AUC.</li>
+<li><strong><a href="https://github.com/GXNU-ZhongLab/AQATrack" class="external">AQATrack<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (CVPR 2024, non-commercial) uses autoregressive <em>learnable queries</em> in a sliding window, conceptually similar to a recurrent attention mechanism. 71.4 AUC.</li>
+<li><strong><a href="https://github.com/GXNU-ZhongLab/EVPTrack" class="external">EVPTrack<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (AAAI 2024, non-commercial) generates explicit visual prompts from previous frames and feeds them as conditioning. 70.4 AUC.</li>
+<li><strong><a href="https://github.com/WenRuiCai/HIPTrack" class="external">HIPTrack<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (CVPR 2024, non-commercial) layers a <strong>plug-in historical prompt network</strong> on top of a <em>frozen</em> base tracker. 72.7 AUC, +1-2 AUC over the base. The plug-in design is the interesting part: it suggests that historical conditioning is mostly orthogonal to the backbone-and-head architecture, and can be retrofitted to any pretrained tracker.</li>
+</ul>
+<p>The story this family tells: <strong>2-3 AUC of LaSOT performance comes from better historical conditioning alone</strong>, achievable by plug-in modules on top of a frozen one-stream tracker. This is roughly the same gain people are chasing by training larger backbones from scratch.</p>
+<p>Two practical notes. First, all four methods above are non-commercially licensed (GXNU-ZhongLab and WenRuiCai both ship under research-only). For a permissive open-source project, none of them are drop-in. Second, the temporal mechanism is structurally what SAMURAI gets <em>for free</em> from the SAM 2 memory bank, which is the segue to the next family.</p>
+<h3 id="promptable-foundation-model-trackers-sam--sam-2--samurai--efficienttam">Promptable foundation-model trackers: SAM → SAM 2 → SAMURAI → EfficientTAM<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#promptable-foundation-model-trackers-sam--sam-2--samurai--efficienttam" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The most consequential thread of the last two years is the <em>promptable video segmentation</em> lineage. SAM 2 and its derivatives do not look like trackers at all: there is no template, no search region, no bounding-box head. The model is a <strong>recurrent mask-propagation network with a streaming memory bank</strong>.</p>
+<p><img src="../blog/assets/research-passes/v1/sam2-architecture.png" width="auto" height="auto" alt/>
+<em>SAM 2 architecture (Ravi et al., Meta 2024). Segmentation prediction is conditioned on the current prompt and/or previously observed memories, processed in a streaming fashion.</em></p>
+<p>The shared mechanism in one paragraph: the image encoder produces a feature map for the current frame; the memory attention block cross-attends to a fixed-size buffer of past frames’ features and past mask predictions; the mask decoder produces the current mask; the memory encoder writes the new frame’s features (conditioned on its own predicted mask) into the buffer for future frames. The prompt is applied once at frame 0 and is implicitly carried by the memory bank thereafter. This is structurally very different from template-search SOT, and it is the reason the family has different failure modes (and different strengths).</p>
+<p>Lineage:</p>
+<pre><button class="expand-button" aria-label="Expand mermaid diagram" data-view-component="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 1.06L2.56 7h10.88l-2.22-2.22a.75.75 0 011.06-1.06l3.5 3.5a.75.75 0 010 1.06l-3.5 3.5a.75.75 0 11-1.06-1.06l2.22-2.22H2.56l2.22 2.22a.75.75 0 11-1.06 1.06l-3.5-3.5a.75.75 0 010-1.06l3.5-3.5z"></path></svg></button><code class="mermaid" data-clipboard="&quot;flowchart LR\n    SAM[\&quot;SAM (2023)&lt;br/>Hiera + promptable&lt;br/>image segmentation\&quot;] --> SAM2[\&quot;SAM 2 (2024)&lt;br/>+ memory bank&lt;br/>+ video propagation&lt;br/>Apache-2.0\&quot;]\n    SAM2 --> SAMURAI[\&quot;SAMURAI (Nov 2024)&lt;br/>+ Kalman-gated memory&lt;br/>zero-shot, no retraining&lt;br/>~7.1k stars\&quot;]\n    SAM2 --> EfficientTAM[\&quot;EfficientTAM (2024)&lt;br/>plain ViT backbone&lt;br/>1.6\\u00d7 faster&lt;br/>iPhone-capable\&quot;]&quot;">flowchart LR
+    SAM[&quot;SAM (2023)&lt;br/>Hiera + promptable&lt;br/>image segmentation&quot;] --> SAM2[&quot;SAM 2 (2024)&lt;br/>+ memory bank&lt;br/>+ video propagation&lt;br/>Apache-2.0&quot;]
+    SAM2 --> SAMURAI[&quot;SAMURAI (Nov 2024)&lt;br/>+ Kalman-gated memory&lt;br/>zero-shot, no retraining&lt;br/>~7.1k stars&quot;]
+    SAM2 --> EfficientTAM[&quot;EfficientTAM (2024)&lt;br/>plain ViT backbone&lt;br/>1.6\u00d7 faster&lt;br/>iPhone-capable&quot;]
+</code><div id="mermaid-container" role="dialog"><div id="mermaid-space"><div class="mermaid-content"></div></div></div></pre>
+<p>Per-method deltas:</p>
+<ul>
+<li><strong><a href="https://github.com/facebookresearch/segment-anything" class="external">SAM<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (Meta, 2023, Apache-2.0) is the still-image promptable segmenter. Hiera ViT image encoder + prompt encoder + mask decoder. Not a tracker; the foundation everything below builds on.</li>
+<li><strong><a href="https://github.com/facebookresearch/sam2" class="external">SAM 2<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (Meta, 2024, Apache-2.0) adds the memory bank and the memory encoder, making it a <em>streaming video</em> segmenter. The shipped weights cover Hiera-Tiny / Small / Base+ / Large at multiple resolutions. ~44 FPS on Hiera-Large on an A100. <strong>Notably, MPS support is broken upstream</strong> (<a href="https://github.com/facebookresearch/sam2/pull/123" class="external">PR #123<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> abandoned), which matters if your dev machine is a Mac.</li>
+<li><strong><a href="https://github.com/yangchris11/samurai" class="external">SAMURAI<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (arXiv 2411.11922, Nov 2024, Apache-2.0) is the breakout. Same SAM 2 weights, no retraining, <strong>+7.1 AUC over base SAM 2 on LaSOT-ext</strong> purely from <em>motion-aware memory selection</em>: a small Kalman filter predicts where the target will be next, and the memory attention weights memory frames by Kalman-IoU before cross-attending. This is the cleanest demonstration that the SAM 2 memory bank had latent capacity nobody was using. ~7.1k GitHub stars by May 2026.</li>
+</ul>
+<p><img src="../blog/assets/research-passes/v1/samurai-pipeline.png" width="auto" height="auto" alt/>
+<em>SAMURAI pipeline overview (Yang et al., 2024). Motion-aware memory selection via Kalman-gated scoring, applied to SAM 2’s memory bank without retraining.</em></p>
+<ul>
+<li><strong><a href="https://github.com/yformer/EfficientTAM" class="external">EfficientTAM<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (2024, Apache-2.0) swaps the Hiera backbone for a plain ViT, trims memory cross-attention, and ships ~1.6× faster than SAM 2 Hiera-B+ with comparable J&amp;F (segmentation accuracy) on standard VOS benchmarks. Critically, MPS works. ~10 FPS on iPhone 15 Pro Max in their own reporting.</li>
+</ul>
+<p><img src="../blog/assets/research-passes/v1/efficienttam-architecture.png" width="auto" height="auto" alt/>
+<em>EfficientTAM architecture (Yformer, 2024). Lightweight ViT image encoder with efficient memory cross-attention, trained on SA-1B + SA-V for unified image/video segmentation.</em></p>
+<p>The story this family tells: the SAM 2 memory bank is doing more work than its authors initially designed for. <strong>SAMURAI’s +7.1 AUC on LaSOT-ext from a Kalman wrapper, with zero training</strong>, is a stronger signal about the underlying mechanism than any of the supervised gains in the transformer-SOT family. And EfficientTAM proves the backbone is interchangeable, which opens the deployment path discussed in <a href="#6-edge-inference-reality" class="internal alias">§6 Edge inference reality</a>.</p>
+<p>The family also has under-explored capacity:</p>
+<ul>
+<li><strong>Out-of-view and re-acquisition</strong>. SAMURAI alone (no external re-ID head) handles short-to-medium out-of-view events on its own. Empirical measurement on a 4-clip pilot showed post-out-of-view centroid drift <em>smaller</em> than pre-out-of-view, contradicting the intuition that errors compound across the recurrence. The memory bank acts as an averaging filter, not an error amplifier.</li>
+<li><strong>Same-class distractors</strong>. On a 200-frame clip with four runners in the same outfit, SAMURAI tracks the right one throughout without an external appearance discriminator. The motion-aware memory selection is doing implicit instance disambiguation.</li>
+</ul>
+<p>Both of these are findings from my own POC work on the kubrick-tracking integration. They are not published as separate results, because nobody has published the right benchmark to measure them, which is itself the gap.</p>
+<blockquote class="callout note" data-callout="note">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>The fork ecosystem around SAM 2 </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>SAM 2’s release in 2024 triggered an unusually broad fork ecosystem. The most relevant for tracking integration:</p>
+<ul>
+<li><a href="https://github.com/Gy920/segment-anything-2-real-time" class="external"><code>Gy920/segment-anything-2-real-time</code><svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> (585 stars) is a webcam streaming wrapper around the upstream <code>vos_optimized=True</code> path. UX layer, not a perf innovation.</li>
+<li><a href="https://github.com/dxlcnm/segment-anything-2-real-time-onnx" class="external"><code>dxlcnm/segment-anything-2-real-time-onnx</code><svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> (5 stars) ships a 5-file ONNX export with a hand-rewritten RoPE. Closest analog to my own export work.</li>
+<li><a href="https://github.com/wp133716/samurai-tensorrt" class="external"><code>wp133716/samurai-tensorrt</code><svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> (5 stars) ports SAMURAI to TensorRT in a 4-file ONNX split, Python + C++. No published latency numbers as of May 2026.</li>
+<li><a href="https://github.com/tier4/sam2_trt_inference" class="external"><code>tier4/sam2_trt_inference</code><svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> (51 stars) is the only project with honest reproducible TRT numbers, but for image segmentation rather than video tracking.</li>
+</ul>
+<p>Stars are low because video-tracking-on-edge is a small audience. The ecosystem is one or two contributors per fork.</p>
+</div>
+</blockquote>
+<h3 id="foundation-feature-re-id-instance-embeddings-from-large-pretrained-models">Foundation-feature re-ID: instance embeddings from large pretrained models<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#foundation-feature-re-id-instance-embeddings-from-large-pretrained-models" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The fourth family is conceptually orthogonal to the tracker itself: it asks how to get a <em>stable per-instance descriptor</em> that survives appearance changes, so a tracker that has lost its subject can re-acquire by template-matching against a vector store rather than against a single template image.</p>
+<p>Shared mechanism: take a large pretrained backbone (<a href="https://github.com/facebookresearch/dinov2" class="external">DINOv2<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, SAM ViT-H, <a href="https://github.com/openai/CLIP" class="external">CLIP<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> / <a href="https://github.com/mlfoundations/open_clip" class="external">OpenCLIP<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>) and either (a) use its features directly as an instance descriptor, (b) train a small adapter that turns its features into a discriminative embedding using self-supervised pseudo-pairs.</p>
+<p><img src="../blog/assets/research-passes/v1/masa-training-pipeline.png" width="auto" height="auto" alt/>
+<em>MASA training pipeline (Li et al., CVPR 2024). SAM generates exhaustive masks on unlabeled images; strong augmentations create pseudo-pairs for self-supervised instance similarity learning.</em></p>
+<p>The methods:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Method</th><th>Foundation backbone</th><th>What it does</th><th>License</th></tr></thead><tbody><tr><td><strong><a href="https://github.com/siyuanliii/masa" class="external">MASA<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (CVPR 2024 Highlight)</td><td>SAM ViT-H / GroundingDINO / Detic / R-50</td><td>Trains an adapter that produces appearance embeddings for any region SAM proposes, using <em>unlabeled static images</em> + heavy augmentation as pseudo-pairs</td><td>Apache-2.0</td></tr><tr><td><strong><a href="https://github.com/LitingLin/LoRAT" class="external">LoRAT<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (ECCV 2024)</td><td>DINOv2 ViT-L/g (LoRA-tuned)</td><td>Uses DINOv2 features as the <em>tracking backbone</em> itself, not as a separate re-ID head</td><td>Apache-2.0</td></tr><tr><td><strong><a href="https://github.com/NorahGreen/CiteTracker" class="external">CiteTracker<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (ICCV 2023)</td><td>CLIP</td><td>Correlates image patches with CLIP text/image features to inject open-vocab semantics</td><td>research</td></tr><tr><td><strong><a href="https://github.com/facebookresearch/dinov2" class="external">DINOv2<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (Meta, 2023)</td><td>, (self-supervised ViT pretrain)</td><td>Provides the features the above are built on; OpenCLIP plays a similar role in CLIP-flavored stacks</td><td>Apache-2.0 (DINOv2) / MIT (OpenCLIP)</td></tr></tbody></table></div>
+<p>The story this family tells: <strong>the obvious recipe for “foundation-model re-ID for SOT-with-occlusion” is SAMURAI + MASA-style cached DINOv2/SAM embeddings</strong>. The local tracker (SAMURAI) handles short-term mask propagation; the re-ID cache (MASA-style embeddings, computed at init from the masked crop) handles the global re-acquisition after a long occlusion ends. No published tracker does exactly this combination, it is one of the cleaner novelty corridors.</p>
+<p>I built a research-only validation of the OpenCLIP-patch-NN variant of this idea (“POC #05” in my own notebooks) and it works: R@1 of 1.00 on a small targeted benchmark. But empirically, <em>the bare SAMURAI memory bank handles the cases I expected to need re-ID for</em>. The re-ID layer in my own tracker stayed on the research bench as a contingency rather than shipping in the production pipeline. The lesson, generalized: <strong>measure the unextended baseline before designing the extension</strong>.</p>
+<h3 id="aerial--and-edge-specific-tracking-the-avtrack-thread">Aerial- and edge-specific tracking: the AVTrack thread<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#aerial--and-edge-specific-tracking-the-avtrack-thread" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The fifth family is the only one explicitly thinking about deployment on drone-class hardware. The shared mechanism: ViT-Tiny / DeiT-Tiny / EVA02-Tiny backbones, view-invariant pretraining or auxiliary losses, <em>adaptive token computation</em> (skip processing patches that look like background).</p>
+<p>The methods:</p>
+<ul>
+<li><strong><a href="https://github.com/wuyou3474/AVTrack" class="external">AVTrack<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (ICML 2024, MIT) is the original: ViT-Tiny with a view-invariance loss, adaptive token computation, real-time on CPU. State-of-the-art on UAV123, UAVDT, VisDrone, DTB70 within its weight class.</li>
+<li><strong>AVTrack-MD</strong> (TCSVT 2025, same repo) adds multi-distillation and pushes the aerial-benchmark numbers further.</li>
+</ul>
+<p>This family is the smallest in the survey for two reasons. First, the aerial domain is consistently 5-10 AUC behind general-purpose LaSOT for the same architecture, and most leaderboard-chasing work simply skips UAV evaluation. Second, edge-aware design has been mostly absent from CVPR-tier tracking work, the assumption is that someone else will handle the deployment layer, and “someone else” turns out to be the foundation-model deployment community (<a href="#6-edge-inference-reality" class="internal alias">§6 Edge inference reality</a>).</p>
+<p>The headline numbers from the aerial domain confirm both points: no UAV123 number from the SAMURAI authors despite SAMURAI being demonstrably the strongest zero-shot tracker; no AVTrack number on LaSOT despite AVTrack being demonstrably the only real-time-on-CPU contender. The two communities barely talk.</p>
+<h3 id="datasets-and-benchmarks">Datasets and benchmarks<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#datasets-and-benchmarks" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The shared evaluation tier is well-established and not controversial:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Tier</th><th>Datasets</th><th>Role</th></tr></thead><tbody><tr><td><strong>General-purpose long-term SOT</strong></td><td><a href="http://vision.cs.stonybrook.edu/~lasot/" class="external">LaSOT, LaSOT-ext<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></td><td>The de-facto leaderboard. Avg 83 s per clip. LaSOT-ext is the harder generalization split (150 sequences, 15 unseen classes).</td></tr><tr><td><strong>One-shot generalization</strong></td><td><a href="http://got-10k.aitestunion.com/" class="external">GOT-10k<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> (test, 180 clips)</td><td>Trained on <em>disjoint</em> classes from test. Catches overfitting to training-class appearance.</td></tr><tr><td><strong>Aerial / UAV</strong></td><td><a href="https://cemse.kaust.edu.sa/ivul/uav123" class="external">UAV123, UAV20L<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, <a href="https://sites.google.com/view/grli-uavdt" class="external">UAVDT<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, DTB70</td><td>Small targets, viewpoint changes, motion blur, motion-blur-from-vibration. UAV20L specifically is the long-term aerial split.</td></tr><tr><td><strong>Promptable VOS (mask)</strong></td><td><a href="https://davischallenge.org/" class="external">DAVIS 2017<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, <a href="https://youtube-vos.org/" class="external">YouTube-VOS<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, <a href="https://ai.meta.com/datasets/segment-anything-video/" class="external">SA-V<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> (Meta)</td><td>Where SAM 2 reports. Not a SOT leaderboard, but cross-applicable.</td></tr><tr><td><strong>Long-term re-acquisition</strong></td><td>OxUvA</td><td>6+ years old, rarely reported in modern work. The category-killer everyone agrees they should evaluate on and almost nobody does.</td></tr></tbody></table></div>
+<p>The novel benchmarks in my own work:</p>
+<ul>
+<li><strong>Isaac Sim aerial scenarios</strong> (~50-100 scripted clips with perfect ground truth <em>including during full occlusion</em>). Allows continuous re-acquisition latency / recall measurement, which is impossible in real-world data because nobody knows where the subject is when it is occluded.</li>
+<li><strong>Cinematic public-domain excerpts</strong> (20-40 short clips). Qualitative + consistency metrics. Tests cinematic motion, focus pulls, motion blur from drone vibration.</li>
+<li><strong>Real drone follow-cam</strong> (~20-30 curated clips with manual long-occlusion annotations). The hardest tier; comes online with hardware integration.</li>
+</ul>
+<p>The dataset gap that matters most: <strong>no academic benchmark measures re-acquisition latency on long out-of-view events</strong>. OxUvA is the closest, and almost nobody reports it. Every modern tracking paper that uses LaSOT effectively measures “did the tracker stay roughly on the subject” and ignores the “did the tracker honestly report when it had lost it” question. The lost-state honesty axis is missing entirely.</p>
+<h3 id="the-takeaway-from-2">The takeaway from §2<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-takeaway-from-2" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>Five families, one consolidating pattern. <strong>The architectural choices in trackers have stopped explaining most of the variance</strong>; backbone and training data dominate. The most consequential development of the last two years is <strong>promptable foundation models</strong> (SAM 2 → SAMURAI), which gets you a zero-shot SOTA tracker without training a tracker at all. The next research dividend is plausibly <strong>plug-in historical conditioning</strong> (HIPTrack style) and <strong>foundation-feature re-ID</strong> (MASA style), both of which compose with the foundation-tracker family rather than competing with it.</p>
+<p>The integration gap, the thing every paper above implicitly assumes someone else will solve, is what the next section is about.</p>
+<h2 id="3-industry-production-state">3. Industry production state<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#3-industry-production-state" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>The academic ontology above is mostly research-licensed, mostly workstation-tier, and largely absent from any drone you can buy in May 2026. Production tells a different story: two consolidated closed-source vendors with strong consumer tracking, an under-served open-source middle that is mostly inference scripts the authors explicitly warn against using in production, and a small but visible robotics-adjacent fork ecosystem. Where I can tell from outside, I tag each one with where it sits on the <a href="#academic-frontier" class="internal alias">academic ontology</a> above.</p>
+<h3 id="dji-activetrack-360">DJI ActiveTrack 360°<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#dji-activetrack-360" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p><a href="https://www.dji.com/" class="external">DJI ActiveTrack 360°<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> is the only commercial single-subject follow-cam tracker shipping on consumer drones in May 2026. DJI does not publish architecture details; what is observable from the outside is that it tracks reliably through short occlusions, recovers from medium ones, handles same-class distractors most of the time, and ships with a usable “select subject by tapping in the app” UX.</p>
+<p>Where it sits on the ontology is unknowable in detail, but the timing and the visible behaviour are consistent with a <strong>promptable mask-propagation</strong> core (the visible mask overlay in the app, the recovery from occlusion, the smoothness through partial occlusion) layered on top of a <strong>classical Kalman-filtered bbox</strong> for the autopilot interface. It is plausibly closer to the [[#Promptable foundation-model trackers: SAM \u2192 SAM 2 \u2192 SAMURAI \u2192 EfficientTAM|SAM 2 / SAMURAI family]] than to the <a href="#transformer-sot-trackers-the-one-stream-lineage" class="internal alias">template-search transformer family</a>, the failure-mode signature (graceful through occlusion, occasional mask-decoder hallucination when the subject is small) matches.</p>
+<blockquote class="callout note" data-callout="note">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>The takeaway </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>DJI ships the only consumer-grade long-term subject tracker on a drone. It is closed, and its existence is the reason anyone building an open-source equivalent has to be honest about the gap to “good enough for an end user”. The reference quality bar is well-defined; the recipe is not.</p>
+</div>
+</blockquote>
+<h3 id="skydio-and-the-consumer-cinematography-exit">Skydio (and the consumer-cinematography exit)<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#skydio-and-the-consumer-cinematography-exit" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p><a href="https://www.skydio.com/" class="external">Skydio<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> shipped the second-best consumer follow-cam tracker through 2023 (Skydio 2+, R1, R2 / X2). In <strong>August 2023, Skydio exited the consumer cinematography market entirely</strong>, pivoting to defense and public-safety platforms (X10D Asimov, August 2025). The consumer subject-tracking stack went with them.</p>
+<p>This exit is the most consequential industry event in the consumer-tracking landscape since DJI launched ActiveTrack. It left DJI as the only commercial player a cinematographer or amateur can buy. The current Skydio defense stack still does subject tracking, but behind an export-controlled API. The tracking quality from public-released defense footage is consistent with a continued generational lead over DJI in some failure modes (faster occlusion recovery, better small-target acquisition) but the recipe is permanently inaccessible.</p>
+<p>Where Skydio’s tracker sits on the ontology is similarly opaque. Their 2018-2022 publications (when they were more open) emphasized depth-from-stereo + classical SOT; modern signs (especially the smoothness on long occlusions) suggest a foundation-segmentation upgrade, but nothing is published.</p>
+<h3 id="open-source-robotics-adjacent">Open-source robotics-adjacent<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#open-source-robotics-adjacent" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The open-source ecosystem closest to long-term drone-tracking is currently three repositories deep:</p>
+<ul>
+<li><strong><a href="https://github.com/ammar-n-abbas/FoundationPoseROS2" class="external">FoundationPoseROS2<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (273 stars, last updated Oct 2025) wraps SAM 2 + FoundationPose for 6D pose estimation on robot manipulators. Algorithmically it composes SAM 2’s [[#Promptable foundation-model trackers: SAM \u2192 SAM 2 \u2192 SAMURAI \u2192 EfficientTAM|mask propagation]] with a per-frame pose head; ROS 2 plumbing is reusable for any SAM 2-based tracker. <strong>Not subject tracking, not aerial</strong>, but it is the closest existing demonstration of “foundation segmentation in a ROS 2 node”.</li>
+<li><strong><a href="https://github.com/leggedrobotics/segment-anything-2-tracking-ros-2" class="external">leggedrobotics/segment-anything-2-tracking-ros-2<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (6 stars, April 2025) is the closest spiritual neighbour: SAM 2 → ROS 2 image stream. Tiny, no drone control, no benchmark, no edge inference path. Confirms the gap rather than filling it.</li>
+<li><strong><a href="https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common" class="external">NVIDIA Isaac ROS<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> ships a <code>visual_global_localization</code> package and a <code>cuvslam</code> package, but <strong>no SOT tracker</strong>. The closest Isaac primitive to long-term subject tracking is image-based feature-map relocalization (<a href="#" class="internal alias">discussed in the V3 post</a>), which is a different problem.</li>
+</ul>
+<p>None of these three projects ships a streaming, real-time, edge-deployable, drone-targeted single-object tracker. The integration gap is real.</p>
+<h3 id="the-upstream-research-repos">The upstream research repos<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-upstream-research-repos" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The third tier of “open-source production” is the upstream research repos themselves. They are downloadable, often Apache-2.0, and explicitly warned against for production use:</p>
+<ul>
+<li><strong><a href="https://github.com/yangchris11/samurai" class="external">yangchris11/samurai<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (~7.1k stars). Inference scripts over LaSOT/GOT-10k folders. <strong>The FAQ explicitly says: no streaming, no webcam support, no library API.</strong> It is the dominant <em>reference</em> implementation but is not a deployable component.</li>
+<li><strong><a href="https://github.com/facebookresearch/sam2" class="external">facebookresearch/sam2<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (the upstream SAM 2). Ships a streaming <code>SAM2VideoPredictor</code> API but with the same caveat: built for offline VOS evaluation, no fixed-latency guarantees, MPS broken, no edge runtime.</li>
+<li><strong><a href="https://github.com/siyuanliii/masa" class="external">siyuanliii/masa<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (~1.4k stars). MMDetection configs, not an installable library.</li>
+<li><strong><a href="https://github.com/LitingLin/LoRAT" class="external">LitingLin/LoRAT<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (Apache-2.0). Training and evaluation scripts; the most permissively-licensed of the top-leaderboard methods, but again not a library.</li>
+</ul>
+<p>None of them is <code>pip install</code>-able as a tracker with a stable API. The integration work to wrap any of them in a streaming, multi-subject, state-machine-equipped contract is <em>every project’s homework</em>.</p>
+<h3 id="the-integration-gap-summarized">The integration gap, summarized<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-integration-gap-summarized" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>A reasonable diagnostic question: in May 2026, is there a single open-source tool that gives you “follow this subject, return bbox+state every frame, run at ≥30 FPS on a Jetson Orin”? The honest answer is <strong>no</strong>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Requirement</th><th>Where it lives today</th></tr></thead><tbody><tr><td>Mask propagation foundation model</td><td>SAM 2 / SAMURAI / EfficientTAM upstream, all research scripts</td></tr><tr><td>Streaming inference API</td><td>Nowhere open-source. Closest: <code>dxlcnm/segment-anything-2-real-time-onnx</code> (5 stars, ONNX only).</td></tr><tr><td>Explicit <code>lost</code> / <code>occluded</code> state</td><td>Nowhere open-source. SAMURAI silently tracks the wrong thing when it loses the subject.</td></tr><tr><td>Multi-subject orchestration (K=1..4)</td><td>Nowhere open-source. SAM 2 supports it internally; no library exposes it cleanly.</td></tr><tr><td>Edge runtime (TRT / CoreML / DSP)</td><td>Hand-rolled per project. <code>wp133716/samurai-tensorrt</code> is the closest, no published numbers.</td></tr><tr><td>ROS 2 integration</td><td><code>leggedrobotics/segment-anything-2-tracking-ros-2</code> (6 stars), nothing else.</td></tr><tr><td>Reproducible aerial benchmark</td><td>Nothing comparable to LaSOT but for drone follow-cam.</td></tr></tbody></table></div>
+<p>This is the gap <a href="https://github.com/egordm/kubrick" class="external">kubrick-tracking<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> and similar in-progress projects are trying to fill. The contribution is not algorithmic, the algorithm is decided (SAMURAI on EfficientTAM-Ti @ 512). The contribution is the <em>integration</em>, in the same shape that ROS / Open3D / llama.cpp are contributions: nobody publishes a paper on it, everyone needs it.</p>
+<blockquote class="callout warning" data-callout="warning">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Closed-source defense vendors </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>Palantir VNav, Shield AI, Anduril, Red Cat, and Honeywell all have visual-tracking components in some form. They are closed, accelerated by the Ukraine-Russia conflict, and outside the civilian-developer accessible set. Their existence affects the publication norms (a handful of CVPR 2025-2026 papers are released without weights citing dual-use concerns) but not the buildable open-source landscape.</p>
+</div>
+</blockquote>
+<h2 id="4-adjacent-fields-and-reusable-architecture">4. Adjacent fields and reusable architecture<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#4-adjacent-fields-and-reusable-architecture" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>Three adjacent fields cross-pollinate with long-term SOT and are worth knowing about:</p>
+<h3 id="multi-object-tracking-mot">Multi-object tracking (MOT)<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#multi-object-tracking-mot" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The MOT side of the wall (surveillance, traffic, marathon-finish-line, multi-pedestrian) has a different ontology (tracking-by-detection: a detector emits boxes every frame, an association layer links boxes across frames into tracks) and a different reference set (<a href="https://github.com/ifzhang/ByteTrack" class="external">ByteTrack<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, <a href="https://github.com/NirAharon/BoT-SORT" class="external">BoT-SORT<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, <a href="https://github.com/noahcao/OC_SORT" class="external">OC-SORT<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, <a href="https://github.com/vukasin-stanojevic/BoostTrack" class="external">BoostTrack<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>). The shared mechanism is <em>Kalman filtering on per-track state</em> + <em>Hungarian association</em>; deep learning enters as the appearance descriptor in some variants (StrongSORT, DeepSORT-PaddleDetection).</p>
+<p>The interesting cross-pollination is <strong><a href="https://github.com/siyuanliii/masa" class="external">MASA<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong> (<a href="#foundation-feature-re-id-instance-embeddings-from-large-pretrained-models" class="internal alias">§2 foundation-feature re-ID</a>), which sits at the boundary: it produces instance appearance embeddings learned from SAM-segmented unlabeled images, which is a re-ID head that any tracker (MOT or SOT) can use. MASA is the most direct evidence that MOT and SOT are converging at the appearance-descriptor layer.</p>
+<p>For an autonomous cinematography drone, MOT is the wrong tool: it solves a fundamentally different problem (assignment across many simultaneous detections). But for crowd-resilience evaluation in SOT, “can the tracker hold the right runner through a marathon crowd of 30”, the MOT benchmark and association ideas are reusable.</p>
+<h3 id="promptable-image-segmentation-without-video">Promptable image segmentation (without video)<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#promptable-image-segmentation-without-video" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The image-only SAM family is much larger than the video family:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Project</th><th>Stars</th><th>Image / Video</th><th>Notes</th></tr></thead><tbody><tr><td><strong><a href="https://github.com/ChaoningZhang/MobileSAM" class="external">MobileSAM<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong></td><td>5.8k</td><td>Image only</td><td>TinyViT 5M params. 12 ms/image GPU.</td></tr><tr><td><strong><a href="https://github.com/yformer/EfficientSAM" class="external">EfficientSAM<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong></td><td>2.5k</td><td>Image only</td><td>Predecessor to EfficientTAM.</td></tr><tr><td><strong><a href="https://github.com/NVIDIA-AI-IOT/nanosam" class="external">NanoSAM<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong></td><td>879</td><td>Image only</td><td>ResNet18-distilled MobileSAM. <strong>8 ms on Jetson Orin Nano FP16</strong>. mIoU 0.706.</td></tr><tr><td><strong><a href="https://github.com/czg1225/SlimSAM" class="external">SlimSAM<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong></td><td>358</td><td>Image only</td><td>SAM-v1 pruning + distillation. NeurIPS 2024.</td></tr><tr><td><strong><a href="https://github.com/CASIA-IVA-Lab/FastSAM" class="external">FastSAM<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></strong></td><td>,</td><td>Image only</td><td>YOLO-based. Lower SAM alignment than MobileSAM.</td></tr></tbody></table></div>
+<p><strong>Only EfficientTAM ships video-equivalent SAM in a smaller package.</strong> Everything else is image-only, which is structurally insufficient for tracking (no memory across frames, no mask propagation). The deployment recipes (TRT, CoreML, DSP) and the per-platform calibration patterns are reusable across image and video, but the model itself is not.</p>
+<p>The lesson: when reading “edge SAM” benchmarks, distinguish image vs video. NanoSAM’s 8 ms on Orin Nano FP16 is real but does not get you a tracker.</p>
+<h3 id="6d-pose-estimation-on-robots">6D pose estimation on robots<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#6d-pose-estimation-on-robots" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p><a href="https://github.com/NVlabs/FoundationPose" class="external">FoundationPose<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> and its derivatives (including <a href="https://github.com/ammar-n-abbas/FoundationPoseROS2" class="external">FoundationPoseROS2<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>) solve a different problem (6-DoF object pose from a depth+RGB stream, conditioned on a CAD model) but share substantial plumbing with SAM 2-based tracking: same memory-bank-style temporal smoothing, same ROS 2 wrapping patterns, same TRT-on-Orin deployment constraints. For a tracking library architect, FoundationPoseROS2 is the closest existing example of “foundation model + ROS 2 + Orin” in the open source ecosystem.</p>
+<h3 id="reusable-architecture">Reusable architecture<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#reusable-architecture" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The pieces of architecture that ought to be reusable across all of the above, and currently aren’t:</p>
+<ul>
+<li>A streaming <code>Frame</code> / <code>Track</code> / <code>Source</code> / <code>Sink</code> contract with calibrated confidence and explicit <code>state</code>.</li>
+<li>A foundation-model bundle format (the four-module ONNX split SAM 2 / SAMURAI / EfficientTAM all converge on: <code>image_encoder</code>, <code>memory_attention</code>, <code>mask_decoder</code>, <code>memory_encoder</code>).</li>
+<li>A per-platform precision policy (CUDA-MIXED-INT8, CoreML-MIXED-FP16, ORT-CPU-FP32, ORT-DML-FP16) with measured numerical tolerances rather than ad-hoc per-project tuning.</li>
+<li>A reproducible “long-occlusion recall” benchmark, ideally drawing on Isaac Sim’s perfect-GT-through-occlusion capability.</li>
+</ul>
+<p>None of these exist as standalone open-source artifacts today. The closest thing to all of them combined is the work I am doing in kubrick-tracking, but it is project-specific by design rather than a community standard.</p>
+<h2 id="5-the-standardized-engineering-layer">5. The standardized engineering layer<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#5-the-standardized-engineering-layer" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>The “boring layer” of long-term tracking, the parts that should be standardized across vendors so that an autopilot, a recorder, and a focus puller can interoperate, is mostly <em>un</em>standardized in May 2026.</p>
+<h3 id="what-is-standardized">What is standardized<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#what-is-standardized" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<ul>
+<li><strong>ROS 2 message types</strong> for <code>sensor_msgs/Image</code>, <code>geometry_msgs/Point</code>, <code>vision_msgs/BoundingBox2D</code> exist and are widely used. Subject tracking outputs land naturally as <code>vision_msgs/Detection2DArray</code> or <code>vision_msgs/ObjectHypothesisWithPose</code>, both of which are stable.</li>
+<li><strong>ONNX as a model interchange format</strong> is the de-facto standard for moving a trained PyTorch model into a non-Python runtime. The four-module SAM 2 split is a community convention; no formal standard.</li>
+<li><strong>OpenCV <code>Tracker</code> API</strong> is the legacy reference for the <em>single-tracker</em> surface. It is functionally dead (no foundation-model trackers expose it) but its shape (<code>init</code>, <code>update</code> → bbox) is the historical baseline against which modern APIs are designed.</li>
+</ul>
+<h3 id="what-is-not-standardized">What is not standardized<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#what-is-not-standardized" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<ul>
+<li><strong>The tracking-state vocabulary</strong>. There is no agreed-upon enum for <code>tracked</code> / <code>occluded</code> / <code>lost</code> / <code>reacquired</code>. Every project rolls its own (or, more commonly, lacks the concept entirely).</li>
+<li><strong>Calibrated confidence</strong>. “Confidence” in published trackers is usually a raw mask-logit max or an objectness score; whether it is calibrated against IoU is rarely tested.</li>
+<li><strong>Init prompt modality</strong>. SAM 2 accepts bbox / mask / clicks; SAMURAI accepts bbox only; LoRAT accepts bbox; AVTrack accepts bbox. Text-prompted init (via Grounding-DINO) is a separate research thread without a stable API.</li>
+<li><strong>Multi-subject orchestration</strong>. SAM 2 supports it internally; no API contract documents the K-subject cost model or the assignment behaviour. Pricing models for autonomous drone services that bill per-subject have no reference implementation to point at.</li>
+</ul>
+<h3 id="what-about-a-safety-standard">What about a safety standard?<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#what-about-a-safety-standard" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>There is no equivalent of <a href="https://en.wikipedia.org/wiki/DO-178C" class="external">DO-178C<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> (avionics software) or <a href="https://en.wikipedia.org/wiki/ISO_26262" class="external">ISO 26262<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> (automotive functional safety) for foundation-model trackers. The closest thing is the <em>ML systems</em> discussion in <a href="https://en.wikipedia.org/wiki/ISO_21448" class="external">ISO 21448 SOTIF<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> (Safety Of The Intended Functionality), which is aimed at automotive ADAS and applies only by analogy. For consumer drones flying around people, the answer for the moment is liability + insurance, not certification.</p>
+<p>This is mostly a feature, not a bug, for a research-and-shipping project: the rules are loose enough to ship. It does mean that “honest failure states” is <em>the</em> differentiator from a safety perspective, even without a formal standard to gate on.</p>
+<h2 id="6-edge-inference-reality">6. Edge inference reality<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#6-edge-inference-reality" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>The deployment numbers are where the gap between academic claims and shipped product is widest. The reference fact, baselined by <a href="https://github.com/tier4/sam2_trt_inference" class="external"><code>tier4/sam2_trt_inference</code><svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> on the closest published benchmark:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Hardware</th><th>Precision</th><th>Encoder ms</th><th>Decoder ms</th><th>Post ms</th><th>Total ms (image, 94 bboxes)</th></tr></thead><tbody><tr><td>L40s</td><td>FP32</td><td>45</td><td>83</td><td>15</td><td>168</td></tr><tr><td>L40s</td><td>FP16</td><td>23</td><td>63</td><td>13</td><td>123</td></tr><tr><td>RTX 3070 Ti</td><td>FP16</td><td>60</td><td>276</td><td>46</td><td>414</td></tr><tr><td><strong>Jetson Orin AGX</strong></td><td><strong>FP16</strong></td><td><strong>135</strong></td><td><strong>308</strong></td><td><strong>93</strong></td><td><strong>611</strong></td></tr></tbody></table></div>
+<p>These are image-segmentation numbers (no video memory, 94 bboxes per image). The single-bbox single-frame video case is faster (encoder dominates at ~135 ms + ~5 ms decoder ≈ <strong>140 ms on Orin FP16</strong> for SAM 2 base_plus), but that is still 4× over the realistic 33 ms / 30 FPS target. <strong>Encoder dominates.</strong></p>
+<h3 id="what-fits-what-doesnt">What fits, what doesn’t<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#what-fits-what-doesnt" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The path from 140 ms to 33 ms on Orin is not a single optimization, it is a stack:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Lever</th><th style="text-align:right;">Estimated gain</th><th>Effort</th><th>Risk</th></tr></thead><tbody><tr><td><strong>EfficientTAM swap</strong> (Hiera-Tiny → plain-ViT-Tiny)</td><td style="text-align:right;">1.6×</td><td>medium</td><td>accuracy may not hold under SAMURAI’s motion-aware memory</td></tr><tr><td><strong>Resolution reduction</strong> (1024 → 512)</td><td style="text-align:right;">2-3×</td><td>low</td><td>small accuracy hit, well-characterized</td></tr><tr><td><strong>MIXED-INT8 / FP16 quantization</strong></td><td style="text-align:right;">1.5-2×</td><td>high</td><td>calibration sensitivity per-module</td></tr><tr><td><strong>Skip mask-logits upsample</strong></td><td style="text-align:right;">1.5-2×</td><td>low</td><td>downstream API change</td></tr><tr><td><strong>TensorRT (vs ORT CUDA)</strong></td><td style="text-align:right;">1.3-2×</td><td>medium</td><td>engine-cache cold-start complexity</td></tr><tr><td><strong>Pipelining across stages</strong></td><td style="text-align:right;">1.2-1.5×</td><td>medium</td><td>jitter in p99</td></tr></tbody></table></div>
+<p>Stacked, the realistic budget reaches <strong>20-40 ms per frame on Orin AGX</strong> for SAMURAI on EfficientTAM-Ti @ 512. Measured numbers from my own work (full TensorRT chained runtime on RTX 4090):</p>
+<ul>
+<li><strong>MIXED-INT8</strong>: 9.7 ms / 103 FPS / mIoU 0.98 on RTX 4090.</li>
+<li><strong>FP16</strong>: 9.15 ms / 109 FPS / mIoU 0.99 on RTX 4090.</li>
+<li><strong>Orin AGX projection</strong> (RTX 4090 × INT8:FP16 ratio + measured Orin Hiera-Tiny encoder time): ~30-35 ms / 28-33 FPS at MIXED-INT8.</li>
+</ul>
+<p>These numbers are the spine of <a href="../blog/2026-05-16-optimizing-samurai-part-1" class="internal alias" data-slug="blog/2026-05-16-optimizing-samurai-part-1">the Optimizing SAMURAI series</a> (parts 1-3, May 2026). Part 1 covers the ONNX export saga; part 2 covers TensorRT, the FP16 softmax catastrophe, and the chained runtime; part 3 covers the Apple Silicon CoreML path. The numbers above are the consequence; the work to get there is in those three posts.</p>
+<blockquote class="callout info" data-callout="info">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>A realistic deployment timeline </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>The path from “SAM 2 / SAMURAI exists upstream” to “real-time on Orin” is roughly 4-8 weeks of focused integration work for one engineer who knows the area. Most of that time is not on the model, it is on the ONNX export (which the upstream code is not export-friendly), the precision calibration (per-module, with different sensitivities), the engine-cache strategy (engines are JetPack-version-pinned), and the streaming inference loop. The model itself is solved.</p>
+</div>
+</blockquote>
+<h3 id="foundation-feature-re-id-on-the-edge-the-work-in-progress">Foundation-feature re-ID on the edge: the work-in-progress<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#foundation-feature-re-id-on-the-edge-the-work-in-progress" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The re-ID lever from <a href="#foundation-feature-re-id-instance-embeddings-from-large-pretrained-models" class="internal alias">§2 foundation-feature re-ID</a> is more expensive than the base tracker on edge. OpenCLIP ViT-B-16 on MPS runs ~17 ms per crop; on Orin AGX FP16 it is ~10 ms. For a tracker already running at 30 ms, adding 10 ms per <code>lost</code> event is acceptable; doing it every frame is not. The right architecture is <strong>trigger re-ID only when <code>state == lost</code></strong>, not on every frame. The contention is whether the re-ID lever is needed at all, since SAMURAI alone appears to handle the long-occlusion cases in practice, but the deployment plumbing has to be ready in case wider evaluation says otherwise.</p>
+<h3 id="numerical-precision-a-real-gotcha-on-orin">Numerical precision: a real gotcha on Orin<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#numerical-precision-a-real-gotcha-on-orin" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>A subtle issue specific to TensorRT 10.x on Jetson: pure INT8 quantization of the SAM 2 image_encoder fails on TRT 10.16 because of a fusion-engine constraint (a fused FP16 overflow site that cannot be constrained per-layer). MIXED-INT8, where most of the encoder is INT8 but specific layers stay FP16, works and is what I ship. The diagnostic experience is unpleasant: pure INT8 builds successfully and produces visibly wrong masks at certain resolutions. This is the kind of failure mode that does not appear in published benchmarks and is the reason <a href="../blog/2026-05-17-optimizing-samurai-part-2" class="internal alias" data-slug="blog/2026-05-17-optimizing-samurai-part-2">part 2 of the Optimizing SAMURAI series</a> spends a full section on FP16-softmax overflow.</p>
+<h2 id="7-discussion">7. Discussion<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#7-discussion" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>Three observations from across the survey:</p>
+<p><strong>The algorithm is solved; the integration is wide open.</strong> The dominant pattern across <a href="#2-academic-frontier" class="internal alias">§2</a> is that backbone-and-data dominates architecture-and-recipe at the top of the leaderboard. The most consequential 2024-2025 development is a <em>zero-shot</em> Kalman wrapper on top of SAM 2 (SAMURAI) that beats most supervised methods on LaSOT-ext. Meanwhile <a href="#3-industry-production-state" class="internal alias">§3</a> shows that nobody open-source has shipped a streaming, edge-deployable, multi-subject, state-machine-equipped tracker. The contribution that is <em>most</em> needed and <em>least</em> incentivized, the integration in the same shape as ROS, Open3D, llama.cpp, is the missing layer.</p>
+<p><strong>The benchmarks are pointing in the wrong direction.</strong> LaSOT measures “did the tracker stay roughly on the subject”; it does not penalize a tracker for silently following the wrong subject after the real one is occluded. None of the standard benchmarks measure the <em>honesty</em> of the lost-state signal that any downstream consumer actually needs. Building those benchmarks (Isaac Sim with perfect occlusion ground truth, real drone follow-cam with manual long-occlusion annotation) is not glamorous but it is what would change the field’s incentives.</p>
+<p><strong>Foundation models keep paying surprising dividends.</strong> SAMURAI is the headline (Kalman gating on the existing memory bank, +7.1 AUC on LaSOT-ext with zero training). The empirical surprise from my own POCs, that the bare SAMURAI memory bank handles long out-of-view and same-class distractors without an external re-ID head, points the same direction: the SAM 2 memory bank has latent capacity that was not designed for, and the right research moves are the ones that <em>probe</em> that capacity rather than wrapping it in additional machinery.</p>
+<h3 id="recommended-starting-set">Recommended starting set<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#recommended-starting-set" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>If you are starting work in this area in May 2026, the cheapest path to a useful baseline is:</p>
+<ol>
+<li><strong>Read SAMURAI first</strong> (<a href="https://arxiv.org/abs/2411.11922" class="external">arXiv 2411.11922<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>). It is the most consequential paper in the space and the cleanest entry point to the SAM 2 family.</li>
+<li><strong>Run the upstream SAMURAI repo on a clip you care about</strong>. Verify the failure modes match what the paper claims. Render frame 0 with the init bbox overlaid as a PNG before trusting any tracker output; the silent failure mode of “tracked a different subject from the start” is the most expensive in this domain.</li>
+<li><strong>Profile before optimizing</strong>. Use a per-op PyTorch profiler to find the real bottlenecks; you will be surprised.</li>
+<li><strong>For deployment: search <a href="https://github.com/vietanhdev/samexporter" class="external">samexporter<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> and <a href="https://github.com/wp133716/samurai-tensorrt" class="external">wp133716/samurai-tensorrt<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> before writing your own ONNX export</strong>. Both are partial but get you most of the way.</li>
+<li><strong>For aerial-specific work, read AVTrack-MD</strong> (<a href="https://arxiv.org/pdf/2412.20002" class="external">arXiv 2412.20002<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>) for the only published real-time-on-CPU aerial SOT recipe, and treat it as the lower-bound baseline.</li>
+<li><strong>For re-ID, treat it as a contingency, not a default</strong>. SAMURAI alone handles more of the long-occlusion problem than the published architecture suggests; do not design a re-ID layer into your production interface until your measurements say you need one.</li>
+</ol>
+<h3 id="where-the-gap-will-be-filled">Where the gap will be filled<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#where-the-gap-will-be-filled" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The integration gap will close in one of three ways. NVIDIA Isaac ROS could ship a <code>sam2_tracker</code> package (currently absent across all 65 NVIDIA-ISAAC-ROS repos in May 2026, but plausible by end of 2026). A consumer drone vendor that lost the closed-source race could open-source a tracker as a positioning move (most plausible candidate: a defense vendor releasing a sanitised civilian version). A community project (like <a href="https://github.com/egordm/kubrick" class="external">kubrick-tracking<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> or similar) could hit critical mass.</p>
+<p>The most likely outcome is some combination of the three, with no single dominant project, much like the early ROS days. The integration is hard enough and the audience is small enough that the field will not consolidate around one library; it will consolidate around a <em>set of conventions</em> (the four-module ONNX split, the streaming <code>Frame</code> / <code>TrackedSubject</code> contract, the per-platform precision policy) and then leave the libraries plural.</p>
+<p>My own integration bet lives at <a href="https://github.com/egordm/kubrick" class="external">kubrick-tracking<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>; the design and deployment story will surface in subsequent posts and the repo itself. The bet, in one line: the field’s center of gravity will shift from “publish another +1 AUC on LaSOT” to “ship something a drone autopilot can actually consume”, and the dominant artifacts will be libraries and benchmarks rather than papers.</p>
+<h2 id="references">References<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#references" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>The reading list for the survey, in priority order:</p>
+<ol>
+<li><strong>SAMURAI</strong>, Liu et al., <a href="https://arxiv.org/abs/2411.11922" class="external">arXiv 2411.11922<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> · <a href="https://github.com/yangchris11/samurai" class="external">code<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>. The single most consequential 2024 paper.</li>
+<li><strong>SAM 2</strong>, Ravi et al., <a href="https://arxiv.org/abs/2408.00714" class="external">arXiv 2408.00714<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> · <a href="https://github.com/facebookresearch/sam2" class="external">code<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>. The substrate.</li>
+<li><strong>EfficientTAM</strong>, Xiong et al., <a href="https://arxiv.org/abs/2411.18933" class="external">arXiv 2411.18933<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> · <a href="https://github.com/yformer/EfficientTAM" class="external">code<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>. The deployable backbone.</li>
+<li><strong>LoRAT</strong>, Lin et al., ECCV 2024, <a href="https://arxiv.org/abs/2403.05231" class="external">arXiv 2403.05231<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> · <a href="https://github.com/LitingLin/LoRAT" class="external">code<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>. DINOv2-as-backbone recipe.</li>
+<li><strong>SUTrack</strong>, Chen et al., AAAI 2025, <a href="https://arxiv.org/abs/2412.19138" class="external">arXiv 2412.19138<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> · <a href="https://github.com/chenxin-dlut/SUTrack" class="external">code<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>. Current LaSOT leader.</li>
+<li><strong>MASA</strong>, Li et al., CVPR 2024 Highlight, <a href="https://arxiv.org/abs/2406.04221" class="external">arXiv 2406.04221<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> · <a href="https://github.com/siyuanliii/masa" class="external">code<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>. Foundation-feature re-ID.</li>
+<li><strong>AVTrack / AVTrack-MD</strong>, Wu et al., ICML 2024 + TCSVT 2025, <a href="https://github.com/wuyou3474/AVTrack" class="external">code<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>. Only real-time-on-CPU aerial SOT.</li>
+<li><strong>HIPTrack</strong>, Cai et al., CVPR 2024, <a href="https://arxiv.org/abs/2311.02072" class="external">arXiv 2311.02072<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> · <a href="https://github.com/WenRuiCai/HIPTrack" class="external">code<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>. Best clean illustration that historical prompts > template updates.</li>
+<li><strong>ODTrack</strong>, Zheng et al., AAAI 2024, <a href="https://arxiv.org/abs/2401.01686" class="external">arXiv 2401.01686<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> · <a href="https://github.com/GXNU-ZhongLab/ODTrack" class="external">code<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>. Video-level token propagation.</li>
+<li><strong>DINOv2</strong>, Oquab et al., <a href="https://arxiv.org/abs/2304.07193" class="external">arXiv 2304.07193<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> · <a href="https://github.com/facebookresearch/dinov2" class="external">code<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>. The foundation backbone.</li>
+</ol>
+<p>Companion posts in this series:</p>
+<ul>
+<li><a href="../blog/2026-05-23-drone-to-satellite-localization-2026" class="internal alias" data-slug="blog/2026-05-23-drone-to-satellite-localization-2026">V3, Drone-to-satellite visual geo-localization</a>: the “where am I in world coordinates” half of the autonomous drone perception stack.</li>
+<li><a href="../blog/2026-05-24-vio-drones-2026" class="internal alias" data-slug="blog/2026-05-24-vio-drones-2026">V2, VIO for drones</a>: the “where am I relative to a few seconds ago” half. SAMURAI’s Kalman gating is conceptually related to the IMU-coupled filtering in VIO; the <a href="../blog/2026-05-24-vio-drones-2026#classical-vio-families-the-baseline-being-displaced" class="internal alias" data-slug="blog/2026-05-24-vio-drones-2026">sliding-window BA family</a> is the same intellectual lineage applied to a different sensor.</li>
+<li><a href="../blog/2026-05-16-optimizing-samurai-part-1" class="internal alias" data-slug="blog/2026-05-16-optimizing-samurai-part-1">Optimizing SAMURAI part 1, From research checkpoint to ONNX Runtime</a>: the deployment story for the SAM 2 / SAMURAI family. Three parts ending May 18.</li>
+</ul></article><hr/><div class="page-footer"><nav class="prev-next-nav"><div class="prev-next-links"><div class="nav-link nav-prev"><a href="/blog/2026-05-24-vio-drones-2026" rel="prev"><span class="nav-direction">← Older</span><span class="nav-title">Visual-Inertial Odometry for Drones: State of the Art, Foundation-3D, and the cuVSLAM Squeeze in 2026</span></a></div><div class="nav-link nav-next"><a href="/blog/2026-07-12-did-your-agent-actually-read-that-file" rel="next"><span class="nav-direction">Newer →</span><span class="nav-title">Did Your Agent Actually Read That File?</span></a></div></div></nav></div></div><div class="right sidebar"><div class="toc desktop-only"><button type="button" class="toc-header" aria-controls="toc-20" aria-expanded="true"><h3>Table of Contents</h3><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="fold"><polyline points="6 9 12 15 18 9"></polyline></svg></button><ul id="list-0" class="toc-content overflow"><li class="depth-0"><a href="#1-the-problem-and-the-canonical-pipeline" data-for="1-the-problem-and-the-canonical-pipeline">1. The problem and the canonical pipeline</a></li><li class="depth-0"><a href="#2-academic-frontier" data-for="2-academic-frontier">2. Academic frontier</a></li><li class="depth-1"><a href="#transformer-sot-trackers-the-one-stream-lineage" data-for="transformer-sot-trackers-the-one-stream-lineage">Transformer SOT trackers: the one-stream lineage</a></li><li class="depth-1"><a href="#temporal-token-propagation-escaping-the-pair-wise-paradigm" data-for="temporal-token-propagation-escaping-the-pair-wise-paradigm">Temporal token propagation: escaping the pair-wise paradigm</a></li><li class="depth-1"><a href="#promptable-foundation-model-trackers-sam--sam-2--samurai--efficienttam" data-for="promptable-foundation-model-trackers-sam--sam-2--samurai--efficienttam">Promptable foundation-model trackers: SAM → SAM 2 → SAMURAI → EfficientTAM</a></li><li class="depth-1"><a href="#foundation-feature-re-id-instance-embeddings-from-large-pretrained-models" data-for="foundation-feature-re-id-instance-embeddings-from-large-pretrained-models">Foundation-feature re-ID: instance embeddings from large pretrained models</a></li><li class="depth-1"><a href="#aerial--and-edge-specific-tracking-the-avtrack-thread" data-for="aerial--and-edge-specific-tracking-the-avtrack-thread">Aerial- and edge-specific tracking: the AVTrack thread</a></li><li class="depth-1"><a href="#datasets-and-benchmarks" data-for="datasets-and-benchmarks">Datasets and benchmarks</a></li><li class="depth-1"><a href="#the-takeaway-from-2" data-for="the-takeaway-from-2">The takeaway from §2</a></li><li class="depth-0"><a href="#3-industry-production-state" data-for="3-industry-production-state">3. Industry production state</a></li><li class="depth-1"><a href="#dji-activetrack-360" data-for="dji-activetrack-360">DJI ActiveTrack 360°</a></li><li class="depth-1"><a href="#skydio-and-the-consumer-cinematography-exit" data-for="skydio-and-the-consumer-cinematography-exit">Skydio (and the consumer-cinematography exit)</a></li><li class="depth-1"><a href="#open-source-robotics-adjacent" data-for="open-source-robotics-adjacent">Open-source robotics-adjacent</a></li><li class="depth-1"><a href="#the-upstream-research-repos" data-for="the-upstream-research-repos">The upstream research repos</a></li><li class="depth-1"><a href="#the-integration-gap-summarized" data-for="the-integration-gap-summarized">The integration gap, summarized</a></li><li class="depth-0"><a href="#4-adjacent-fields-and-reusable-architecture" data-for="4-adjacent-fields-and-reusable-architecture">4. Adjacent fields and reusable architecture</a></li><li class="depth-1"><a href="#multi-object-tracking-mot" data-for="multi-object-tracking-mot">Multi-object tracking (MOT)</a></li><li class="depth-1"><a href="#promptable-image-segmentation-without-video" data-for="promptable-image-segmentation-without-video">Promptable image segmentation (without video)</a></li><li class="depth-1"><a href="#6d-pose-estimation-on-robots" data-for="6d-pose-estimation-on-robots">6D pose estimation on robots</a></li><li class="depth-1"><a href="#reusable-architecture" data-for="reusable-architecture">Reusable architecture</a></li><li class="depth-0"><a href="#5-the-standardized-engineering-layer" data-for="5-the-standardized-engineering-layer">5. The standardized engineering layer</a></li><li class="depth-1"><a href="#what-is-standardized" data-for="what-is-standardized">What is standardized</a></li><li class="depth-1"><a href="#what-is-not-standardized" data-for="what-is-not-standardized">What is not standardized</a></li><li class="depth-1"><a href="#what-about-a-safety-standard" data-for="what-about-a-safety-standard">What about a safety standard?</a></li><li class="depth-0"><a href="#6-edge-inference-reality" data-for="6-edge-inference-reality">6. Edge inference reality</a></li><li class="depth-1"><a href="#what-fits-what-doesnt" data-for="what-fits-what-doesnt">What fits, what doesn’t</a></li><li class="depth-1"><a href="#foundation-feature-re-id-on-the-edge-the-work-in-progress" data-for="foundation-feature-re-id-on-the-edge-the-work-in-progress">Foundation-feature re-ID on the edge: the work-in-progress</a></li><li class="depth-1"><a href="#numerical-precision-a-real-gotcha-on-orin" data-for="numerical-precision-a-real-gotcha-on-orin">Numerical precision: a real gotcha on Orin</a></li><li class="depth-0"><a href="#7-discussion" data-for="7-discussion">7. Discussion</a></li><li class="depth-1"><a href="#recommended-starting-set" data-for="recommended-starting-set">Recommended starting set</a></li><li class="depth-1"><a href="#where-the-gap-will-be-filled" data-for="where-the-gap-will-be-filled">Where the gap will be filled</a></li><li class="depth-0"><a href="#references" data-for="references">References</a></li><li class="overflow-end"></li></ul></div></div><footer class><ul><li><a href="https://github.com/egordm/">GitHub</a></li><li><a href="https://www.linkedin.com/in/egor-dmitriev/">LinkedIn</a></li><li><a href="/index.xml">RSS Feed</a></li></ul></footer></div></div></body><script type="application/javascript" data-persist="true">function n(){let t=this.parentElement;t.classList.toggle("is-collapsed");let e=t.getElementsByClassName("callout-content")[0];if(!e)return;let l=t.classList.contains("is-collapsed");e.style.gridTemplateRows=l?"0fr":"1fr"}function c(){let t=document.getElementsByClassName("callout is-collapsible");for(let e of t){let l=e.getElementsByClassName("callout-title")[0],s=e.getElementsByClassName("callout-content")[0];if(!l||!s)continue;l.addEventListener("click",n),window.addCleanup(()=>l.removeEventListener("click",n));let o=e.classList.contains("is-collapsed");s.style.gridTemplateRows=o?"0fr":"1fr"}}document.addEventListener("nav",c);
+</script><script type="module" data-persist="true">function E(a,e){if(!a)return;function t(o){o.target===this&&(o.preventDefault(),o.stopPropagation(),e())}function n(o){o.key.startsWith("Esc")&&(o.preventDefault(),e())}a?.addEventListener("click",t),window.addCleanup(()=>a?.removeEventListener("click",t)),document.addEventListener("keydown",n),window.addCleanup(()=>document.removeEventListener("keydown",n))}function f(a){for(;a.firstChild;)a.removeChild(a.firstChild)}var m=class{constructor(e,t){this.container=e;this.content=t;this.setupEventListeners(),this.setupNavigationControls(),this.resetTransform()}isDragging=!1;startPan={x:0,y:0};currentPan={x:0,y:0};scale=1;MIN_SCALE=.5;MAX_SCALE=3;cleanups=[];setupEventListeners(){let e=this.onMouseDown.bind(this),t=this.onMouseMove.bind(this),n=this.onMouseUp.bind(this),o=this.onTouchStart.bind(this),r=this.onTouchMove.bind(this),i=this.onTouchEnd.bind(this),s=this.resetTransform.bind(this);this.container.addEventListener("mousedown",e),document.addEventListener("mousemove",t),document.addEventListener("mouseup",n),this.container.addEventListener("touchstart",o,{passive:!1}),document.addEventListener("touchmove",r,{passive:!1}),document.addEventListener("touchend",i),window.addEventListener("resize",s),this.cleanups.push(()=>this.container.removeEventListener("mousedown",e),()=>document.removeEventListener("mousemove",t),()=>document.removeEventListener("mouseup",n),()=>this.container.removeEventListener("touchstart",o),()=>document.removeEventListener("touchmove",r),()=>document.removeEventListener("touchend",i),()=>window.removeEventListener("resize",s))}cleanup(){for(let e of this.cleanups)e()}setupNavigationControls(){let e=document.createElement("div");e.className="mermaid-controls";let t=this.createButton("+",()=>this.zoom(.1)),n=this.createButton("-",()=>this.zoom(-.1)),o=this.createButton("Reset",()=>this.resetTransform());e.appendChild(n),e.appendChild(o),e.appendChild(t),this.container.appendChild(e)}createButton(e,t){let n=document.createElement("button");return n.textContent=e,n.className="mermaid-control-button",n.addEventListener("click",t),window.addCleanup(()=>n.removeEventListener("click",t)),n}onMouseDown(e){e.button===0&&(this.isDragging=!0,this.startPan={x:e.clientX-this.currentPan.x,y:e.clientY-this.currentPan.y},this.container.style.cursor="grabbing")}onMouseMove(e){this.isDragging&&(e.preventDefault(),this.currentPan={x:e.clientX-this.startPan.x,y:e.clientY-this.startPan.y},this.updateTransform())}onMouseUp(){this.isDragging=!1,this.container.style.cursor="grab"}onTouchStart(e){if(e.touches.length!==1)return;this.isDragging=!0;let t=e.touches[0];this.startPan={x:t.clientX-this.currentPan.x,y:t.clientY-this.currentPan.y}}onTouchMove(e){if(!this.isDragging||e.touches.length!==1)return;e.preventDefault();let t=e.touches[0];this.currentPan={x:t.clientX-this.startPan.x,y:t.clientY-this.startPan.y},this.updateTransform()}onTouchEnd(){this.isDragging=!1}zoom(e){let t=Math.min(Math.max(this.scale+e,this.MIN_SCALE),this.MAX_SCALE),n=this.content.getBoundingClientRect(),o=n.width/2,r=n.height/2,i=t-this.scale;this.currentPan.x-=o*i,this.currentPan.y-=r*i,this.scale=t,this.updateTransform()}updateTransform(){this.content.style.transform=`translate(${this.currentPan.x}px, ${this.currentPan.y}px) scale(${this.scale})`}resetTransform(){let t=this.content.querySelector("svg").getBoundingClientRect(),n=t.width/this.scale,o=t.height/this.scale;this.scale=1,this.currentPan={x:(this.container.clientWidth-n)/2,y:(this.container.clientHeight-o)/2},this.updateTransform()}},T=["--secondary","--tertiary","--gray","--light","--lightgray","--highlight","--dark","--darkgray","--codeFont"],y;document.addEventListener("nav",async()=>{let e=document.querySelector(".center").querySelectorAll("code.mermaid");if(e.length===0)return;y||=await import("https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.4.0/mermaid.esm.min.mjs");let t=y.default,n=new WeakMap;for(let r of e)n.set(r,r.innerText);async function o(){for(let s of e){s.removeAttribute("data-processed");let c=n.get(s);c&&(s.innerHTML=c)}let r=T.reduce((s,c)=>(s[c]=window.getComputedStyle(document.documentElement).getPropertyValue(c),s),{}),i=document.documentElement.getAttribute("saved-theme")==="dark";t.initialize({startOnLoad:!1,securityLevel:"loose",theme:i?"dark":"base",themeVariables:{fontFamily:r["--codeFont"],primaryColor:r["--light"],primaryTextColor:r["--darkgray"],primaryBorderColor:r["--tertiary"],lineColor:r["--darkgray"],secondaryColor:r["--secondary"],tertiaryColor:r["--tertiary"],clusterBkg:r["--light"],edgeLabelBackground:r["--highlight"]}}),await t.run({nodes:e})}await o(),document.addEventListener("themechange",o),window.addCleanup(()=>document.removeEventListener("themechange",o));for(let r=0;r<e.length;r++){let v=function(){let g=l.querySelector("#mermaid-space"),h=l.querySelector(".mermaid-content");if(!h)return;f(h);let w=i.querySelector("svg").cloneNode(!0);h.appendChild(w),l.classList.add("active"),g.style.cursor="grab",u=new m(g,h)},M=function(){l.classList.remove("active"),u?.cleanup(),u=null},i=e[r],s=i.parentElement,c=s.querySelector(".clipboard-button"),d=s.querySelector(".expand-button"),p=window.getComputedStyle(c),L=c.offsetWidth+parseFloat(p.marginLeft||"0")+parseFloat(p.marginRight||"0");d.style.right=`calc(${L}px + 0.3rem)`,s.prepend(d);let l=s.querySelector("#mermaid-container");if(!l)return;let u=null;d.addEventListener("click",v),E(l,M),window.addCleanup(()=>{u?.cleanup(),d.removeEventListener("click",v)})}});
+</script><script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/copy-tex.min.js" type="application/javascript" data-persist="true"></script><script src="../postscript.js" type="module" data-persist="true"></script></html>

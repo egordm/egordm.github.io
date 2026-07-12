@@ -1,4 +1,7 @@
 User-agent: *
-Disallow:
+Disallow: /BOLD/
+Disallow: /BOLDER/
+Disallow: /notionsci/
 Allow: /
+
 Sitemap: https://egordmitriev.dev/sitemap.xml

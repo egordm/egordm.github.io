@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1C1C1C;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            font-family: 'Inter', -apple-system, sans-serif;
+            color: #ECECEC;
+        }
+
+        h1 {
+            font-size: 14px;
+            font-weight: 400;
+            color: #969696;
+            margin-bottom: 20px;
+        }
+
+        .preview-container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        object,
+        img {
+            width: 100%;
+            height: auto;
+        }
+
+        .file-list {
+            margin-top: 40px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .file-list a {
+            color: #3182BD;
+            text-decoration: none;
+            padding: 8px 16px;
+            border: 1px solid #3182BD;
+            border-radius: 6px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .file-list a:hover {
+            background: rgba(49, 130, 189, 0.15);
+        }
+
+        .file-list a.active {
+            background: #3182BD;
+            color: #1C1C1C;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Blog Visualization Preview</h1>
+
+    <div class="preview-container">
+        <object id="preview" type="image/svg+xml" data="decision_tree.svg">
+            Your browser doesn't support SVG
+        </object>
+    </div>
+
+    <div class="file-list">
+        <a href="?file=decision_tree.svg" class="active">Decision Tree</a>
+        <a href="?file=split_gain.svg">Split Gain</a>
+        <!-- Add more as needed -->
+    </div>
+
+    <script>
+        // Load SVG from query param
+        const params = new URLSearchParams(window.location.search);
+        const file = params.get('file') || 'decision_tree.svg';
+        document.getElementById('preview').data = file;
+
+        // Update active link
+        document.querySelectorAll('.file-list a').forEach(a => {
+            const href = new URL(a.href).searchParams.get('file');
+            a.classList.toggle('active', href === file || (!href && file === 'decision_tree.svg'));
+        });
+    </script>
+</body>
+
+</html>

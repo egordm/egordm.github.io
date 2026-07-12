@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr"><head><title>Exclusive Feature Bundling and Categorical Features | egordmitriev.dev</title><meta charset="utf-8"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Inter:ital,wght@0,400;0,600;1,400;1,600&amp;family=JetBrains Mono:wght@400;600&amp;display=swap"/><link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin="anonymous"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="alternate" type="application/rss+xml" title="Egor Dmitriev" href="https://egordmitriev.dev/index.xml"/><meta name="og:site_name" content="Egor Dmitriev"/><meta property="og:title" content="Exclusive Feature Bundling and Categorical Features | egordmitriev.dev"/><meta property="og:type" content="article"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="Exclusive Feature Bundling and Categorical Features | egordmitriev.dev"/><meta name="twitter:description" content="How LightGBM bundles sparse features to reduce memory 25×, and how both libraries handle categorical data without one-hot encoding."/><meta property="og:description" content="How LightGBM bundles sparse features to reduce memory 25×, and how both libraries handle categorical data without one-hot encoding."/><meta property="og:image:alt" content="How LightGBM bundles sparse features to reduce memory 25×, and how both libraries handle categorical data without one-hot encoding."/><meta property="og:image" content="https://egordmitriev.dev/static/og-image.png"/><meta property="og:image:url" content="https://egordmitriev.dev/static/og-image.png"/><meta name="twitter:image" content="https://egordmitriev.dev/static/og-image.png"/><meta property="og:image:type" content="image/.png"/><meta property="twitter:domain" content="egordmitriev.dev"/><meta property="og:url" content="https://egordmitriev.dev/blog/2026-01-18-efb-and-categorical-features"/><meta property="twitter:url" content="https://egordmitriev.dev/blog/2026-01-18-efb-and-categorical-features"/><link rel="canonical" href="https://egordmitriev.dev/blog/2026-01-18-efb-and-categorical-features"/><link rel="icon" href="../static/icon.png"/><meta name="description" content="How LightGBM bundles sparse features to reduce memory 25×, and how both libraries handle categorical data without one-hot encoding."/><meta name="generator" content="Quartz"/><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Exclusive Feature Bundling and Categorical Features","description":"How LightGBM bundles sparse features to reduce memory 25×, and how both libraries handle categorical data without one-hot encoding.","datePublished":"2026-01-18","url":"https://egordmitriev.dev/blog/2026-01-18-efb-and-categorical-features","author":{"@type":"Person","name":"Egor Dmitriev","url":"https://egordmitriev.dev"},"publisher":{"@type":"Person","name":"Egor Dmitriev"},"keywords":"machine-learning, gradient-boosting, algorithms, optimization"}</script><link href="../index.css" rel="stylesheet" type="text/css" data-persist="true"/><style>.expand-button {
+  position: absolute;
+  display: flex;
+  float: right;
+  padding: 0.4rem;
+  margin: 0.3rem;
+  right: 0;
+  color: var(--gray);
+  border-color: var(--dark);
+  background-color: var(--light);
+  border: 1px solid;
+  border-radius: 5px;
+  opacity: 0;
+  transition: 0.2s;
+}
+.expand-button > svg {
+  fill: var(--light);
+  filter: contrast(0.3);
+}
+.expand-button:hover {
+  cursor: pointer;
+  border-color: var(--secondary);
+}
+.expand-button:focus {
+  outline: 0;
+}
+
+pre:hover > .expand-button {
+  opacity: 1;
+  transition: 0.2s;
+}
+
+#mermaid-container {
+  position: fixed;
+  contain: layout;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: none;
+  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.5);
+}
+#mermaid-container.active {
+  display: inline-block;
+}
+#mermaid-container > #mermaid-space {
+  border: 1px solid var(--lightgray);
+  background-color: var(--light);
+  border-radius: 5px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 80vh;
+  width: 80vw;
+  overflow: hidden;
+}
+#mermaid-container > #mermaid-space > .mermaid-content {
+  position: relative;
+  transform-origin: 0 0;
+  transition: transform 0.1s ease;
+  overflow: visible;
+  min-height: 200px;
+  min-width: 200px;
+}
+#mermaid-container > #mermaid-space > .mermaid-content pre {
+  margin: 0;
+  border: none;
+}
+#mermaid-container > #mermaid-space > .mermaid-content svg {
+  max-width: none;
+  height: auto;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: var(--light);
+  border: 1px solid var(--lightgray);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--lightgray);
+  background: var(--light);
+  color: var(--dark);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: var(--bodyFont);
+  transition: all 0.2s ease;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:hover {
+  background: var(--lightgray);
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:active {
+  transform: translateY(1px);
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:nth-child(2) {
+  width: auto;
+  padding: 0 12px;
+  font-size: 14px;
+}
+/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VSb290IjoiL1VzZXJzL2Vnb3JkbS9wcm9qZWN0cy9hcmQvZWdvcmRtLmdpdGh1Yi5pby9xdWFydHovY29tcG9uZW50cy9zdHlsZXMiLCJzb3VyY2VzIjpbIm1lcm1haWQuaW5saW5lLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7O0FBR0Y7RUFDRTtFQUNBOztBQUdGO0VBQ0U7OztBQUtGO0VBQ0U7RUFDQTs7O0FBSUo7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOztBQUVBO0VBQ0U7O0FBR0Y7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7O0FBR0Y7RUFDRTtFQUNBOztBQUlKO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7O0FBRUE7RUFDRTs7QUFHRjtFQUNFOztBQUlGO0VBQ0U7RUFDQTtFQUNBIiwic291cmNlc0NvbnRlbnQiOlsiLmV4cGFuZC1idXR0b24ge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGZsb2F0OiByaWdodDtcbiAgcGFkZGluZzogMC40cmVtO1xuICBtYXJnaW46IDAuM3JlbTtcbiAgcmlnaHQ6IDA7IC8vIE5PVEU6IHJpZ2h0IHdpbGwgYmUgc2V0IGluIG1lcm1haWQuaW5saW5lLnRzXG4gIGNvbG9yOiB2YXIoLS1ncmF5KTtcbiAgYm9yZGVyLWNvbG9yOiB2YXIoLS1kYXJrKTtcbiAgYmFja2dyb3VuZC1jb2xvcjogdmFyKC0tbGlnaHQpO1xuICBib3JkZXI6IDFweCBzb2xpZDtcbiAgYm9yZGVyLXJhZGl1czogNXB4O1xuICBvcGFjaXR5OiAwO1xuICB0cmFuc2l0aW9uOiAwLjJzO1xuXG4gICYgPiBzdmcge1xuICAgIGZpbGw6IHZhcigtLWxpZ2h0KTtcbiAgICBmaWx0ZXI6IGNvbnRyYXN0KDAuMyk7XG4gIH1cblxuICAmOmhvdmVyIHtcbiAgICBjdXJzb3I6IHBvaW50ZXI7XG4gICAgYm9yZGVyLWNvbG9yOiB2YXIoLS1zZWNvbmRhcnkpO1xuICB9XG5cbiAgJjpmb2N1cyB7XG4gICAgb3V0bGluZTogMDtcbiAgfVxufVxuXG5wcmUge1xuICAmOmhvdmVyID4gLmV4cGFuZC1idXR0b24ge1xuICAgIG9wYWNpdHk6IDE7XG4gICAgdHJhbnNpdGlvbjogMC4ycztcbiAgfVxufVxuXG4jbWVybWFpZC1jb250YWluZXIge1xuICBwb3NpdGlvbjogZml4ZWQ7XG4gIGNvbnRhaW46IGxheW91dDtcbiAgei1pbmRleDogOTk5O1xuICBsZWZ0OiAwO1xuICB0b3A6IDA7XG4gIHdpZHRoOiAxMDB2dztcbiAgaGVpZ2h0OiAxMDB2aDtcbiAgb3ZlcmZsb3c6IGhpZGRlbjtcbiAgZGlzcGxheTogbm9uZTtcbiAgYmFja2Ryb3AtZmlsdGVyOiBibHVyKDRweCk7XG4gIGJhY2tncm91bmQ6IHJnYmEoMCwgMCwgMCwgMC41KTtcblxuICAmLmFjdGl2ZSB7XG4gICAgZGlzcGxheTogaW5saW5lLWJsb2NrO1xuICB9XG5cbiAgJiA+ICNtZXJtYWlkLXNwYWNlIHtcbiAgICBib3JkZXI6IDFweCBzb2xpZCB2YXIoLS1saWdodGdyYXkpO1xuICAgIGJhY2tncm91bmQtY29sb3I6IHZhcigtLWxpZ2h0KTtcbiAgICBib3JkZXItcmFkaXVzOiA1cHg7XG4gICAgcG9zaXRpb246IGZpeGVkO1xuICAgIHRvcDogNTAlO1xuICAgIGxlZnQ6IDUwJTtcbiAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZSgtNTAlLCAtNTAlKTtcbiAgICBoZWlnaHQ6IDgwdmg7XG4gICAgd2lkdGg6IDgwdnc7XG4gICAgb3ZlcmZsb3c6IGhpZGRlbjtcblxuICAgICYgPiAubWVybWFpZC1jb250ZW50IHtcbiAgICAgIHBvc2l0aW9uOiByZWxhdGl2ZTtcbiAgICAgIHRyYW5zZm9ybS1vcmlnaW46IDAgMDtcbiAgICAgIHRyYW5zaXRpb246IHRyYW5zZm9ybSAwLjFzIGVhc2U7XG4gICAgICBvdmVyZmxvdzogdmlzaWJsZTtcbiAgICAgIG1pbi1oZWlnaHQ6IDIwMHB4O1xuICAgICAgbWluLXdpZHRoOiAyMDBweDtcblxuICAgICAgcHJlIHtcbiAgICAgICAgbWFyZ2luOiAwO1xuICAgICAgICBib3JkZXI6IG5vbmU7XG4gICAgICB9XG5cbiAgICAgIHN2ZyB7XG4gICAgICAgIG1heC13aWR0aDogbm9uZTtcbiAgICAgICAgaGVpZ2h0OiBhdXRvO1xuICAgICAgfVxuICAgIH1cblxuICAgICYgPiAubWVybWFpZC1jb250cm9scyB7XG4gICAgICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gICAgICBib3R0b206IDIwcHg7XG4gICAgICByaWdodDogMjBweDtcbiAgICAgIGRpc3BsYXk6IGZsZXg7XG4gICAgICBnYXA6IDhweDtcbiAgICAgIHBhZGRpbmc6IDhweDtcbiAgICAgIGJhY2tncm91bmQ6IHZhcigtLWxpZ2h0KTtcbiAgICAgIGJvcmRlcjogMXB4IHNvbGlkIHZhcigtLWxpZ2h0Z3JheSk7XG4gICAgICBib3JkZXItcmFkaXVzOiA2cHg7XG4gICAgICBib3gtc2hhZG93OiAwIDJweCA0cHggcmdiYSgwLCAwLCAwLCAwLjEpO1xuICAgICAgei1pbmRleDogMjtcblxuICAgICAgLm1lcm1haWQtY29udHJvbC1idXR0b24ge1xuICAgICAgICBkaXNwbGF5OiBmbGV4O1xuICAgICAgICBhbGlnbi1pdGVtczogY2VudGVyO1xuICAgICAgICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjtcbiAgICAgICAgd2lkdGg6IDMycHg7XG4gICAgICAgIGhlaWdodDogMzJweDtcbiAgICAgICAgcGFkZGluZzogMDtcbiAgICAgICAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tbGlnaHRncmF5KTtcbiAgICAgICAgYmFja2dyb3VuZDogdmFyKC0tbGlnaHQpO1xuICAgICAgICBjb2xvcjogdmFyKC0tZGFyayk7XG4gICAgICAgIGJvcmRlci1yYWRpdXM6IDRweDtcbiAgICAgICAgY3Vyc29yOiBwb2ludGVyO1xuICAgICAgICBmb250LXNpemU6IDE2cHg7XG4gICAgICAgIGZvbnQtZmFtaWx5OiB2YXIoLS1ib2R5Rm9udCk7XG4gICAgICAgIHRyYW5zaXRpb246IGFsbCAwLjJzIGVhc2U7XG5cbiAgICAgICAgJjpob3ZlciB7XG4gICAgICAgICAgYmFja2dyb3VuZDogdmFyKC0tbGlnaHRncmF5KTtcbiAgICAgICAgfVxuXG4gICAgICAgICY6YWN0aXZlIHtcbiAgICAgICAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZVkoMXB4KTtcbiAgICAgICAgfVxuXG4gICAgICAgIC8vIFN0eWxlIHRoZSByZXNldCBidXR0b24gZGlmZmVyZW50bHlcbiAgICAgICAgJjpudGgtY2hpbGQoMikge1xuICAgICAgICAgIHdpZHRoOiBhdXRvO1xuICAgICAgICAgIHBhZGRpbmc6IDAgMTJweDtcbiAgICAgICAgICBmb250LXNpemU6IDE0cHg7XG4gICAgICAgIH1cbiAgICAgIH1cbiAgICB9XG4gIH1cbn1cbiJdfQ== */</style><link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet" type="text/css" data-persist="true"/><script src="../prescript.js" type="application/javascript" data-persist="true"></script><script type="application/javascript" data-persist="true">const fetchData = fetch("../static/contentIndex.json").then(data => data.json())</script><link rel="alternate" type="application/rss+xml" title="RSS Feed" href="https://egordmitriev.dev/index.xml"/></head><body data-slug="blog/2026-01-18-efb-and-categorical-features"><div id="quartz-root" class="page"><div id="quartz-body"><div class="left sidebar"><h2 class="page-title"><a href="..">Egor Dmitriev</a></h2><div class="spacer mobile-only"></div><div class="search"><button class="search-button"><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title>Search</title><g class="search-path" fill="none"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"></path><circle cx="8" cy="8" r="7"></circle></g></svg><p>Search</p></button><div class="search-container"><div class="search-space"><input autocomplete="off" class="search-bar" name="search" type="text" aria-label="Search for something" placeholder="Search for something"/><div class="search-layout" data-preview="true"></div></div></div></div><div class="sidebar-posts desktop-only"><h3>Recent Posts</h3><ul class="sidebar-posts-ul"><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-07-12-did-your-agent-actually-read-that-file" class="internal sidebar-post-title">Did Your Agent Actually Read That File?</a></div><div class="sidebar-post-meta"><span class="sidebar-post-date"><time datetime="2026-07-11T22:00:00.000Z">Jul 12, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-25-long-term-visual-tracking-for-drones-2026" class="internal sidebar-post-title">Long-Term Visual Tracking for Drones: State of the Art, Open Source, and Edge Inference in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-24T22:00:00.000Z">May 25, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-24-vio-drones-2026" class="internal sidebar-post-title">Visual-Inertial Odometry for Drones: State of the Art, Foundation-3D, and the cuVSLAM Squeeze in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-23T22:00:00.000Z">May 24, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-23-drone-to-satellite-localization-2026" class="internal sidebar-post-title">Drone-to-Satellite Visual Geo-Localization: State of the Art, Open Source, and Edge Inference in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-22T22:00:00.000Z">May 23, 2026</time></span></div></li></ul><p class="sidebar-browse"><a href="../blog/">All posts →</a></p></div></div><div class="center"><div class="page-header"><div class="popover-hint"><nav class="breadcrumb-container" aria-label="breadcrumbs"><div class="breadcrumb-element"><a href="../">Home</a><p> ❯ </p></div><div class="breadcrumb-element"><a href="../blog/">Blog</a><p> ❯ </p></div><div class="breadcrumb-element"><a href>Exclusive Feature Bundling and Categorical Features</a></div></nav><h1 class="article-title">Exclusive Feature Bundling and Categorical Features</h1><p show-comma="true" class="content-meta"><time datetime="2026-01-17T23:00:00.000Z">Jan 18, 2026</time><span>7 min read</span></p><ul class="tags"><li><a href="../tags/machine-learning" class="internal tag-link">machine-learning</a></li><li><a href="../tags/gradient-boosting" class="internal tag-link">gradient-boosting</a></li><li><a href="../tags/algorithms" class="internal tag-link">algorithms</a></li><li><a href="../tags/optimization" class="internal tag-link">optimization</a></li></ul><div class="series-banner"><details class="series-toc"><summary><span class="series-icon">📚</span><a href="/series/inside-gradient-boosting" class="series-name">Inside Gradient Boosting</a><span class="series-position">Part 7 of 10</span></summary><ol class="series-list"><li class><a href="/blog/2026-01-06-what-is-gradient-boosting">What is Gradient Boosting?</a></li><li class><a href="/blog/2026-01-08-functional-gradient-descent">Functional Gradient Descent</a></li><li class><a href="/blog/2026-01-10-trees-and-split-gain">Trees and the Split Gain Formula</a></li><li class><a href="/blog/2026-01-12-histogram-based-split-finding">Histogram-Based Split Finding</a></li><li class><a href="/blog/2026-01-14-depth-wise-vs-leaf-wise">Depth-Wise vs Leaf-Wise Tree Growth</a></li><li class><a href="/blog/2026-01-16-gradient-based-sampling">Gradient-Based Sampling (GOSS)</a></li><li class="current"><span class="current-post">Exclusive Feature Bundling and Categorical Features</span></li><li class><a href="/blog/2026-01-20-regularization">Regularization and Hyperparameter Tuning</a></li><li class><a href="/blog/2026-01-22-xgboost-vs-lightgbm">XGBoost vs LightGBM: A Practical Comparison</a></li><li class><a href="/blog/2026-01-25-boosters">Building Boosters: A Gradient Boosting Library from Scratch</a></li></ol></details></div></div></div><article class="popover-hint"><blockquote class="callout abstract" data-callout="abstract">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Inside Gradient Boosting, Part 7 of 9 </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>This series explains gradient boosting from first principles to advanced implementation details.</p>
+<p><strong>Previous:</strong> <a href="../gb-part-6" class="internal alias" data-slug="gb-part-6">Gradient-Based Sampling (GOSS)</a>
+<strong>In this post:</strong> Feature-level optimizations for sparse and categorical data.
+<strong>Next:</strong> <a href="../gb-part-8" class="internal alias" data-slug="gb-part-8">Regularization and Hyperparameter Tuning</a></p>
+</div>
+</blockquote>
+<p>So far, we’ve focused on sample-level optimizations: histograms, tree growth strategies, and sampling. But what about features?</p>
+<p>Many real-world datasets have hundreds of sparse binary features (from one-hot encoding) or high-cardinality categorical columns. Both create computational challenges that specialized algorithms can address.</p>
+<p>This post covers two related optimizations:</p>
+<ol>
+<li><strong>Exclusive Feature Bundling (EFB)</strong>: LightGBM’s technique for combining sparse features</li>
+<li><strong>Native categorical splits</strong>: How to avoid one-hot encoding entirely</li>
+</ol>
+<hr/>
+<h2 id="the-one-hot-problem">The One-Hot Problem<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-one-hot-problem" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>When you one-hot encode a categorical feature, you create a sparse matrix:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="text" data-theme="github-light one-dark-pro"><code data-language="text" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span>Original: color = {red, blue, green}</span></span>
+<span data-line> </span>
+<span data-line><span>One-hot encoded:</span></span>
+<span data-line><span>  Sample 1 (color=red):   [1, 0, 0]</span></span>
+<span data-line><span>  Sample 2 (color=blue):  [0, 1, 0]</span></span>
+<span data-line><span>  Sample 3 (color=green): [0, 0, 1]</span></span></code></pre></figure>
+<p><strong>Observation</strong>: In any row, at most one of these features is non-zero. These features are <strong>mutually exclusive</strong> - meaning they cannot both be “on” at the same time.</p>
+<p>The waste is significant:</p>
+<ul>
+<li><strong>3× memory</strong>: Three columns instead of one</li>
+<li><strong>3× histogram work</strong>: Build three separate histograms</li>
+<li><strong>3× split evaluation</strong>: Test splits on three features</li>
+</ul>
+<p>For a typical dataset with 50 categorical features averaging 20 categories each:</p>
+<ul>
+<li>One-hot encoding creates <strong>1,000 features</strong> instead of 50</li>
+<li><strong>20× overhead</strong> in memory and computation</li>
+</ul>
+<hr/>
+<h2 id="exclusive-feature-bundling-efb">Exclusive Feature Bundling (EFB)<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#exclusive-feature-bundling-efb" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>LightGBM’s insight: <strong>mutually exclusive features can be merged into one without losing information.</strong></p>
+<h3 id="the-core-idea">The Core Idea<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-core-idea" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>If features <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> are mutually exclusive (at most one is non-zero per row), encode them as a single feature with distinct value ranges:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="text" data-theme="github-light one-dark-pro"><code data-language="text" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span>Original features (each 0 or 1):</span></span>
+<span data-line><span>  f1: color_red</span></span>
+<span data-line><span>  f2: color_blue</span></span>
+<span data-line><span>  f3: color_green</span></span>
+<span data-line> </span>
+<span data-line><span>Bundled feature:</span></span>
+<span data-line><span>  0 = all zero (missing/default)</span></span>
+<span data-line><span>  1 = f1 is active (red)</span></span>
+<span data-line><span>  2 = f2 is active (blue)</span></span>
+<span data-line><span>  3 = f3 is active (green)</span></span></code></pre></figure>
+<p>One histogram instead of three. Same information, 3× less work.</p>
+<h3 id="finding-bundles">Finding Bundles<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#finding-bundles" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>Not all features are perfectly exclusive. LightGBM uses a greedy algorithm (one that makes locally optimal choices at each step) to find near-exclusive bundles:</p>
+<blockquote class="callout tip" data-callout="tip">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Algorithm: Exclusive Feature Bundling </p></div>
+                  
+                </div>
+<div class="callout-content">
+<pre><code>Input: Features, max_conflict_rate (default: 0.01%)
+
+1. Compute conflict graph:
+   - Edge between features i and j if both are non-zero in same row
+
+2. Sort features by non-zero count (descending)
+
+3. Greedy bundling:
+   For each feature:
+       Find bundle with lowest conflict
+       If conflict &lt;= threshold: add to bundle
+       Else: create new bundle
+
+Output: List of feature bundles
+</code></pre>
+</div>
+</blockquote>
+<p>The conflict threshold (0.01% by default) allows bundling features that are <em>almost</em> exclusive, trading tiny accuracy loss for significant speedup.</p>
+<h3 id="encoding-bundle-values">Encoding Bundle Values<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#encoding-bundle-values" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>Once features are bundled, encode the bundle value by assigning offset ranges:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="text" data-theme="github-light one-dark-pro"><code data-language="text" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span>Bundle: [f1 (2 bins), f2 (3 bins), f3 (4 bins)]</span></span>
+<span data-line><span>Offsets: [0, 2, 5]</span></span>
+<span data-line> </span>
+<span data-line><span>If f1 is active with bin 1: bundle_value = 0 + 1 = 1</span></span>
+<span data-line><span>If f2 is active with bin 2: bundle_value = 2 + 2 = 4</span></span>
+<span data-line><span>If f3 is active with bin 0: bundle_value = 5 + 0 = 5</span></span></code></pre></figure>
+<p>The bundle has <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">9</span></span></span></span> possible values, compactly represented in one column.</p>
+<h3 id="performance-impact">Performance Impact<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#performance-impact" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>For a dataset with 105 one-hot features bundled into 14:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Metric</th><th>Without EFB</th><th>With EFB</th></tr></thead><tbody><tr><td>Features to process</td><td>105</td><td>14</td></tr><tr><td>Memory</td><td>5 MB</td><td>0.7 MB</td></tr><tr><td>Histogram work</td><td>105 histograms</td><td>14 histograms</td></tr></tbody></table></div>
+<p><strong>Reduction</strong>: ~7× faster, ~7× less memory.</p>
+<hr/>
+<h2 id="the-combinatorial-challenge-of-categorical-splits">The Combinatorial Challenge of Categorical Splits<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-combinatorial-challenge-of-categorical-splits" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>Beyond bundling, there’s a deeper question: how do we split on categorical features natively?</p>
+<p>For numerical features, we test thresholds: “is <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7719em;vertical-align:-0.136em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span></span></span></span>?”</p>
+<p>For categorical features, we test set membership: “is <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span>?” where <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span> is a subset of categories.</p>
+<p>The problem: for <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span> categories, there are <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9324em;vertical-align:-0.0833em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> possible binary partitions.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Categories</th><th>Possible Partitions</th></tr></thead><tbody><tr><td>3</td><td>3</td></tr><tr><td>5</td><td>15</td></tr><tr><td>10</td><td>511</td></tr><tr><td>20</td><td>524,287</td></tr><tr><td>100</td><td>~<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">29</span></span></span></span></span></span></span></span></span></span></span></span></td></tr></tbody></table></div>
+<p>Exhaustive search is only feasible for small <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span>.</p>
+<hr/>
+<h2 id="native-categorical-splits">Native Categorical Splits<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#native-categorical-splits" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<h3 id="approach-1-one-hot-strategy">Approach 1: One-Hot Strategy<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#approach-1-one-hot-strategy" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>For few categories (LightGBM default: <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8304em;vertical-align:-0.136em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span>), test each category individually:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="text" data-theme="github-light one-dark-pro"><code data-language="text" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span>For each category c:</span></span>
+<span data-line><span>    Compute gain for {c} vs {all other categories}</span></span>
+<span data-line><span>Return the best single-category split</span></span></code></pre></figure>
+<p>This is <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mclose">)</span></span></span></span> but only finds “isolate one category” splits, not arbitrary subsets.</p>
+<h3 id="approach-2-gradient-sorted-strategy">Approach 2: Gradient-Sorted Strategy<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#approach-2-gradient-sorted-strategy" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>For more categories, LightGBM uses a clever approximation based on a classic result:</p>
+<blockquote class="callout info" data-callout="info">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Fisher's Theorem (1958) </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>For squared error, the optimal binary partition of categories can be found by:</p>
+<ol>
+<li>Sort categories by their mean target value</li>
+<li>Test the <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7778em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> split points in sorted order</li>
+</ol>
+<p>The optimal split is contiguous in this ordering. For other losses (e.g., logistic), this is a heuristic that works well in practice.</p>
+</div>
+</blockquote>
+<p>For gradient boosting, we use gradient/Hessian ratio as the “mean target” proxy:</p>
+<p><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8179em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord text"><span class="mord">ratio</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">c</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.3335em;vertical-align:-0.4451em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8884em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.08125em;">H</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1645em;"><span style="top:-2.357em;margin-left:-0.0813em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight">c</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span><span class="mbin mtight">+</span><span class="mord mathnormal mtight">ϵ</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.4101em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1645em;"><span style="top:-2.357em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight">c</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4451em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></p>
+<p>where <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">c</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> and <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.08125em;">H</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0813em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">c</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> are gradient and Hessian sums for category <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span></span></span></span>.</p>
+<blockquote class="callout tip" data-callout="tip">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Algorithm: Gradient-Sorted Categorical Split </p></div>
+                  
+                </div>
+<div class="callout-content">
+<pre><code>Input: Categories, gradients, hessians
+
+1. For each category c:
+   ratio[c] = sum(gradients for c) / sum(hessians for c)
+
+2. Sort categories by ratio
+
+3. Scan sorted order:
+   Running sum: G_left, H_left = 0
+   For split point i = 1 to k-1:
+       Add category i-1 to left
+       Compute gain for left vs right
+       Track best split
+
+Output: Categories going left, gain
+</code></pre>
+</div>
+</blockquote>
+<p><strong>Complexity</strong>: <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mclose">)</span></span></span></span> instead of <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0991em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>.</p>
+<p>Why does this work? Categories with similar gradient ratios have similar optimal leaf values and should be grouped together. Sorting by ratio orders categories by their “effect direction.”</p>
+
+<hr/>
+<h2 id="representing-categorical-splits">Representing Categorical Splits<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#representing-categorical-splits" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>Once we find a good split, we need to store which categories go left.</p>
+<h3 id="bitset-storage">Bitset Storage<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#bitset-storage" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>Store the “goes left” set as a bitset:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="text" data-theme="github-light one-dark-pro"><code data-language="text" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span>Categories: {0: apple, 1: banana, 2: cherry, 3: date}</span></span>
+<span data-line><span>Split: {apple, cherry} go left</span></span>
+<span data-line> </span>
+<span data-line><span>Bitset: 0b0101 = 5</span></span>
+<span data-line><span>        ||||</span></span>
+<span data-line><span>        |||+-- apple (0): 1 = left</span></span>
+<span data-line><span>        ||+--- banana (1): 0 = right</span></span>
+<span data-line><span>        |+---- cherry (2): 1 = left</span></span>
+<span data-line><span>        +----- date (3): 0 = right</span></span>
+<span data-line> </span>
+<span data-line><span>Decision: if (bitset &amp; (1 &lt;&lt; category)) then LEFT else RIGHT</span></span></code></pre></figure>
+<p>For up to 64 categories, this fits in a single <code>u64</code>. For more categories, LightGBM uses multiple 64-bit words packed together. Very high cardinality (1000+ categories) may require 16+ words per split, adding storage overhead.</p>
+<hr/>
+<h2 id="preventing-overfitting">Preventing Overfitting<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#preventing-overfitting" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>Categorical splits are prone to overfitting, especially with high cardinality. Each split can perfectly isolate small groups.</p>
+<h3 id="lightgbms-regularization-parameters">LightGBM’s Regularization Parameters<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#lightgbms-regularization-parameters" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Parameter</th><th>Default</th><th>Effect</th></tr></thead><tbody><tr><td><code>cat_l2</code></td><td>10.0</td><td>Extra L2 penalty on leaf weights</td></tr><tr><td><code>cat_smooth</code></td><td>10.0</td><td>Smoothing in ratio computation</td></tr><tr><td><code>min_data_per_group</code></td><td>100</td><td>Minimum samples per category</td></tr><tr><td><code>max_cat_threshold</code></td><td>32</td><td>Consider only top-k categories by importance</td></tr></tbody></table></div>
+<blockquote class="callout note" data-callout="note">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Practical Guidance </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>For high-cardinality features (100+ categories):</p>
+<ul>
+<li>Increase <code>cat_l2</code> to 20-50</li>
+<li>Increase <code>min_data_per_group</code> to 200-500</li>
+<li>Consider grouping rare categories into “other”</li>
+</ul>
+</div>
+</blockquote>
+<hr/>
+<h2 id="when-to-use-native-vs-one-hot">When to Use Native vs One-Hot<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#when-to-use-native-vs-one-hot" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<h3 id="use-one-hot-encoding-when">Use One-Hot Encoding When<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#use-one-hot-encoding-when" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<ul>
+<li>Cardinality is low (&lt; 10 categories)</li>
+<li>Using a library without native support</li>
+<li>Interpretability matters (one feature per category)</li>
+<li>Categories have independent effects</li>
+</ul>
+<h3 id="use-native-categorical-when">Use Native Categorical When<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#use-native-categorical-when" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<ul>
+<li>Cardinality is moderate (10-1000 categories)</li>
+<li>Memory efficiency matters</li>
+<li>Categories should be grouped (similar products, locations)</li>
+<li>Using LightGBM or XGBoost with <code>enable_categorical</code></li>
+</ul>
+<h3 id="consider-alternatives-when">Consider Alternatives When<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#consider-alternatives-when" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<ul>
+<li>Very high cardinality (> 1000): Target encoding, embeddings</li>
+<li>Ordinal relationship exists: Treat as numerical</li>
+<li>Too few samples per category: Group into “other”</li>
+</ul>
+<hr/>
+<h2 id="handling-unknown-categories">Handling Unknown Categories<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#handling-unknown-categories" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>At inference, you may encounter categories not seen during training.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Strategy</th><th>Behavior</th><th>Use When</th></tr></thead><tbody><tr><td><strong>Default direction</strong></td><td>Go right (or learned default)</td><td>Production systems</td></tr><tr><td><strong>Error</strong></td><td>Reject the input</td><td>Safety-critical systems</td></tr><tr><td><strong>Map to “other”</strong></td><td>Reserve during training</td><td>Expected unknown categories</td></tr></tbody></table></div>
+<blockquote class="callout warning" data-callout="warning">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Encoding Consistency </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>Training and inference <strong>must</strong> use identical category-to-integer mappings. Store the encoder with your model artifact.</p>
+</div>
+</blockquote>
+<hr/>
+<h2 id="library-configuration">Library Configuration<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#library-configuration" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<h3 id="lightgbm">LightGBM<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#lightgbm" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">params </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> {</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">    'categorical_feature'</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: [</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">3</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">7</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">],  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Column indices</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">    'max_cat_to_onehot'</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">4</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,            </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Below this: one-hot search</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">    'cat_l2'</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">10.0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,                    </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Extra regularization</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">    'cat_smooth'</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">10.0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,                </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Ratio smoothing</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">    'max_cat_threshold'</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">32</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,           </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Top-k categories</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">    'min_data_per_group'</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">100</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,         </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Min samples</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">}</span></span></code></pre></figure>
+<h3 id="xgboost">XGBoost<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#xgboost" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Enable categorical support</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">dtrain </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> xgb.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">DMatrix</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(data, </span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">enable_categorical</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">True</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">params </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> {</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">    'tree_method'</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">'hist'</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,    </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Required for categorical</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">    'max_cat_to_onehot'</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">4</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,   </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># One-hot threshold</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">}</span></span></code></pre></figure>
+<hr/>
+<h2 id="summary-feature-level-optimizations">Summary: Feature-Level Optimizations<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#summary-feature-level-optimizations" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Technique</th><th>Problem Solved</th><th>Speedup</th></tr></thead><tbody><tr><td><strong>EFB</strong></td><td>Sparse one-hot features</td><td>5-25× memory, 5-10× speed</td></tr><tr><td><strong>Native categorical</strong></td><td>Arbitrary subset splits</td><td>Shallower trees, better accuracy</td></tr><tr><td><strong>Gradient-sorted splits</strong></td><td>Exponential split space</td><td><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mclose">)</span></span></span></span> vs <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0991em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></td></tr></tbody></table></div>
+<h3 id="when-efb-kicks-in">When EFB Kicks In<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#when-efb-kicks-in" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>EFB is automatic in LightGBM. It activates when:</p>
+<ul>
+<li>Features are sparse (&lt; 1% non-zero)</li>
+<li>Features are nearly exclusive (&lt; 0.01% conflict)</li>
+<li>Multiple features can be bundled together</li>
+</ul>
+<p>You don’t need to configure anything; it just works.</p>
+<hr/>
+<h2 id="whats-next">What’s Next<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#whats-next" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>We’ve covered the core algorithms: split finding, tree growth, sampling, and feature handling. The next post shifts to practical usage.</p>
+<p><a href="../gb-part-8" class="internal alias" data-slug="gb-part-8">Regularization and Hyperparameter Tuning</a> explains how to configure all these parameters to get the best performance: learning rate, tree depth, regularization, and tuning strategies.</p>
+<hr/>
+<h2 id="references">References<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#references" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<ol>
+<li>
+<p>Ke, G. et al. (2017). “LightGBM: A Highly Efficient Gradient Boosting Decision Tree”. <em>NeurIPS 2017</em>. Section 3.1: EFB. <a href="https://proceedings.neurips.cc/paper/2017/file/6449f44a102fde848669bdd9eb6b76fa-Paper.pdf" class="external">PDF<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></p>
+</li>
+<li>
+<p>Fisher, W.D. (1958). “On Grouping for Maximum Homogeneity”. <em>Journal of the American Statistical Association</em>, 53(284), 789-798.</p>
+</li>
+<li>
+<p>Chen, T. &amp; Guestrin, C. (2016). “XGBoost: A Scalable Tree Boosting System”. <em>KDD 2016</em>. <a href="https://arxiv.org/abs/1603.02754" class="external">arXiv<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></p>
+</li>
+</ol></article><hr/><div class="page-footer"><nav class="prev-next-nav"><div class="prev-next-links"><div class="nav-link nav-prev"><a href="/blog/2026-01-16-gradient-based-sampling" rel="prev"><span class="nav-direction">← Older</span><span class="nav-title">Gradient-Based Sampling (GOSS)</span></a></div><div class="nav-link nav-next"><a href="/blog/2026-01-22-xgboost-vs-lightgbm" rel="next"><span class="nav-direction">Newer →</span><span class="nav-title">XGBoost vs LightGBM: A Practical Comparison</span></a></div></div></nav></div></div><div class="right sidebar"><div class="toc desktop-only"><button type="button" class="toc-header" aria-controls="toc-11" aria-expanded="true"><h3>Table of Contents</h3><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="fold"><polyline points="6 9 12 15 18 9"></polyline></svg></button><ul id="list-0" class="toc-content overflow"><li class="depth-0"><a href="#the-one-hot-problem" data-for="the-one-hot-problem">The One-Hot Problem</a></li><li class="depth-0"><a href="#exclusive-feature-bundling-efb" data-for="exclusive-feature-bundling-efb">Exclusive Feature Bundling (EFB)</a></li><li class="depth-1"><a href="#the-core-idea" data-for="the-core-idea">The Core Idea</a></li><li class="depth-1"><a href="#finding-bundles" data-for="finding-bundles">Finding Bundles</a></li><li class="depth-1"><a href="#encoding-bundle-values" data-for="encoding-bundle-values">Encoding Bundle Values</a></li><li class="depth-1"><a href="#performance-impact" data-for="performance-impact">Performance Impact</a></li><li class="depth-0"><a href="#the-combinatorial-challenge-of-categorical-splits" data-for="the-combinatorial-challenge-of-categorical-splits">The Combinatorial Challenge of Categorical Splits</a></li><li class="depth-0"><a href="#native-categorical-splits" data-for="native-categorical-splits">Native Categorical Splits</a></li><li class="depth-1"><a href="#approach-1-one-hot-strategy" data-for="approach-1-one-hot-strategy">Approach 1: One-Hot Strategy</a></li><li class="depth-1"><a href="#approach-2-gradient-sorted-strategy" data-for="approach-2-gradient-sorted-strategy">Approach 2: Gradient-Sorted Strategy</a></li><li class="depth-0"><a href="#representing-categorical-splits" data-for="representing-categorical-splits">Representing Categorical Splits</a></li><li class="depth-1"><a href="#bitset-storage" data-for="bitset-storage">Bitset Storage</a></li><li class="depth-0"><a href="#preventing-overfitting" data-for="preventing-overfitting">Preventing Overfitting</a></li><li class="depth-1"><a href="#lightgbms-regularization-parameters" data-for="lightgbms-regularization-parameters">LightGBM’s Regularization Parameters</a></li><li class="depth-0"><a href="#when-to-use-native-vs-one-hot" data-for="when-to-use-native-vs-one-hot">When to Use Native vs One-Hot</a></li><li class="depth-1"><a href="#use-one-hot-encoding-when" data-for="use-one-hot-encoding-when">Use One-Hot Encoding When</a></li><li class="depth-1"><a href="#use-native-categorical-when" data-for="use-native-categorical-when">Use Native Categorical When</a></li><li class="depth-1"><a href="#consider-alternatives-when" data-for="consider-alternatives-when">Consider Alternatives When</a></li><li class="depth-0"><a href="#handling-unknown-categories" data-for="handling-unknown-categories">Handling Unknown Categories</a></li><li class="depth-0"><a href="#library-configuration" data-for="library-configuration">Library Configuration</a></li><li class="depth-1"><a href="#lightgbm" data-for="lightgbm">LightGBM</a></li><li class="depth-1"><a href="#xgboost" data-for="xgboost">XGBoost</a></li><li class="depth-0"><a href="#summary-feature-level-optimizations" data-for="summary-feature-level-optimizations">Summary: Feature-Level Optimizations</a></li><li class="depth-1"><a href="#when-efb-kicks-in" data-for="when-efb-kicks-in">When EFB Kicks In</a></li><li class="depth-0"><a href="#whats-next" data-for="whats-next">What’s Next</a></li><li class="depth-0"><a href="#references" data-for="references">References</a></li><li class="overflow-end"></li></ul></div></div><footer class><ul><li><a href="https://github.com/egordm/">GitHub</a></li><li><a href="https://www.linkedin.com/in/egor-dmitriev/">LinkedIn</a></li><li><a href="/index.xml">RSS Feed</a></li></ul></footer></div></div></body><script type="application/javascript" data-persist="true">function n(){let t=this.parentElement;t.classList.toggle("is-collapsed");let e=t.getElementsByClassName("callout-content")[0];if(!e)return;let l=t.classList.contains("is-collapsed");e.style.gridTemplateRows=l?"0fr":"1fr"}function c(){let t=document.getElementsByClassName("callout is-collapsible");for(let e of t){let l=e.getElementsByClassName("callout-title")[0],s=e.getElementsByClassName("callout-content")[0];if(!l||!s)continue;l.addEventListener("click",n),window.addCleanup(()=>l.removeEventListener("click",n));let o=e.classList.contains("is-collapsed");s.style.gridTemplateRows=o?"0fr":"1fr"}}document.addEventListener("nav",c);
+</script><script type="module" data-persist="true">function E(a,e){if(!a)return;function t(o){o.target===this&&(o.preventDefault(),o.stopPropagation(),e())}function n(o){o.key.startsWith("Esc")&&(o.preventDefault(),e())}a?.addEventListener("click",t),window.addCleanup(()=>a?.removeEventListener("click",t)),document.addEventListener("keydown",n),window.addCleanup(()=>document.removeEventListener("keydown",n))}function f(a){for(;a.firstChild;)a.removeChild(a.firstChild)}var m=class{constructor(e,t){this.container=e;this.content=t;this.setupEventListeners(),this.setupNavigationControls(),this.resetTransform()}isDragging=!1;startPan={x:0,y:0};currentPan={x:0,y:0};scale=1;MIN_SCALE=.5;MAX_SCALE=3;cleanups=[];setupEventListeners(){let e=this.onMouseDown.bind(this),t=this.onMouseMove.bind(this),n=this.onMouseUp.bind(this),o=this.onTouchStart.bind(this),r=this.onTouchMove.bind(this),i=this.onTouchEnd.bind(this),s=this.resetTransform.bind(this);this.container.addEventListener("mousedown",e),document.addEventListener("mousemove",t),document.addEventListener("mouseup",n),this.container.addEventListener("touchstart",o,{passive:!1}),document.addEventListener("touchmove",r,{passive:!1}),document.addEventListener("touchend",i),window.addEventListener("resize",s),this.cleanups.push(()=>this.container.removeEventListener("mousedown",e),()=>document.removeEventListener("mousemove",t),()=>document.removeEventListener("mouseup",n),()=>this.container.removeEventListener("touchstart",o),()=>document.removeEventListener("touchmove",r),()=>document.removeEventListener("touchend",i),()=>window.removeEventListener("resize",s))}cleanup(){for(let e of this.cleanups)e()}setupNavigationControls(){let e=document.createElement("div");e.className="mermaid-controls";let t=this.createButton("+",()=>this.zoom(.1)),n=this.createButton("-",()=>this.zoom(-.1)),o=this.createButton("Reset",()=>this.resetTransform());e.appendChild(n),e.appendChild(o),e.appendChild(t),this.container.appendChild(e)}createButton(e,t){let n=document.createElement("button");return n.textContent=e,n.className="mermaid-control-button",n.addEventListener("click",t),window.addCleanup(()=>n.removeEventListener("click",t)),n}onMouseDown(e){e.button===0&&(this.isDragging=!0,this.startPan={x:e.clientX-this.currentPan.x,y:e.clientY-this.currentPan.y},this.container.style.cursor="grabbing")}onMouseMove(e){this.isDragging&&(e.preventDefault(),this.currentPan={x:e.clientX-this.startPan.x,y:e.clientY-this.startPan.y},this.updateTransform())}onMouseUp(){this.isDragging=!1,this.container.style.cursor="grab"}onTouchStart(e){if(e.touches.length!==1)return;this.isDragging=!0;let t=e.touches[0];this.startPan={x:t.clientX-this.currentPan.x,y:t.clientY-this.currentPan.y}}onTouchMove(e){if(!this.isDragging||e.touches.length!==1)return;e.preventDefault();let t=e.touches[0];this.currentPan={x:t.clientX-this.startPan.x,y:t.clientY-this.startPan.y},this.updateTransform()}onTouchEnd(){this.isDragging=!1}zoom(e){let t=Math.min(Math.max(this.scale+e,this.MIN_SCALE),this.MAX_SCALE),n=this.content.getBoundingClientRect(),o=n.width/2,r=n.height/2,i=t-this.scale;this.currentPan.x-=o*i,this.currentPan.y-=r*i,this.scale=t,this.updateTransform()}updateTransform(){this.content.style.transform=`translate(${this.currentPan.x}px, ${this.currentPan.y}px) scale(${this.scale})`}resetTransform(){let t=this.content.querySelector("svg").getBoundingClientRect(),n=t.width/this.scale,o=t.height/this.scale;this.scale=1,this.currentPan={x:(this.container.clientWidth-n)/2,y:(this.container.clientHeight-o)/2},this.updateTransform()}},T=["--secondary","--tertiary","--gray","--light","--lightgray","--highlight","--dark","--darkgray","--codeFont"],y;document.addEventListener("nav",async()=>{let e=document.querySelector(".center").querySelectorAll("code.mermaid");if(e.length===0)return;y||=await import("https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.4.0/mermaid.esm.min.mjs");let t=y.default,n=new WeakMap;for(let r of e)n.set(r,r.innerText);async function o(){for(let s of e){s.removeAttribute("data-processed");let c=n.get(s);c&&(s.innerHTML=c)}let r=T.reduce((s,c)=>(s[c]=window.getComputedStyle(document.documentElement).getPropertyValue(c),s),{}),i=document.documentElement.getAttribute("saved-theme")==="dark";t.initialize({startOnLoad:!1,securityLevel:"loose",theme:i?"dark":"base",themeVariables:{fontFamily:r["--codeFont"],primaryColor:r["--light"],primaryTextColor:r["--darkgray"],primaryBorderColor:r["--tertiary"],lineColor:r["--darkgray"],secondaryColor:r["--secondary"],tertiaryColor:r["--tertiary"],clusterBkg:r["--light"],edgeLabelBackground:r["--highlight"]}}),await t.run({nodes:e})}await o(),document.addEventListener("themechange",o),window.addCleanup(()=>document.removeEventListener("themechange",o));for(let r=0;r<e.length;r++){let v=function(){let g=l.querySelector("#mermaid-space"),h=l.querySelector(".mermaid-content");if(!h)return;f(h);let w=i.querySelector("svg").cloneNode(!0);h.appendChild(w),l.classList.add("active"),g.style.cursor="grab",u=new m(g,h)},M=function(){l.classList.remove("active"),u?.cleanup(),u=null},i=e[r],s=i.parentElement,c=s.querySelector(".clipboard-button"),d=s.querySelector(".expand-button"),p=window.getComputedStyle(c),L=c.offsetWidth+parseFloat(p.marginLeft||"0")+parseFloat(p.marginRight||"0");d.style.right=`calc(${L}px + 0.3rem)`,s.prepend(d);let l=s.querySelector("#mermaid-container");if(!l)return;let u=null;d.addEventListener("click",v),E(l,M),window.addCleanup(()=>{u?.cleanup(),d.removeEventListener("click",v)})}});
+</script><script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/copy-tex.min.js" type="application/javascript" data-persist="true"></script><script src="../postscript.js" type="module" data-persist="true"></script></html>

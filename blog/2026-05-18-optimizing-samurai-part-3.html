@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr"><head><title>CoreML Deployment on Apple Silicon: Real-Time Vision Models | egordmitriev.dev</title><meta charset="utf-8"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Inter:ital,wght@0,400;0,600;1,400;1,600&amp;family=JetBrains Mono:wght@400;600&amp;display=swap"/><link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin="anonymous"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="alternate" type="application/rss+xml" title="Egor Dmitriev" href="https://egordmitriev.dev/index.xml"/><meta name="og:site_name" content="Egor Dmitriev"/><meta property="og:title" content="CoreML Deployment on Apple Silicon: Real-Time Vision Models | egordmitriev.dev"/><meta property="og:type" content="article"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="CoreML Deployment on Apple Silicon: Real-Time Vision Models | egordmitriev.dev"/><meta name="twitter:description" content="Deploying ONNX vision models on Apple Silicon via CoreML. From 41% slower than CPU to 28 FPS real-time through compute-unit tuning, ONNX graph surgery, and a pipelined runtime architecture."/><meta property="og:description" content="Deploying ONNX vision models on Apple Silicon via CoreML. From 41% slower than CPU to 28 FPS real-time through compute-unit tuning, ONNX graph surgery, and a pipelined runtime architecture."/><meta property="og:image:alt" content="Deploying ONNX vision models on Apple Silicon via CoreML. From 41% slower than CPU to 28 FPS real-time through compute-unit tuning, ONNX graph surgery, and a pipelined runtime architecture."/><meta property="og:image" content="https://egordmitriev.dev/static/og-image.png"/><meta property="og:image:url" content="https://egordmitriev.dev/static/og-image.png"/><meta name="twitter:image" content="https://egordmitriev.dev/static/og-image.png"/><meta property="og:image:type" content="image/.png"/><meta property="twitter:domain" content="egordmitriev.dev"/><meta property="og:url" content="https://egordmitriev.dev/blog/2026-05-18-optimizing-samurai-part-3"/><meta property="twitter:url" content="https://egordmitriev.dev/blog/2026-05-18-optimizing-samurai-part-3"/><link rel="canonical" href="https://egordmitriev.dev/blog/2026-05-18-optimizing-samurai-part-3"/><link rel="icon" href="../static/icon.png"/><meta name="description" content="Deploying ONNX vision models on Apple Silicon via CoreML. From 41% slower than CPU to 28 FPS real-time through compute-unit tuning, ONNX graph surgery, and a pipelined runtime architecture."/><meta name="generator" content="Quartz"/><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"CoreML Deployment on Apple Silicon: Real-Time Vision Models","description":"Deploying ONNX vision models on Apple Silicon via CoreML. From 41% slower than CPU to 28 FPS real-time through compute-unit tuning, ONNX graph surgery, and a pipelined runtime architecture.","datePublished":"2026-05-18","url":"https://egordmitriev.dev/blog/2026-05-18-optimizing-samurai-part-3","author":{"@type":"Person","name":"Egor Dmitriev","url":"https://egordmitriev.dev"},"publisher":{"@type":"Person","name":"Egor Dmitriev"},"keywords":"deep-learning, computer-vision, apple-silicon, coreml, optimization, onnx, metal, model-deployment"}</script><link href="../index.css" rel="stylesheet" type="text/css" data-persist="true"/><style>.expand-button {
+  position: absolute;
+  display: flex;
+  float: right;
+  padding: 0.4rem;
+  margin: 0.3rem;
+  right: 0;
+  color: var(--gray);
+  border-color: var(--dark);
+  background-color: var(--light);
+  border: 1px solid;
+  border-radius: 5px;
+  opacity: 0;
+  transition: 0.2s;
+}
+.expand-button > svg {
+  fill: var(--light);
+  filter: contrast(0.3);
+}
+.expand-button:hover {
+  cursor: pointer;
+  border-color: var(--secondary);
+}
+.expand-button:focus {
+  outline: 0;
+}
+
+pre:hover > .expand-button {
+  opacity: 1;
+  transition: 0.2s;
+}
+
+#mermaid-container {
+  position: fixed;
+  contain: layout;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: none;
+  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.5);
+}
+#mermaid-container.active {
+  display: inline-block;
+}
+#mermaid-container > #mermaid-space {
+  border: 1px solid var(--lightgray);
+  background-color: var(--light);
+  border-radius: 5px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 80vh;
+  width: 80vw;
+  overflow: hidden;
+}
+#mermaid-container > #mermaid-space > .mermaid-content {
+  position: relative;
+  transform-origin: 0 0;
+  transition: transform 0.1s ease;
+  overflow: visible;
+  min-height: 200px;
+  min-width: 200px;
+}
+#mermaid-container > #mermaid-space > .mermaid-content pre {
+  margin: 0;
+  border: none;
+}
+#mermaid-container > #mermaid-space > .mermaid-content svg {
+  max-width: none;
+  height: auto;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: var(--light);
+  border: 1px solid var(--lightgray);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--lightgray);
+  background: var(--light);
+  color: var(--dark);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: var(--bodyFont);
+  transition: all 0.2s ease;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:hover {
+  background: var(--lightgray);
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:active {
+  transform: translateY(1px);
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:nth-child(2) {
+  width: auto;
+  padding: 0 12px;
+  font-size: 14px;
+}
+/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VSb290IjoiL1VzZXJzL2Vnb3JkbS9wcm9qZWN0cy9hcmQvZWdvcmRtLmdpdGh1Yi5pby9xdWFydHovY29tcG9uZW50cy9zdHlsZXMiLCJzb3VyY2VzIjpbIm1lcm1haWQuaW5saW5lLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7O0FBR0Y7RUFDRTtFQUNBOztBQUdGO0VBQ0U7OztBQUtGO0VBQ0U7RUFDQTs7O0FBSUo7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOztBQUVBO0VBQ0U7O0FBR0Y7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7O0FBR0Y7RUFDRTtFQUNBOztBQUlKO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7O0FBRUE7RUFDRTs7QUFHRjtFQUNFOztBQUlGO0VBQ0U7RUFDQTtFQUNBIiwic291cmNlc0NvbnRlbnQiOlsiLmV4cGFuZC1idXR0b24ge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGZsb2F0OiByaWdodDtcbiAgcGFkZGluZzogMC40cmVtO1xuICBtYXJnaW46IDAuM3JlbTtcbiAgcmlnaHQ6IDA7IC8vIE5PVEU6IHJpZ2h0IHdpbGwgYmUgc2V0IGluIG1lcm1haWQuaW5saW5lLnRzXG4gIGNvbG9yOiB2YXIoLS1ncmF5KTtcbiAgYm9yZGVyLWNvbG9yOiB2YXIoLS1kYXJrKTtcbiAgYmFja2dyb3VuZC1jb2xvcjogdmFyKC0tbGlnaHQpO1xuICBib3JkZXI6IDFweCBzb2xpZDtcbiAgYm9yZGVyLXJhZGl1czogNXB4O1xuICBvcGFjaXR5OiAwO1xuICB0cmFuc2l0aW9uOiAwLjJzO1xuXG4gICYgPiBzdmcge1xuICAgIGZpbGw6IHZhcigtLWxpZ2h0KTtcbiAgICBmaWx0ZXI6IGNvbnRyYXN0KDAuMyk7XG4gIH1cblxuICAmOmhvdmVyIHtcbiAgICBjdXJzb3I6IHBvaW50ZXI7XG4gICAgYm9yZGVyLWNvbG9yOiB2YXIoLS1zZWNvbmRhcnkpO1xuICB9XG5cbiAgJjpmb2N1cyB7XG4gICAgb3V0bGluZTogMDtcbiAgfVxufVxuXG5wcmUge1xuICAmOmhvdmVyID4gLmV4cGFuZC1idXR0b24ge1xuICAgIG9wYWNpdHk6IDE7XG4gICAgdHJhbnNpdGlvbjogMC4ycztcbiAgfVxufVxuXG4jbWVybWFpZC1jb250YWluZXIge1xuICBwb3NpdGlvbjogZml4ZWQ7XG4gIGNvbnRhaW46IGxheW91dDtcbiAgei1pbmRleDogOTk5O1xuICBsZWZ0OiAwO1xuICB0b3A6IDA7XG4gIHdpZHRoOiAxMDB2dztcbiAgaGVpZ2h0OiAxMDB2aDtcbiAgb3ZlcmZsb3c6IGhpZGRlbjtcbiAgZGlzcGxheTogbm9uZTtcbiAgYmFja2Ryb3AtZmlsdGVyOiBibHVyKDRweCk7XG4gIGJhY2tncm91bmQ6IHJnYmEoMCwgMCwgMCwgMC41KTtcblxuICAmLmFjdGl2ZSB7XG4gICAgZGlzcGxheTogaW5saW5lLWJsb2NrO1xuICB9XG5cbiAgJiA+ICNtZXJtYWlkLXNwYWNlIHtcbiAgICBib3JkZXI6IDFweCBzb2xpZCB2YXIoLS1saWdodGdyYXkpO1xuICAgIGJhY2tncm91bmQtY29sb3I6IHZhcigtLWxpZ2h0KTtcbiAgICBib3JkZXItcmFkaXVzOiA1cHg7XG4gICAgcG9zaXRpb246IGZpeGVkO1xuICAgIHRvcDogNTAlO1xuICAgIGxlZnQ6IDUwJTtcbiAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZSgtNTAlLCAtNTAlKTtcbiAgICBoZWlnaHQ6IDgwdmg7XG4gICAgd2lkdGg6IDgwdnc7XG4gICAgb3ZlcmZsb3c6IGhpZGRlbjtcblxuICAgICYgPiAubWVybWFpZC1jb250ZW50IHtcbiAgICAgIHBvc2l0aW9uOiByZWxhdGl2ZTtcbiAgICAgIHRyYW5zZm9ybS1vcmlnaW46IDAgMDtcbiAgICAgIHRyYW5zaXRpb246IHRyYW5zZm9ybSAwLjFzIGVhc2U7XG4gICAgICBvdmVyZmxvdzogdmlzaWJsZTtcbiAgICAgIG1pbi1oZWlnaHQ6IDIwMHB4O1xuICAgICAgbWluLXdpZHRoOiAyMDBweDtcblxuICAgICAgcHJlIHtcbiAgICAgICAgbWFyZ2luOiAwO1xuICAgICAgICBib3JkZXI6IG5vbmU7XG4gICAgICB9XG5cbiAgICAgIHN2ZyB7XG4gICAgICAgIG1heC13aWR0aDogbm9uZTtcbiAgICAgICAgaGVpZ2h0OiBhdXRvO1xuICAgICAgfVxuICAgIH1cblxuICAgICYgPiAubWVybWFpZC1jb250cm9scyB7XG4gICAgICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gICAgICBib3R0b206IDIwcHg7XG4gICAgICByaWdodDogMjBweDtcbiAgICAgIGRpc3BsYXk6IGZsZXg7XG4gICAgICBnYXA6IDhweDtcbiAgICAgIHBhZGRpbmc6IDhweDtcbiAgICAgIGJhY2tncm91bmQ6IHZhcigtLWxpZ2h0KTtcbiAgICAgIGJvcmRlcjogMXB4IHNvbGlkIHZhcigtLWxpZ2h0Z3JheSk7XG4gICAgICBib3JkZXItcmFkaXVzOiA2cHg7XG4gICAgICBib3gtc2hhZG93OiAwIDJweCA0cHggcmdiYSgwLCAwLCAwLCAwLjEpO1xuICAgICAgei1pbmRleDogMjtcblxuICAgICAgLm1lcm1haWQtY29udHJvbC1idXR0b24ge1xuICAgICAgICBkaXNwbGF5OiBmbGV4O1xuICAgICAgICBhbGlnbi1pdGVtczogY2VudGVyO1xuICAgICAgICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjtcbiAgICAgICAgd2lkdGg6IDMycHg7XG4gICAgICAgIGhlaWdodDogMzJweDtcbiAgICAgICAgcGFkZGluZzogMDtcbiAgICAgICAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tbGlnaHRncmF5KTtcbiAgICAgICAgYmFja2dyb3VuZDogdmFyKC0tbGlnaHQpO1xuICAgICAgICBjb2xvcjogdmFyKC0tZGFyayk7XG4gICAgICAgIGJvcmRlci1yYWRpdXM6IDRweDtcbiAgICAgICAgY3Vyc29yOiBwb2ludGVyO1xuICAgICAgICBmb250LXNpemU6IDE2cHg7XG4gICAgICAgIGZvbnQtZmFtaWx5OiB2YXIoLS1ib2R5Rm9udCk7XG4gICAgICAgIHRyYW5zaXRpb246IGFsbCAwLjJzIGVhc2U7XG5cbiAgICAgICAgJjpob3ZlciB7XG4gICAgICAgICAgYmFja2dyb3VuZDogdmFyKC0tbGlnaHRncmF5KTtcbiAgICAgICAgfVxuXG4gICAgICAgICY6YWN0aXZlIHtcbiAgICAgICAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZVkoMXB4KTtcbiAgICAgICAgfVxuXG4gICAgICAgIC8vIFN0eWxlIHRoZSByZXNldCBidXR0b24gZGlmZmVyZW50bHlcbiAgICAgICAgJjpudGgtY2hpbGQoMikge1xuICAgICAgICAgIHdpZHRoOiBhdXRvO1xuICAgICAgICAgIHBhZGRpbmc6IDAgMTJweDtcbiAgICAgICAgICBmb250LXNpemU6IDE0cHg7XG4gICAgICAgIH1cbiAgICAgIH1cbiAgICB9XG4gIH1cbn1cbiJdfQ== */</style><link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet" type="text/css" data-persist="true"/><script src="../prescript.js" type="application/javascript" data-persist="true"></script><script type="application/javascript" data-persist="true">const fetchData = fetch("../static/contentIndex.json").then(data => data.json())</script><link rel="alternate" type="application/rss+xml" title="RSS Feed" href="https://egordmitriev.dev/index.xml"/></head><body data-slug="blog/2026-05-18-optimizing-samurai-part-3"><div id="quartz-root" class="page"><div id="quartz-body"><div class="left sidebar"><h2 class="page-title"><a href="..">Egor Dmitriev</a></h2><div class="spacer mobile-only"></div><div class="search"><button class="search-button"><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title>Search</title><g class="search-path" fill="none"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"></path><circle cx="8" cy="8" r="7"></circle></g></svg><p>Search</p></button><div class="search-container"><div class="search-space"><input autocomplete="off" class="search-bar" name="search" type="text" aria-label="Search for something" placeholder="Search for something"/><div class="search-layout" data-preview="true"></div></div></div></div><div class="sidebar-posts desktop-only"><h3>Recent Posts</h3><ul class="sidebar-posts-ul"><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-07-12-did-your-agent-actually-read-that-file" class="internal sidebar-post-title">Did Your Agent Actually Read That File?</a></div><div class="sidebar-post-meta"><span class="sidebar-post-date"><time datetime="2026-07-11T22:00:00.000Z">Jul 12, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-25-long-term-visual-tracking-for-drones-2026" class="internal sidebar-post-title">Long-Term Visual Tracking for Drones: State of the Art, Open Source, and Edge Inference in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-24T22:00:00.000Z">May 25, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-24-vio-drones-2026" class="internal sidebar-post-title">Visual-Inertial Odometry for Drones: State of the Art, Foundation-3D, and the cuVSLAM Squeeze in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-23T22:00:00.000Z">May 24, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-23-drone-to-satellite-localization-2026" class="internal sidebar-post-title">Drone-to-Satellite Visual Geo-Localization: State of the Art, Open Source, and Edge Inference in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-22T22:00:00.000Z">May 23, 2026</time></span></div></li></ul><p class="sidebar-browse"><a href="../blog/">All posts →</a></p></div></div><div class="center"><div class="page-header"><div class="popover-hint"><nav class="breadcrumb-container" aria-label="breadcrumbs"><div class="breadcrumb-element"><a href="../">Home</a><p> ❯ </p></div><div class="breadcrumb-element"><a href="../blog/">Blog</a><p> ❯ </p></div><div class="breadcrumb-element"><a href>CoreML Deployment on Apple Silicon: Real Time Vision Models</a></div></nav><h1 class="article-title">CoreML Deployment on Apple Silicon: Real-Time Vision Models</h1><p show-comma="true" class="content-meta"><time datetime="2026-05-17T22:00:00.000Z">May 18, 2026</time><span>12 min read</span></p><ul class="tags"><li><a href="../tags/deep-learning" class="internal tag-link">deep-learning</a></li><li><a href="../tags/computer-vision" class="internal tag-link">computer-vision</a></li><li><a href="../tags/apple-silicon" class="internal tag-link">apple-silicon</a></li><li><a href="../tags/coreml" class="internal tag-link">coreml</a></li><li><a href="../tags/optimization" class="internal tag-link">optimization</a></li><li><a href="../tags/onnx" class="internal tag-link">onnx</a></li><li><a href="../tags/metal" class="internal tag-link">metal</a></li><li><a href="../tags/model-deployment" class="internal tag-link">model-deployment</a></li></ul><div class="series-banner"><details class="series-toc"><summary><span class="series-icon">📚</span><a href="/series/optimizing-samurai" class="series-name">Optimizing SAMURAI</a><span class="series-position">Part 3 of 3</span></summary><ol class="series-list"><li class><a href="/blog/2026-05-16-optimizing-samurai-part-1">Optimizing PyTorch Models for Production: ONNX Export with SAM 2</a></li><li class><a href="/blog/2026-05-17-optimizing-samurai-part-2">TensorRT Optimization: 5x Faster Inference with FP16 Precision</a></li><li class="current"><span class="current-post">CoreML Deployment on Apple Silicon: Real-Time Vision Models</span></li></ol></details></div></div></div><article class="popover-hint"><p><a href="../optimizing-samurai-part-2" class="internal alias" data-slug="optimizing-samurai-part-2">Part 2</a> ended at 97 FPS on an RTX 4090 using TensorRT with mixed precision and cuda-python. That’s 3x real-time on a desktop GPU. But the drone cinematography use case also needs to work on a MacBook in the field, where there’s no NVIDIA GPU, no CUDA, and no TensorRT.</p>
+<p>This post covers what happens when you take the same four ONNX modules and run them on an M1 Pro MacBook. The constraints are completely different: a unified memory architecture, three distinct compute units competing for work, and an ML runtime (CoreML) whose op coverage silently determines whether your model runs fast or slow.</p>
+<h2 id="apple-silicons-ml-stack">Apple Silicon’s ML stack<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#apple-silicons-ml-stack" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>Before diving in, a quick orientation for readers coming from the CUDA world.</p>
+<p>Apple Silicon chips (M1, M2, M3, M4 and their Pro/Max/Ultra variants) have three types of compute hardware that can run ML workloads:</p>
+<ul>
+<li><strong>CPU</strong>: standard ARM cores, but with Apple’s AMX (Apple Matrix eXtend) coprocessor and <a href="https://developer.apple.com/documentation/accelerate/bnns" class="external">BNNS<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> (Basic Neural Network Subroutines) via the Accelerate framework. These are not just “fallback” cores; Apple has heavily optimized this path.</li>
+<li><strong>GPU</strong>: Apple’s integrated GPU, accessed via Metal. Good at large parallelizable operations (convolutions, large matrix multiplies).</li>
+<li><strong>Neural Engine (ANE)</strong>: a dedicated ML accelerator, designed for 16-bit inference on specific graph patterns. Fast when your model fits its constraints; useless when it doesn’t.</li>
+</ul>
+<p>All three share a single unified memory pool. There’s no PCIe transfer cost between CPU and GPU memory because there’s no separate GPU memory. The cost comes instead from <em>dispatch overhead</em>: handing work to a compute unit and collecting the result.</p>
+<p><a href="https://developer.apple.com/documentation/coreml" class="external">CoreML<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> is Apple’s ML framework that decides which compute unit handles which operation. ONNX Runtime’s <a href="https://onnxruntime.ai/docs/execution-providers/CoreML-ExecutionProvider.html" class="external">CoreML Execution Provider<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> bridges ONNX models to CoreML: at session init, it compiles supported ONNX subgraphs into CoreML programs. Unsupported ops stay on ORT’s CPU kernels. The boundary between “CoreML-supported” and “not supported” becomes the critical optimization surface.</p>
+<h2 id="the-41-regression">The 41% regression<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-41-regression" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>My first attempt was straightforward. The ONNX bundle from Part 1, the CoreML EP, default settings:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">import</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> onnxruntime </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">as</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> ort</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">session </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> ort.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">InferenceSession</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">    &quot;image_encoder.onnx&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">    providers</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">[</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;CoreMLExecutionProvider&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">]</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span></code></pre></figure>
+<p>The result:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>EP</th><th>mIoU</th><th>p50 ms</th><th>FPS</th></tr></thead><tbody><tr><td>CPU</td><td>0.9203</td><td>258.2</td><td><strong>3.87</strong></td></tr><tr><td>CoreML (default)</td><td>0.9202</td><td>438.9</td><td>2.28</td></tr></tbody></table></div>
+<p>CoreML was <strong>41% slower than pure CPU</strong>. Same model, same Mac, worse performance by enabling the hardware accelerator.</p>
+<p>The ORT session-init logs tell the story. During graph partitioning, ORT prints which nodes CoreML claimed:</p>
+<pre><code>[CoreML] Supported 136/1495 nodes (9.1%) in memory_attention
+[CoreML] Supported 5/29 nodes (17.2%) in prompt_encoder
+</code></pre>
+<p>Only 9% of <code>memory_attention</code> nodes run on CoreML. The rest fall back to ORT’s CPU kernels. But the real cost isn’t the fallback ops themselves. It’s the <strong>partition boundaries</strong>: each time execution crosses from a CoreML subgraph to a CPU subgraph (or back), tensors must be copied between CoreML’s internal format and ORT’s format. With 24 partitions in <code>memory_attention</code>, that’s 23 boundary crossings per frame. The copy overhead dominated any kernel speedup.</p>
+<p>My initial conclusion: ship CPU EP as the Mac default, revisit CoreML later. That conclusion was wrong.</p>
+<h2 id="the-breakthrough-one-runtime-flag">The breakthrough: one runtime flag<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-breakthrough-one-runtime-flag" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>The default CoreML configuration uses the legacy <code>NeuralNetwork</code> container format, which dates back to CoreML 1 and has narrow op coverage for transformer-style attention. FP16 batched MatMul, Gemm, and several reshape variants are rejected, forcing the graph into dozens of fragments.</p>
+<p><a href="https://coremltools.readme.io/docs/model-intermediate-language" class="external">MLProgram<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, introduced in CoreML 5 (iOS 15 / macOS 12), is the modern container format with substantially wider op coverage. Switching to it is a single provider option:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">session </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> ort.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">InferenceSession</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">    &quot;memory_attention.onnx&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">    providers</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">[(</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;CoreMLExecutionProvider&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, {</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">        &quot;ModelFormat&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;MLProgram&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">        &quot;MLComputeUnits&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;CPUAndGPU&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    })]</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span></code></pre></figure>
+<p>The effect on <code>memory_attention</code>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>CoreML format</th><th>Partitions</th><th>Nodes claimed</th><th>p50 ms</th></tr></thead><tbody><tr><td>NeuralNetwork (default)</td><td>24</td><td>136/1495 (9%)</td><td>320</td></tr><tr><td><strong>MLProgram</strong></td><td><strong>13</strong></td><td><strong>509/549 (93%)</strong></td><td><strong>77</strong></td></tr></tbody></table></div>
+<p>Coverage jumps from 9% to 93%. Partitions drop from 24 to 13. Latency falls 4x. The reason: the legacy NeuralNetwork format rejects FP16 batched MatMul/Gemm operations, triggering 987 <code>Cast</code> (fp16 to fp32 and back) events at partition boundaries. MLProgram supports those operations natively, so the entire attention block runs end-to-end on CoreML without intermediate precision conversions.</p>
+<p>The <code>MLComputeUnits=CPUAndGPU</code> setting skips the Neural Engine, which has even stricter dtype/shape constraints than the GPU path. For transformer attention, the GPU path is better. More on compute unit selection later.</p>
+<p>End-to-end result:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Config</th><th>mIoU</th><th>p50 ms</th><th>FPS</th></tr></thead><tbody><tr><td>CPU EP</td><td>0.9203</td><td>258</td><td>3.87</td></tr><tr><td>CoreML NeuralNetwork (old default)</td><td>0.9202</td><td>439</td><td>2.28</td></tr><tr><td><strong>CoreML MLProgram + CPUAndGPU</strong></td><td><strong>0.9084</strong></td><td><strong>136</strong></td><td><strong>7.36</strong></td></tr></tbody></table></div>
+<p>1.9x faster than CPU, 3.2x faster than the old CoreML default. Small mIoU drop (−0.012) from FP16 GPU numerics, well above the 0.85 acceptance bar. The one cost: ~13 seconds of one-time session initialization while CoreML compiles the MLProgram subgraph. Fine for a long-running tracking service; noticeable for quick scripts.</p>
+<blockquote class="callout note" data-callout="note">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Note</p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>An initial measurement showed 183 ms / 5.46 FPS for this configuration. That turned out to be thermal throttling. After letting the Mac stabilize and re-running with a longer benchmark window, the true number was 136 ms / 7.36 FPS.</p>
+</div>
+</blockquote>
+<h2 id="where-the-time-goes">Where the time goes<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#where-the-time-goes" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>With MLProgram defaults, per-stage profiling reveals:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Stage</th><th>p50 ms</th><th>% of frame</th></tr></thead><tbody><tr><td>Preprocess (resize + normalize)</td><td>6.5</td><td>4.8%</td></tr><tr><td>image_encoder</td><td>36.6</td><td>27.1%</td></tr><tr><td>prompt_encoder</td><td>0.7</td><td>0.5%</td></tr><tr><td><strong>memory_attention</strong></td><td><strong>75.2</strong></td><td><strong>55.7%</strong></td></tr><tr><td>mask_decoder</td><td>5.9</td><td>4.4%</td></tr><tr><td>memory_encoder</td><td>3.8</td><td>2.8%</td></tr><tr><td>Python overhead</td><td>3.3</td><td>2.5%</td></tr><tr><td><strong>Total</strong></td><td><strong>134.9</strong></td><td></td></tr></tbody></table></div>
+<p><code>memory_attention</code> is still 56% of the frame. That’s where to focus. The Python overhead is only ~10 ms: no big hidden tax, unlike the CUDA pipeline in Part 2 where preprocessing was 40% of total time.</p>
+<p>One module surprise: <code>memory_encoder</code> under CoreML MLProgram was <strong>5.75x faster</strong> than CPU EP (2.1 ms vs 12.3 ms). The unsung hero, and a sign that CoreML’s GPU path handles feed-forward convolution blocks extremely well.</p>
+<h2 id="onnx-surgery-the-pattern-matters-more-than-the-op">ONNX surgery: the pattern matters more than the op<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#onnx-surgery-the-pattern-matters-more-than-the-op" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>Part 2 had the TensorRT FP16 Softmax bug. CoreML has its own version of the same lesson: <strong>how PyTorch traces your model to ONNX determines whether CoreML can fuse or must fragment.</strong></p>
+<h3 id="gather-to-splitsqueeze">Gather to Split/Squeeze<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#gather-to-splitsqueeze" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The rotary position embedding (RoPE) code in <code>memory_attention</code> indexes a pair tensor like this:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Original PyTorch code</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">xq_pair </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> xq.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">reshape</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#D73A49;--shiki-dark:#ABB2BF;">*</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">xq.shape[:</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">-</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">], </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">-</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">2</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">xq_real </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> xq_pair[</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">...</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">]  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># real part</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">xq_imag </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> xq_pair[</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">...</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">]  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># imaginary part</span></span></code></pre></figure>
+<p>How do you find what this becomes in ONNX? Open the exported <code>.onnx</code> in <a href="https://netron.app/" class="external">Netron<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> and trace the graph from the RoPE reshape. You’ll see that <code>torch.onnx.export</code> lowers <code>xq_pair[..., 0]</code> to a <code>Gather</code> node:</p>
+<pre><code># What Netron shows for this indexing pattern:
+Gather(data=xq_pair, indices=0, axis=-1)
+  → output shape: [batch, seq, heads, dim/2]
+</code></pre>
+<p>Then cross-reference against ORT’s session-init log:</p>
+<pre><code>[CoreML] Node 'Gather_142' is not supported: 
+  Gather with scalar index on last axis not supported for MLProgram
+</code></pre>
+<p>CoreML MLProgram refuses that combination (scalar int64 index on the last axis with variable batch dimensions), creating a partition seam right in the middle of the attention block.</p>
+<p>The fix is a one-line change in the model code before re-export:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Fixed: Split instead of Gather</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">xq_pair </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> xq.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">reshape</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#D73A49;--shiki-dark:#ABB2BF;">*</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">xq.shape[:</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">-</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">], </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">-</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">2</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">xq_real, xq_imag </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> torch.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">unbind</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(xq_pair, </span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">dim</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=-</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span></code></pre></figure>
+<p><code>torch.unbind</code> lowers to ONNX <code>Split</code> + <code>Squeeze</code> (visible in Netron as two nodes instead of one <code>Gather</code>). Both are fully supported by CoreML MLProgram.</p>
+<p>The numbers tell an interesting story. The trace showed <code>Gather</code> ops costing only ~9 ms/frame directly. But removing them let CoreML fuse longer contiguous partitions, saving <strong>30 ms</strong> of boundary overhead. The indirect partition cost was 3x the direct op cost.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Metric</th><th>Before (Gather)</th><th>After (Split/Squeeze)</th></tr></thead><tbody><tr><td>mIoU</td><td>0.9084</td><td>0.9085</td></tr><tr><td>p50 ms</td><td>135.8</td><td><strong>99.3</strong></td></tr><tr><td>FPS</td><td>7.36</td><td><strong>10.08</strong></td></tr><tr><td>memory_attention ms</td><td>75.2</td><td><strong>45.4</strong></td></tr></tbody></table></div>
+<h3 id="scatternd-to-splitconcat">ScatterND to Split/Concat<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#scatternd-to-splitconcat" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The same RoPE code has a slice-assignment pattern:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Original: slice-assignment</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">k[:, :, :num_k_rope] </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;"> apply_rotary_enc</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(k[:, :, :num_k_rope], </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">...</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span></code></pre></figure>
+<p>In Netron, this shows up as a <code>ScatterND</code> node with a symbolic-length int64 index tensor (the <code>:num_k_rope</code> slice generates a dynamic index range). ORT’s CoreML EP logs confirm:</p>
+<pre><code>[CoreML] Node 'ScatterND_89' is not supported:
+  ScatterND with symbolic index dimensions not supported
+</code></pre>
+<p>CoreML refuses the symbolic index dimension.</p>
+<p>The fix: replace the in-place slice-assignment with an explicit split, transform, and concatenate:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Fixed: split → transform → concat</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">k_rope, k_pass </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> k.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">split</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">([num_k_rope, k.shape[</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">2</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">] </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> num_k_rope], </span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">dim</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">2</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">k_rope </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;"> apply_rotary_enc</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(k_rope, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">...</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">k </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> torch.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">cat</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">([k_rope, k_pass], </span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">dim</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">2</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span></code></pre></figure>
+<p>The ONNX node count dropped from 1322 to <strong>950</strong> (−372 nodes). Only 8 <code>ScatterND</code> nodes were removed directly, but their removal let the ONNX optimizer fuse 364 other nodes that had been trapped at partition boundaries. The optimizer couldn’t see through the partition seams before.</p>
+<p>Combined with the Gather fix, <code>memory_attention</code> went from the biggest bottleneck (75 ms) to a manageable 35 ms.</p>
+<h2 id="the-compute-unit-surprise">The compute-unit surprise<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-compute-unit-surprise" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>After the ONNX surgery, I ran a per-module compute-unit sweep on <code>image_encoder</code> (the new bottleneck at 33.8 ms):</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Config</th><th>p50 ms</th><th>Partitions</th></tr></thead><tbody><tr><td>ORT CPU EP (reference)</td><td>75.18</td><td>N/A</td></tr><tr><td>MLProgram + ALL (CPU+GPU+ANE)</td><td>30.55</td><td>17</td></tr><tr><td>MLProgram + CPUAndNeuralEngine</td><td>29.63</td><td>17</td></tr><tr><td>MLProgram + CPUAndGPU (shipped default)</td><td>44.07</td><td>17</td></tr><tr><td><strong>MLProgram + CPUOnly</strong></td><td><strong>23.74</strong></td><td><strong>17</strong></td></tr></tbody></table></div>
+<p>Three things I didn’t expect:</p>
+<p><strong>1. CPUAndGPU was the worst CoreML config for image_encoder.</strong> The evidence: <code>CPUOnly</code> (23.7 ms) beats <code>CPUAndGPU</code> (44.1 ms) by nearly 2x, yet both run the same CoreML-compiled graph with identical partition counts. The only difference is which hardware executes the kernels. The ViT encoder has 12 attention blocks, each with LayerNorm, GELU, and small per-head matmuls. That’s ~60 individual Metal dispatches per forward pass, each paying a fixed GPU command-buffer submission cost. For operations this small, the dispatch overhead exceeds the GPU’s compute advantage over the CPU’s AMX path. You can see this in Instruments (Metal System Trace): the GPU utilization is only ~15% with most time spent in command submission.</p>
+<p><strong>2. CoreML CPUOnly crushed ORT’s CPU EP: 24 ms vs 75 ms (3.2x faster).</strong> Same CPU, same operations, dramatically different performance. CoreML’s CPUOnly path uses Apple’s <a href="https://developer.apple.com/documentation/accelerate/bnns" class="external">BNNS<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> (Basic Neural Network Subroutines) and AMX coprocessor through the Accelerate framework. These are hand-tuned for Apple Silicon’s specific microarchitecture (cache line sizes, vector widths, memory controller behavior). ORT’s CPU kernels are portable C++ targeting generic x86/ARM, so they can’t exploit these hardware-specific paths.</p>
+<p><strong>3. All four configs have identical partitioning</strong> (17 partitions, 92% on CoreML). The performance difference is purely about which hardware backend executes the CoreML subgraphs, not about op coverage.</p>
+<p>The production fix: a per-module compute-unit override. <code>image_encoder</code> gets <code>CPUOnly</code>, everything else keeps <code>CPUAndGPU</code>:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">from</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> onnxruntime </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">import</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> InferenceSession</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">def</span><span style="--shiki-light:#6F42C1;--shiki-dark:#61AFEF;"> create_session</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#24292E;--shiki-light-font-style:inherit;--shiki-dark:#D19A66;--shiki-dark-font-style:italic;">model_path</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#24292E;--shiki-light-font-style:inherit;--shiki-dark:#D19A66;--shiki-dark-font-style:italic;">module_name</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">):</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">    # Per-module compute unit selection</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    compute_units </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> {</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">        &quot;image_encoder&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;CPUOnly&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,      </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># BNNS/AMX path</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">        &quot;memory_attention&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;CPUAndGPU&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># GPU handles attention well</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">        &quot;mask_decoder&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;CPUAndGPU&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">        &quot;memory_encoder&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;CPUAndGPU&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">        &quot;prompt_encoder&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;CPUAndGPU&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    }</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">    return</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;"> InferenceSession</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">        model_path,</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">        providers</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">[(</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;CoreMLExecutionProvider&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, {</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">            &quot;ModelFormat&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;MLProgram&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">            &quot;MLComputeUnits&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: compute_units.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">get</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(module_name, </span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;CPUAndGPU&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">),</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">        })]</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    )</span></span></code></pre></figure>
+<p>Stacked result: 10.08 → <strong>15.94 FPS</strong>. The <code>image_encoder</code> alone went from 44 ms to 24 ms.</p>
+<h2 id="pipelining-why-threading-works-here">Pipelining: why threading works here<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#pipelining-why-threading-works-here" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>On an NVIDIA GPU, pipelining ORT sessions across Python threads is pointless. All sessions share a single CUDA stream by default; the GPU serializes their kernel launches regardless of how many threads you use. You’d need multi-stream execution with explicit synchronization, which is its own complexity.</p>
+<p>On Apple Silicon, threading actually works. The three compute units (CPU/BNNS, GPU, ANE) are physically separate hardware. When <code>image_encoder</code> runs on BNNS/AMX (CPUOnly) and <code>memory_attention</code> runs on the GPU (CPUAndGPU), they execute on different silicon. Two Python threads calling two ORT sessions map to genuinely concurrent computation.</p>
+<p>ORT releases the GIL during <code>session.run()</code>, so standard <code>threading.Thread</code> is sufficient. No need for Python 3.13’s free-threaded interpreter.</p>
+<p>The architecture: three stages connected by two bounded queues:</p>
+<pre><button class="expand-button" aria-label="Expand mermaid diagram" data-view-component="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 1.06L2.56 7h10.88l-2.22-2.22a.75.75 0 011.06-1.06l3.5 3.5a.75.75 0 010 1.06l-3.5 3.5a.75.75 0 11-1.06-1.06l2.22-2.22H2.56l2.22 2.22a.75.75 0 11-1.06 1.06l-3.5-3.5a.75.75 0 010-1.06l3.5-3.5z"></path></svg></button><code class="mermaid" data-clipboard="&quot;graph LR\n    subgraph Thread 1\n        A[\&quot;Preprocess\\ncv2 resize + normalize\&quot;]\n    end\n    subgraph Thread 2\n        B[\&quot;image_encoder\\nCPUOnly / BNNS+AMX\&quot;]\n    end\n    subgraph Caller Thread\n        C[\&quot;SAMURAI consumer\\nmemory_attention + decoders\\non GPU + Kalman update\&quot;]\n    end\n    A -->|\&quot;Queue(maxsize=2)\&quot;| B\n    B -->|\&quot;Queue(maxsize=2)\&quot;| C&quot;">graph LR
+    subgraph Thread 1
+        A[&quot;Preprocess\ncv2 resize + normalize&quot;]
+    end
+    subgraph Thread 2
+        B[&quot;image_encoder\nCPUOnly / BNNS+AMX&quot;]
+    end
+    subgraph Caller Thread
+        C[&quot;SAMURAI consumer\nmemory_attention + decoders\non GPU + Kalman update&quot;]
+    end
+    A -->|&quot;Queue(maxsize=2)&quot;| B
+    B -->|&quot;Queue(maxsize=2)&quot;| C
+</code><div id="mermaid-container" role="dialog"><div id="mermaid-space"><div class="mermaid-content"></div></div></div></pre>
+<p>Each queue holds at most 2 frames. This bounds memory usage and provides enough buffering to absorb per-frame jitter without unbounded growth.</p>
+<p>I tested five variants to understand the design space:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Variant</th><th>FPS p50</th><th>mIoU</th><th>Notes</th></tr></thead><tbody><tr><td>Sequential</td><td>15.39</td><td>0.9041</td><td>No concurrency. One frame at a time.</td></tr><tr><td>Threaded (1-buffer)</td><td>25.28</td><td>0.9041</td><td>2 stages, <code>Queue(maxsize=1)</code>. Producer blocks if consumer is slow.</td></tr><tr><td>Asyncio</td><td>26.39</td><td>0.9041</td><td>Same 2-stage split but with <code>asyncio.Queue</code>. Similar to threads since the real work is in ORT (C++, GIL released).</td></tr><tr><td>Threaded (2-buffer)</td><td>26.51</td><td>0.9041</td><td>2 stages, <code>Queue(maxsize=2)</code>. Extra buffer absorbs variance but doesn’t add a pipeline stage.</td></tr><tr><td><strong>3-stage</strong></td><td><strong>31.24</strong></td><td><strong>0.9041</strong></td><td>3 stages, 2 queues. Preprocess, encoder, consumer each run independently.</td></tr></tbody></table></div>
+<p>The key insight: the asyncio variant performs nearly identically to threads because ORT releases the GIL during <code>session.run()</code>. The actual computation happens in C++/Metal, so Python’s concurrency model (threads vs asyncio) barely matters. What does matter is the number of pipeline stages.</p>
+<p>The 3-stage variant wins because splitting preprocess into its own stage frees the image_encoder thread from blocking on cv2/numpy work. Queue wait time dropped to 0.01 ms, meaning the consumer (stage 3) is the bottleneck and the encoder is always one frame ahead. That’s exactly the right regime: the pipeline is balanced enough that no stage is idle.</p>
+<p>Production validation (250-frame clip, <code>person-1</code>):</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Metric</th><th>Sequential</th><th>Pipelined</th></tr></thead><tbody><tr><td>FPS p50</td><td>14.05</td><td><strong>29.64</strong></td></tr><tr><td>Wall FPS</td><td>13.28</td><td><strong>28.06</strong></td></tr><tr><td>p95 ms</td><td>93.64</td><td><strong>38.34</strong></td></tr><tr><td>mIoU</td><td>0.9087</td><td><strong>0.9087</strong></td></tr></tbody></table></div>
+<p>Bit-exact mIoU parity. The p95 improvement is notable: pipelining doesn’t just raise throughput, it <strong>smooths per-frame jitter</strong> because a slow frame in one stage is hidden by the buffer in the next. p95 dropped from 94 ms to 38 ms.</p>
+<blockquote class="callout info" data-callout="info">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Info</p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>The spike’s 31.24 FPS slipped to 29.64 in production due to per-call <code>ThreadPoolExecutor</code> construction and dataclass bookkeeping. Under 1 ms per frame of overhead, well worth it for the clean <code>Iterator[TrackingResult]</code> API.</p>
+</div>
+</blockquote>
+<p>Pipelining is enabled by default for <code>mac_silicon</code> and disabled for CUDA/TRT (where it adds queue overhead with no concurrency win).</p>
+<h2 id="where-we-landed">Where we landed<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#where-we-landed" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>The full trajectory on Apple Silicon:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Configuration</th><th>FPS p50</th><th>mIoU</th><th>vs CPU</th></tr></thead><tbody><tr><td>CoreML NeuralNetwork (starting point)</td><td>2.28</td><td>0.9202</td><td>0.59x</td></tr><tr><td>ORT CPU EP</td><td>3.87</td><td>0.9203</td><td>1.00x</td></tr><tr><td>MLProgram + CPUAndGPU</td><td>7.36</td><td>0.9084</td><td>1.90x</td></tr><tr><td>+ Gather → Split/Squeeze re-export</td><td>10.08</td><td>0.9085</td><td>2.60x</td></tr><tr><td>+ Per-module CPUOnly + ScatterND fix</td><td>15.94</td><td>0.9087</td><td>4.12x</td></tr><tr><td><strong>+ 3-stage pipelined streaming</strong></td><td><strong>29.64</strong></td><td><strong>0.9087</strong></td><td><strong>7.66x</strong></td></tr></tbody></table></div>
+<p>13x over the CoreML starting point. 7.66x over CPU. Same mIoU throughout.</p>
+<h3 id="cross-platform-comparison">Cross-platform comparison<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#cross-platform-comparison" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Platform</th><th>FPS</th><th>Precision</th><th>Runtime</th></tr></thead><tbody><tr><td>Apple Silicon (this post)</td><td><strong>28</strong> wall</td><td>FP16</td><td>ORT CoreML EP, pipelined</td></tr><tr><td>RTX 4090 (Part 2)</td><td><strong>97</strong></td><td>Mixed FP16/FP32</td><td>Raw TRT + cuda-python</td></tr></tbody></table></div>
+<p>Both exceed the 30 FPS real-time bar (with Apple Silicon sitting right at the boundary). The RTX 4090 is 3.5x faster in raw throughput, but Apple Silicon’s 28 FPS is achieved on laptop hardware with no discrete GPU, no external power supply, and no CUDA dependency.</p>
+<h3 id="what-the-coreml-journey-teaches">What the CoreML journey teaches<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#what-the-coreml-journey-teaches" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The optimization surface on Apple Silicon is fundamentally different from CUDA:</p>
+<ol>
+<li><strong>Op coverage, not kernel speed.</strong> The dominant cost factor was partition fragmentation, not individual kernel performance. Fixing two ONNX patterns (<code>Gather</code> and <code>ScatterND</code>) yielded more speedup than any runtime configuration change.</li>
+<li><strong>The right format flag matters more than the right hardware.</strong> Switching from <code>NeuralNetwork</code> to <code>MLProgram</code> was a bigger win (3.2x) than any of the ONNX graph changes.</li>
+<li><strong>CPU can beat GPU.</strong> On Apple Silicon, the CPU path (via BNNS/AMX) can outperform GPU dispatch for graphs with many small operations. Per-module compute-unit selection is essential.</li>
+<li><strong>Threading works because the hardware is heterogeneous.</strong> Unlike a single CUDA GPU, Apple Silicon’s physically separate compute units enable real concurrent execution from plain Python threads.</li>
+</ol>
+<p><strong>Next up</strong>: Part 4 drops Python entirely and rebuilds the pipeline in Rust with <code>ort</code> (the Rust ONNX Runtime bindings), targeting both platforms from a single codebase.</p>
+<blockquote class="callout tip" data-callout="tip">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Full series </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p><a href="../optimizing-samurai-part-1" class="internal alias" data-slug="optimizing-samurai-part-1">Part 1: ONNX Export</a> → <a href="../optimizing-samurai-part-2" class="internal alias" data-slug="optimizing-samurai-part-2">Part 2: CUDA &amp; TensorRT</a> → <strong>Part 3: CoreML</strong> → Part 4: Rust (upcoming)</p>
+<p>For the research context behind the model choice, see <a href="../long-term-visual-tracking-2026" class="internal alias" data-slug="long-term-visual-tracking-2026">Long-Term Visual Tracking for Drones (2026)</a>.</p>
+</div>
+</blockquote>
+<hr/>
+<h2 id="references">References<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#references" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<ul>
+<li><a href="https://developer.apple.com/documentation/coreml" class="external">CoreML documentation<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></li>
+<li><a href="https://onnxruntime.ai/docs/execution-providers/CoreML-ExecutionProvider.html" class="external">ORT CoreML EP docs<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></li>
+<li><a href="https://coremltools.readme.io/docs/model-intermediate-language" class="external">MLProgram / Core ML Intermediate Language<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></li>
+<li><a href="https://developer.apple.com/documentation/accelerate/bnns" class="external">BNNS (Accelerate framework)<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></li>
+<li><a href="https://github.com/yformer/EfficientTAM" class="external">EfficientTAM<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></li>
+</ul></article><hr/><div class="page-footer"><nav class="prev-next-nav"><div class="prev-next-links"><div class="nav-link nav-prev"><a href="/blog/2026-05-17-optimizing-samurai-part-2" rel="prev"><span class="nav-direction">← Older</span><span class="nav-title">TensorRT Optimization: 5x Faster Inference with FP16 Precision</span></a></div><div class="nav-link nav-next"><a href="/blog/2026-05-23-drone-to-satellite-localization-2026" rel="next"><span class="nav-direction">Newer →</span><span class="nav-title">Drone-to-Satellite Visual Geo-Localization: State of the Art, Open Source, and Edge Inference in 2026</span></a></div></div></nav></div></div><div class="right sidebar"><div class="toc desktop-only"><button type="button" class="toc-header" aria-controls="toc-17" aria-expanded="true"><h3>Table of Contents</h3><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="fold"><polyline points="6 9 12 15 18 9"></polyline></svg></button><ul id="list-0" class="toc-content overflow"><li class="depth-0"><a href="#apple-silicons-ml-stack" data-for="apple-silicons-ml-stack">Apple Silicon’s ML stack</a></li><li class="depth-0"><a href="#the-41-regression" data-for="the-41-regression">The 41% regression</a></li><li class="depth-0"><a href="#the-breakthrough-one-runtime-flag" data-for="the-breakthrough-one-runtime-flag">The breakthrough: one runtime flag</a></li><li class="depth-0"><a href="#where-the-time-goes" data-for="where-the-time-goes">Where the time goes</a></li><li class="depth-0"><a href="#onnx-surgery-the-pattern-matters-more-than-the-op" data-for="onnx-surgery-the-pattern-matters-more-than-the-op">ONNX surgery: the pattern matters more than the op</a></li><li class="depth-1"><a href="#gather-to-splitsqueeze" data-for="gather-to-splitsqueeze">Gather to Split/Squeeze</a></li><li class="depth-1"><a href="#scatternd-to-splitconcat" data-for="scatternd-to-splitconcat">ScatterND to Split/Concat</a></li><li class="depth-0"><a href="#the-compute-unit-surprise" data-for="the-compute-unit-surprise">The compute-unit surprise</a></li><li class="depth-0"><a href="#pipelining-why-threading-works-here" data-for="pipelining-why-threading-works-here">Pipelining: why threading works here</a></li><li class="depth-0"><a href="#where-we-landed" data-for="where-we-landed">Where we landed</a></li><li class="depth-1"><a href="#cross-platform-comparison" data-for="cross-platform-comparison">Cross-platform comparison</a></li><li class="depth-1"><a href="#what-the-coreml-journey-teaches" data-for="what-the-coreml-journey-teaches">What the CoreML journey teaches</a></li><li class="depth-0"><a href="#references" data-for="references">References</a></li><li class="overflow-end"></li></ul></div></div><footer class><ul><li><a href="https://github.com/egordm/">GitHub</a></li><li><a href="https://www.linkedin.com/in/egor-dmitriev/">LinkedIn</a></li><li><a href="/index.xml">RSS Feed</a></li></ul></footer></div></div></body><script type="application/javascript" data-persist="true">function n(){let t=this.parentElement;t.classList.toggle("is-collapsed");let e=t.getElementsByClassName("callout-content")[0];if(!e)return;let l=t.classList.contains("is-collapsed");e.style.gridTemplateRows=l?"0fr":"1fr"}function c(){let t=document.getElementsByClassName("callout is-collapsible");for(let e of t){let l=e.getElementsByClassName("callout-title")[0],s=e.getElementsByClassName("callout-content")[0];if(!l||!s)continue;l.addEventListener("click",n),window.addCleanup(()=>l.removeEventListener("click",n));let o=e.classList.contains("is-collapsed");s.style.gridTemplateRows=o?"0fr":"1fr"}}document.addEventListener("nav",c);
+</script><script type="module" data-persist="true">function E(a,e){if(!a)return;function t(o){o.target===this&&(o.preventDefault(),o.stopPropagation(),e())}function n(o){o.key.startsWith("Esc")&&(o.preventDefault(),e())}a?.addEventListener("click",t),window.addCleanup(()=>a?.removeEventListener("click",t)),document.addEventListener("keydown",n),window.addCleanup(()=>document.removeEventListener("keydown",n))}function f(a){for(;a.firstChild;)a.removeChild(a.firstChild)}var m=class{constructor(e,t){this.container=e;this.content=t;this.setupEventListeners(),this.setupNavigationControls(),this.resetTransform()}isDragging=!1;startPan={x:0,y:0};currentPan={x:0,y:0};scale=1;MIN_SCALE=.5;MAX_SCALE=3;cleanups=[];setupEventListeners(){let e=this.onMouseDown.bind(this),t=this.onMouseMove.bind(this),n=this.onMouseUp.bind(this),o=this.onTouchStart.bind(this),r=this.onTouchMove.bind(this),i=this.onTouchEnd.bind(this),s=this.resetTransform.bind(this);this.container.addEventListener("mousedown",e),document.addEventListener("mousemove",t),document.addEventListener("mouseup",n),this.container.addEventListener("touchstart",o,{passive:!1}),document.addEventListener("touchmove",r,{passive:!1}),document.addEventListener("touchend",i),window.addEventListener("resize",s),this.cleanups.push(()=>this.container.removeEventListener("mousedown",e),()=>document.removeEventListener("mousemove",t),()=>document.removeEventListener("mouseup",n),()=>this.container.removeEventListener("touchstart",o),()=>document.removeEventListener("touchmove",r),()=>document.removeEventListener("touchend",i),()=>window.removeEventListener("resize",s))}cleanup(){for(let e of this.cleanups)e()}setupNavigationControls(){let e=document.createElement("div");e.className="mermaid-controls";let t=this.createButton("+",()=>this.zoom(.1)),n=this.createButton("-",()=>this.zoom(-.1)),o=this.createButton("Reset",()=>this.resetTransform());e.appendChild(n),e.appendChild(o),e.appendChild(t),this.container.appendChild(e)}createButton(e,t){let n=document.createElement("button");return n.textContent=e,n.className="mermaid-control-button",n.addEventListener("click",t),window.addCleanup(()=>n.removeEventListener("click",t)),n}onMouseDown(e){e.button===0&&(this.isDragging=!0,this.startPan={x:e.clientX-this.currentPan.x,y:e.clientY-this.currentPan.y},this.container.style.cursor="grabbing")}onMouseMove(e){this.isDragging&&(e.preventDefault(),this.currentPan={x:e.clientX-this.startPan.x,y:e.clientY-this.startPan.y},this.updateTransform())}onMouseUp(){this.isDragging=!1,this.container.style.cursor="grab"}onTouchStart(e){if(e.touches.length!==1)return;this.isDragging=!0;let t=e.touches[0];this.startPan={x:t.clientX-this.currentPan.x,y:t.clientY-this.currentPan.y}}onTouchMove(e){if(!this.isDragging||e.touches.length!==1)return;e.preventDefault();let t=e.touches[0];this.currentPan={x:t.clientX-this.startPan.x,y:t.clientY-this.startPan.y},this.updateTransform()}onTouchEnd(){this.isDragging=!1}zoom(e){let t=Math.min(Math.max(this.scale+e,this.MIN_SCALE),this.MAX_SCALE),n=this.content.getBoundingClientRect(),o=n.width/2,r=n.height/2,i=t-this.scale;this.currentPan.x-=o*i,this.currentPan.y-=r*i,this.scale=t,this.updateTransform()}updateTransform(){this.content.style.transform=`translate(${this.currentPan.x}px, ${this.currentPan.y}px) scale(${this.scale})`}resetTransform(){let t=this.content.querySelector("svg").getBoundingClientRect(),n=t.width/this.scale,o=t.height/this.scale;this.scale=1,this.currentPan={x:(this.container.clientWidth-n)/2,y:(this.container.clientHeight-o)/2},this.updateTransform()}},T=["--secondary","--tertiary","--gray","--light","--lightgray","--highlight","--dark","--darkgray","--codeFont"],y;document.addEventListener("nav",async()=>{let e=document.querySelector(".center").querySelectorAll("code.mermaid");if(e.length===0)return;y||=await import("https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.4.0/mermaid.esm.min.mjs");let t=y.default,n=new WeakMap;for(let r of e)n.set(r,r.innerText);async function o(){for(let s of e){s.removeAttribute("data-processed");let c=n.get(s);c&&(s.innerHTML=c)}let r=T.reduce((s,c)=>(s[c]=window.getComputedStyle(document.documentElement).getPropertyValue(c),s),{}),i=document.documentElement.getAttribute("saved-theme")==="dark";t.initialize({startOnLoad:!1,securityLevel:"loose",theme:i?"dark":"base",themeVariables:{fontFamily:r["--codeFont"],primaryColor:r["--light"],primaryTextColor:r["--darkgray"],primaryBorderColor:r["--tertiary"],lineColor:r["--darkgray"],secondaryColor:r["--secondary"],tertiaryColor:r["--tertiary"],clusterBkg:r["--light"],edgeLabelBackground:r["--highlight"]}}),await t.run({nodes:e})}await o(),document.addEventListener("themechange",o),window.addCleanup(()=>document.removeEventListener("themechange",o));for(let r=0;r<e.length;r++){let v=function(){let g=l.querySelector("#mermaid-space"),h=l.querySelector(".mermaid-content");if(!h)return;f(h);let w=i.querySelector("svg").cloneNode(!0);h.appendChild(w),l.classList.add("active"),g.style.cursor="grab",u=new m(g,h)},M=function(){l.classList.remove("active"),u?.cleanup(),u=null},i=e[r],s=i.parentElement,c=s.querySelector(".clipboard-button"),d=s.querySelector(".expand-button"),p=window.getComputedStyle(c),L=c.offsetWidth+parseFloat(p.marginLeft||"0")+parseFloat(p.marginRight||"0");d.style.right=`calc(${L}px + 0.3rem)`,s.prepend(d);let l=s.querySelector("#mermaid-container");if(!l)return;let u=null;d.addEventListener("click",v),E(l,M),window.addCleanup(()=>{u?.cleanup(),d.removeEventListener("click",v)})}});
+</script><script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/copy-tex.min.js" type="application/javascript" data-persist="true"></script><script src="../postscript.js" type="module" data-persist="true"></script></html>

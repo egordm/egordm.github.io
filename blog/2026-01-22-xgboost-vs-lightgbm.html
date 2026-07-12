@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr"><head><title>XGBoost vs LightGBM: A Practical Comparison | egordmitriev.dev</title><meta charset="utf-8"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Inter:ital,wght@0,400;0,600;1,400;1,600&amp;family=JetBrains Mono:wght@400;600&amp;display=swap"/><link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin="anonymous"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="alternate" type="application/rss+xml" title="Egor Dmitriev" href="https://egordmitriev.dev/index.xml"/><meta name="og:site_name" content="Egor Dmitriev"/><meta property="og:title" content="XGBoost vs LightGBM: A Practical Comparison | egordmitriev.dev"/><meta property="og:type" content="article"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="XGBoost vs LightGBM: A Practical Comparison | egordmitriev.dev"/><meta name="twitter:description" content="When to choose XGBoost vs LightGBM: speed, accuracy, features, and practical recommendations based on your use case."/><meta property="og:description" content="When to choose XGBoost vs LightGBM: speed, accuracy, features, and practical recommendations based on your use case."/><meta property="og:image:alt" content="When to choose XGBoost vs LightGBM: speed, accuracy, features, and practical recommendations based on your use case."/><meta property="og:image" content="https://egordmitriev.dev/static/og-image.png"/><meta property="og:image:url" content="https://egordmitriev.dev/static/og-image.png"/><meta name="twitter:image" content="https://egordmitriev.dev/static/og-image.png"/><meta property="og:image:type" content="image/.png"/><meta property="twitter:domain" content="egordmitriev.dev"/><meta property="og:url" content="https://egordmitriev.dev/blog/2026-01-22-xgboost-vs-lightgbm"/><meta property="twitter:url" content="https://egordmitriev.dev/blog/2026-01-22-xgboost-vs-lightgbm"/><link rel="canonical" href="https://egordmitriev.dev/blog/2026-01-22-xgboost-vs-lightgbm"/><link rel="icon" href="../static/icon.png"/><meta name="description" content="When to choose XGBoost vs LightGBM: speed, accuracy, features, and practical recommendations based on your use case."/><meta name="generator" content="Quartz"/><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"XGBoost vs LightGBM: A Practical Comparison","description":"When to choose XGBoost vs LightGBM: speed, accuracy, features, and practical recommendations based on your use case.","datePublished":"2026-01-22","url":"https://egordmitriev.dev/blog/2026-01-22-xgboost-vs-lightgbm","author":{"@type":"Person","name":"Egor Dmitriev","url":"https://egordmitriev.dev"},"publisher":{"@type":"Person","name":"Egor Dmitriev"},"keywords":"machine-learning, gradient-boosting, xgboost, lightgbm"}</script><link href="../index.css" rel="stylesheet" type="text/css" data-persist="true"/><style>.expand-button {
+  position: absolute;
+  display: flex;
+  float: right;
+  padding: 0.4rem;
+  margin: 0.3rem;
+  right: 0;
+  color: var(--gray);
+  border-color: var(--dark);
+  background-color: var(--light);
+  border: 1px solid;
+  border-radius: 5px;
+  opacity: 0;
+  transition: 0.2s;
+}
+.expand-button > svg {
+  fill: var(--light);
+  filter: contrast(0.3);
+}
+.expand-button:hover {
+  cursor: pointer;
+  border-color: var(--secondary);
+}
+.expand-button:focus {
+  outline: 0;
+}
+
+pre:hover > .expand-button {
+  opacity: 1;
+  transition: 0.2s;
+}
+
+#mermaid-container {
+  position: fixed;
+  contain: layout;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: none;
+  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.5);
+}
+#mermaid-container.active {
+  display: inline-block;
+}
+#mermaid-container > #mermaid-space {
+  border: 1px solid var(--lightgray);
+  background-color: var(--light);
+  border-radius: 5px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 80vh;
+  width: 80vw;
+  overflow: hidden;
+}
+#mermaid-container > #mermaid-space > .mermaid-content {
+  position: relative;
+  transform-origin: 0 0;
+  transition: transform 0.1s ease;
+  overflow: visible;
+  min-height: 200px;
+  min-width: 200px;
+}
+#mermaid-container > #mermaid-space > .mermaid-content pre {
+  margin: 0;
+  border: none;
+}
+#mermaid-container > #mermaid-space > .mermaid-content svg {
+  max-width: none;
+  height: auto;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: var(--light);
+  border: 1px solid var(--lightgray);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--lightgray);
+  background: var(--light);
+  color: var(--dark);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: var(--bodyFont);
+  transition: all 0.2s ease;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:hover {
+  background: var(--lightgray);
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:active {
+  transform: translateY(1px);
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:nth-child(2) {
+  width: auto;
+  padding: 0 12px;
+  font-size: 14px;
+}
+/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VSb290IjoiL1VzZXJzL2Vnb3JkbS9wcm9qZWN0cy9hcmQvZWdvcmRtLmdpdGh1Yi5pby9xdWFydHovY29tcG9uZW50cy9zdHlsZXMiLCJzb3VyY2VzIjpbIm1lcm1haWQuaW5saW5lLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7O0FBR0Y7RUFDRTtFQUNBOztBQUdGO0VBQ0U7OztBQUtGO0VBQ0U7RUFDQTs7O0FBSUo7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOztBQUVBO0VBQ0U7O0FBR0Y7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7O0FBR0Y7RUFDRTtFQUNBOztBQUlKO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7O0FBRUE7RUFDRTs7QUFHRjtFQUNFOztBQUlGO0VBQ0U7RUFDQTtFQUNBIiwic291cmNlc0NvbnRlbnQiOlsiLmV4cGFuZC1idXR0b24ge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGZsb2F0OiByaWdodDtcbiAgcGFkZGluZzogMC40cmVtO1xuICBtYXJnaW46IDAuM3JlbTtcbiAgcmlnaHQ6IDA7IC8vIE5PVEU6IHJpZ2h0IHdpbGwgYmUgc2V0IGluIG1lcm1haWQuaW5saW5lLnRzXG4gIGNvbG9yOiB2YXIoLS1ncmF5KTtcbiAgYm9yZGVyLWNvbG9yOiB2YXIoLS1kYXJrKTtcbiAgYmFja2dyb3VuZC1jb2xvcjogdmFyKC0tbGlnaHQpO1xuICBib3JkZXI6IDFweCBzb2xpZDtcbiAgYm9yZGVyLXJhZGl1czogNXB4O1xuICBvcGFjaXR5OiAwO1xuICB0cmFuc2l0aW9uOiAwLjJzO1xuXG4gICYgPiBzdmcge1xuICAgIGZpbGw6IHZhcigtLWxpZ2h0KTtcbiAgICBmaWx0ZXI6IGNvbnRyYXN0KDAuMyk7XG4gIH1cblxuICAmOmhvdmVyIHtcbiAgICBjdXJzb3I6IHBvaW50ZXI7XG4gICAgYm9yZGVyLWNvbG9yOiB2YXIoLS1zZWNvbmRhcnkpO1xuICB9XG5cbiAgJjpmb2N1cyB7XG4gICAgb3V0bGluZTogMDtcbiAgfVxufVxuXG5wcmUge1xuICAmOmhvdmVyID4gLmV4cGFuZC1idXR0b24ge1xuICAgIG9wYWNpdHk6IDE7XG4gICAgdHJhbnNpdGlvbjogMC4ycztcbiAgfVxufVxuXG4jbWVybWFpZC1jb250YWluZXIge1xuICBwb3NpdGlvbjogZml4ZWQ7XG4gIGNvbnRhaW46IGxheW91dDtcbiAgei1pbmRleDogOTk5O1xuICBsZWZ0OiAwO1xuICB0b3A6IDA7XG4gIHdpZHRoOiAxMDB2dztcbiAgaGVpZ2h0OiAxMDB2aDtcbiAgb3ZlcmZsb3c6IGhpZGRlbjtcbiAgZGlzcGxheTogbm9uZTtcbiAgYmFja2Ryb3AtZmlsdGVyOiBibHVyKDRweCk7XG4gIGJhY2tncm91bmQ6IHJnYmEoMCwgMCwgMCwgMC41KTtcblxuICAmLmFjdGl2ZSB7XG4gICAgZGlzcGxheTogaW5saW5lLWJsb2NrO1xuICB9XG5cbiAgJiA+ICNtZXJtYWlkLXNwYWNlIHtcbiAgICBib3JkZXI6IDFweCBzb2xpZCB2YXIoLS1saWdodGdyYXkpO1xuICAgIGJhY2tncm91bmQtY29sb3I6IHZhcigtLWxpZ2h0KTtcbiAgICBib3JkZXItcmFkaXVzOiA1cHg7XG4gICAgcG9zaXRpb246IGZpeGVkO1xuICAgIHRvcDogNTAlO1xuICAgIGxlZnQ6IDUwJTtcbiAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZSgtNTAlLCAtNTAlKTtcbiAgICBoZWlnaHQ6IDgwdmg7XG4gICAgd2lkdGg6IDgwdnc7XG4gICAgb3ZlcmZsb3c6IGhpZGRlbjtcblxuICAgICYgPiAubWVybWFpZC1jb250ZW50IHtcbiAgICAgIHBvc2l0aW9uOiByZWxhdGl2ZTtcbiAgICAgIHRyYW5zZm9ybS1vcmlnaW46IDAgMDtcbiAgICAgIHRyYW5zaXRpb246IHRyYW5zZm9ybSAwLjFzIGVhc2U7XG4gICAgICBvdmVyZmxvdzogdmlzaWJsZTtcbiAgICAgIG1pbi1oZWlnaHQ6IDIwMHB4O1xuICAgICAgbWluLXdpZHRoOiAyMDBweDtcblxuICAgICAgcHJlIHtcbiAgICAgICAgbWFyZ2luOiAwO1xuICAgICAgICBib3JkZXI6IG5vbmU7XG4gICAgICB9XG5cbiAgICAgIHN2ZyB7XG4gICAgICAgIG1heC13aWR0aDogbm9uZTtcbiAgICAgICAgaGVpZ2h0OiBhdXRvO1xuICAgICAgfVxuICAgIH1cblxuICAgICYgPiAubWVybWFpZC1jb250cm9scyB7XG4gICAgICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gICAgICBib3R0b206IDIwcHg7XG4gICAgICByaWdodDogMjBweDtcbiAgICAgIGRpc3BsYXk6IGZsZXg7XG4gICAgICBnYXA6IDhweDtcbiAgICAgIHBhZGRpbmc6IDhweDtcbiAgICAgIGJhY2tncm91bmQ6IHZhcigtLWxpZ2h0KTtcbiAgICAgIGJvcmRlcjogMXB4IHNvbGlkIHZhcigtLWxpZ2h0Z3JheSk7XG4gICAgICBib3JkZXItcmFkaXVzOiA2cHg7XG4gICAgICBib3gtc2hhZG93OiAwIDJweCA0cHggcmdiYSgwLCAwLCAwLCAwLjEpO1xuICAgICAgei1pbmRleDogMjtcblxuICAgICAgLm1lcm1haWQtY29udHJvbC1idXR0b24ge1xuICAgICAgICBkaXNwbGF5OiBmbGV4O1xuICAgICAgICBhbGlnbi1pdGVtczogY2VudGVyO1xuICAgICAgICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjtcbiAgICAgICAgd2lkdGg6IDMycHg7XG4gICAgICAgIGhlaWdodDogMzJweDtcbiAgICAgICAgcGFkZGluZzogMDtcbiAgICAgICAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tbGlnaHRncmF5KTtcbiAgICAgICAgYmFja2dyb3VuZDogdmFyKC0tbGlnaHQpO1xuICAgICAgICBjb2xvcjogdmFyKC0tZGFyayk7XG4gICAgICAgIGJvcmRlci1yYWRpdXM6IDRweDtcbiAgICAgICAgY3Vyc29yOiBwb2ludGVyO1xuICAgICAgICBmb250LXNpemU6IDE2cHg7XG4gICAgICAgIGZvbnQtZmFtaWx5OiB2YXIoLS1ib2R5Rm9udCk7XG4gICAgICAgIHRyYW5zaXRpb246IGFsbCAwLjJzIGVhc2U7XG5cbiAgICAgICAgJjpob3ZlciB7XG4gICAgICAgICAgYmFja2dyb3VuZDogdmFyKC0tbGlnaHRncmF5KTtcbiAgICAgICAgfVxuXG4gICAgICAgICY6YWN0aXZlIHtcbiAgICAgICAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZVkoMXB4KTtcbiAgICAgICAgfVxuXG4gICAgICAgIC8vIFN0eWxlIHRoZSByZXNldCBidXR0b24gZGlmZmVyZW50bHlcbiAgICAgICAgJjpudGgtY2hpbGQoMikge1xuICAgICAgICAgIHdpZHRoOiBhdXRvO1xuICAgICAgICAgIHBhZGRpbmc6IDAgMTJweDtcbiAgICAgICAgICBmb250LXNpemU6IDE0cHg7XG4gICAgICAgIH1cbiAgICAgIH1cbiAgICB9XG4gIH1cbn1cbiJdfQ== */</style><link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet" type="text/css" data-persist="true"/><script src="../prescript.js" type="application/javascript" data-persist="true"></script><script type="application/javascript" data-persist="true">const fetchData = fetch("../static/contentIndex.json").then(data => data.json())</script><link rel="alternate" type="application/rss+xml" title="RSS Feed" href="https://egordmitriev.dev/index.xml"/></head><body data-slug="blog/2026-01-22-xgboost-vs-lightgbm"><div id="quartz-root" class="page"><div id="quartz-body"><div class="left sidebar"><h2 class="page-title"><a href="..">Egor Dmitriev</a></h2><div class="spacer mobile-only"></div><div class="search"><button class="search-button"><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title>Search</title><g class="search-path" fill="none"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"></path><circle cx="8" cy="8" r="7"></circle></g></svg><p>Search</p></button><div class="search-container"><div class="search-space"><input autocomplete="off" class="search-bar" name="search" type="text" aria-label="Search for something" placeholder="Search for something"/><div class="search-layout" data-preview="true"></div></div></div></div><div class="sidebar-posts desktop-only"><h3>Recent Posts</h3><ul class="sidebar-posts-ul"><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-07-12-did-your-agent-actually-read-that-file" class="internal sidebar-post-title">Did Your Agent Actually Read That File?</a></div><div class="sidebar-post-meta"><span class="sidebar-post-date"><time datetime="2026-07-11T22:00:00.000Z">Jul 12, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-25-long-term-visual-tracking-for-drones-2026" class="internal sidebar-post-title">Long-Term Visual Tracking for Drones: State of the Art, Open Source, and Edge Inference in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-24T22:00:00.000Z">May 25, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-24-vio-drones-2026" class="internal sidebar-post-title">Visual-Inertial Odometry for Drones: State of the Art, Foundation-3D, and the cuVSLAM Squeeze in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-23T22:00:00.000Z">May 24, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-23-drone-to-satellite-localization-2026" class="internal sidebar-post-title">Drone-to-Satellite Visual Geo-Localization: State of the Art, Open Source, and Edge Inference in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-22T22:00:00.000Z">May 23, 2026</time></span></div></li></ul><p class="sidebar-browse"><a href="../blog/">All posts →</a></p></div></div><div class="center"><div class="page-header"><div class="popover-hint"><nav class="breadcrumb-container" aria-label="breadcrumbs"><div class="breadcrumb-element"><a href="../">Home</a><p> ❯ </p></div><div class="breadcrumb-element"><a href="../blog/">Blog</a><p> ❯ </p></div><div class="breadcrumb-element"><a href>XGBoost vs LightGBM: A Practical Comparison</a></div></nav><h1 class="article-title">XGBoost vs LightGBM: A Practical Comparison</h1><p show-comma="true" class="content-meta"><time datetime="2026-01-21T23:00:00.000Z">Jan 22, 2026</time><span>5 min read</span></p><ul class="tags"><li><a href="../tags/machine-learning" class="internal tag-link">machine-learning</a></li><li><a href="../tags/gradient-boosting" class="internal tag-link">gradient-boosting</a></li><li><a href="../tags/xgboost" class="internal tag-link">xgboost</a></li><li><a href="../tags/lightgbm" class="internal tag-link">lightgbm</a></li></ul><div class="series-banner"><details class="series-toc"><summary><span class="series-icon">📚</span><a href="/series/inside-gradient-boosting" class="series-name">Inside Gradient Boosting</a><span class="series-position">Part 9 of 10</span></summary><ol class="series-list"><li class><a href="/blog/2026-01-06-what-is-gradient-boosting">What is Gradient Boosting?</a></li><li class><a href="/blog/2026-01-08-functional-gradient-descent">Functional Gradient Descent</a></li><li class><a href="/blog/2026-01-10-trees-and-split-gain">Trees and the Split Gain Formula</a></li><li class><a href="/blog/2026-01-12-histogram-based-split-finding">Histogram-Based Split Finding</a></li><li class><a href="/blog/2026-01-14-depth-wise-vs-leaf-wise">Depth-Wise vs Leaf-Wise Tree Growth</a></li><li class><a href="/blog/2026-01-16-gradient-based-sampling">Gradient-Based Sampling (GOSS)</a></li><li class><a href="/blog/2026-01-18-efb-and-categorical-features">Exclusive Feature Bundling and Categorical Features</a></li><li class><a href="/blog/2026-01-20-regularization">Regularization and Hyperparameter Tuning</a></li><li class="current"><span class="current-post">XGBoost vs LightGBM: A Practical Comparison</span></li><li class><a href="/blog/2026-01-25-boosters">Building Boosters: A Gradient Boosting Library from Scratch</a></li></ol></details></div></div></div><article class="popover-hint"><blockquote class="callout abstract" data-callout="abstract">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Inside Gradient Boosting, Part 9 of 10 </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>This series explains gradient boosting from first principles to advanced implementation details.</p>
+<p><strong>Previous:</strong> <a href="../gb-part-8" class="internal alias" data-slug="gb-part-8">Regularization and Hyperparameter Tuning</a>
+<strong>In this post:</strong> A practical comparison of the two dominant implementations.
+<strong>Next:</strong> <a href="../gb-part-10" class="internal alias" data-slug="gb-part-10">Boosters: A From-Scratch Implementation in Rust</a></p>
+</div>
+</blockquote>
+<p>Throughout this series, I’ve referenced both XGBoost and LightGBM. Now it’s time to compare them directly: when should you choose each, and what are the trade-offs?</p>
+<p>This isn’t a feature checklist. It’s an analysis of <strong>design philosophies</strong> and <strong>practical implications</strong>.</p>
+<hr/>
+<h2 id="design-philosophy">Design Philosophy<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#design-philosophy" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<h3 id="xgboost-correctness-and-compatibility">XGBoost: Correctness and Compatibility<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#xgboost-correctness-and-compatibility" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>XGBoost prioritizes:</p>
+<ul>
+<li><strong>Reproducibility</strong>: Same inputs → same outputs</li>
+<li><strong>Extensive documentation</strong>: Every parameter is well-documented</li>
+<li><strong>Wide compatibility</strong>: Multiple language bindings, serialization formats</li>
+<li><strong>Conservative defaults</strong>: Less likely to overfit out of the box</li>
+</ul>
+<h3 id="lightgbm-speed-and-efficiency">LightGBM: Speed and Efficiency<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#lightgbm-speed-and-efficiency" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>LightGBM prioritizes:</p>
+<ul>
+<li><strong>Training speed</strong>: Optimized for large datasets</li>
+<li><strong>Memory efficiency</strong>: Lower memory footprint</li>
+<li><strong>Aggressive optimizations</strong>: GOSS, EFB, gradient quantization</li>
+<li><strong>Accuracy per compute</strong>: Better results for the same training time</li>
+</ul>
+<blockquote class="callout note" data-callout="note">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Neither is &quot;Better&quot; </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>They optimize for different objectives. The right choice depends on your constraints.</p>
+</div>
+</blockquote>
+<hr/>
+<h2 id="tree-growth-strategy">Tree Growth Strategy<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#tree-growth-strategy" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>This is the core architectural difference:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Aspect</th><th>XGBoost</th><th>LightGBM</th></tr></thead><tbody><tr><td><strong>Default strategy</strong></td><td>Depth-wise</td><td>Leaf-wise</td></tr><tr><td><strong>Tree control</strong></td><td><code>max_depth</code></td><td><code>num_leaves</code></td></tr><tr><td><strong>Tree shape</strong></td><td>Balanced</td><td>Unbalanced</td></tr><tr><td><strong>Overfitting risk</strong></td><td>Lower</td><td>Higher (needs constraints)</td></tr></tbody></table></div>
+<p><strong>Depth-wise</strong> (XGBoost): Splits all nodes at each level before going deeper. Produces balanced trees.</p>
+<p><strong>Leaf-wise</strong> (LightGBM): Always splits the highest-gain leaf. Produces deeper, more efficient trees.</p>
+<h3 id="practical-impact">Practical Impact<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#practical-impact" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>For the <strong>same number of leaves</strong>, leaf-wise typically achieves lower loss. But it can create very deep paths that overfit.</p>
+<blockquote class="callout note" data-callout="note">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Rough Equivalence </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p><code>max_depth=6</code> (XGBoost) ≈ <code>num_leaves=63</code> (LightGBM)</p>
+<p>When comparing, set these to equivalent values.</p>
+</div>
+</blockquote>
+<hr/>
+<h2 id="speed-comparison">Speed Comparison<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#speed-comparison" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>LightGBM is generally faster, especially on large datasets:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Dataset Size</th><th>XGBoost</th><th>LightGBM</th><th>Typical Ratio</th></tr></thead><tbody><tr><td>&lt; 10K rows</td><td>Fast</td><td>Fast</td><td>~1:1</td></tr><tr><td>100K rows</td><td>Moderate</td><td>Fast</td><td>2-3× faster</td></tr><tr><td>1M rows</td><td>Slow</td><td>Moderate</td><td>3-5× faster</td></tr><tr><td>10M+ rows</td><td>Very slow</td><td>Moderate</td><td>5-10× faster</td></tr></tbody></table></div>
+<p><em>Note: Ratios are approximate and vary by dataset characteristics, feature count, and hyperparameters.</em></p>
+<h3 id="why-lightgbm-is-faster">Why LightGBM is Faster<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#why-lightgbm-is-faster" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<ol>
+<li><strong>Leaf-wise growth</strong>: Skips low-gain splits</li>
+<li><strong>GOSS</strong>: Uses only 20-30% of data (high-gradient samples)</li>
+<li><strong>EFB</strong>: Bundles sparse features</li>
+<li><strong>Histogram optimization</strong>: Better cache utilization</li>
+</ol>
+<h3 id="when-xgboost-is-competitive">When XGBoost is Competitive<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#when-xgboost-is-competitive" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<ul>
+<li>Small datasets (&lt; 100K rows): Overhead differences diminish</li>
+<li>GPU training: XGBoost’s GPU implementation is highly optimized</li>
+<li>When GOSS/EFB don’t apply (dense, non-sparse data)</li>
+</ul>
+<hr/>
+<h2 id="accuracy-comparison">Accuracy Comparison<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#accuracy-comparison" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>On most benchmarks, <strong>accuracy is comparable</strong> when both are properly tuned.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Scenario</th><th>Edge</th></tr></thead><tbody><tr><td>Default settings</td><td>LightGBM (often)</td></tr><tr><td>Tuned settings</td><td>Tie</td></tr><tr><td>Small data (&lt; 10K)</td><td>XGBoost (less overfit)</td></tr><tr><td>Large data (> 1M)</td><td>LightGBM (more efficient)</td></tr><tr><td>High-cardinality categoricals</td><td>LightGBM (native support)</td></tr></tbody></table></div>
+<p>The lesson: <strong>tuning matters more than library choice</strong>.</p>
+<hr/>
+<h2 id="feature-comparison">Feature Comparison<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#feature-comparison" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Feature</th><th>XGBoost</th><th>LightGBM</th></tr></thead><tbody><tr><td><strong>Categorical handling</strong></td><td>Via <code>enable_categorical</code></td><td>Native, gradient-sorted</td></tr><tr><td><strong>GOSS sampling</strong></td><td>❌</td><td>✅</td></tr><tr><td><strong>Feature bundling (EFB)</strong></td><td>❌</td><td>✅</td></tr><tr><td><strong>Leaf-wise growth</strong></td><td>Via <code>grow_policy='lossguide'</code></td><td>Default</td></tr><tr><td><strong>GPU training</strong></td><td>✅ (highly optimized)</td><td>✅</td></tr><tr><td><strong>Distributed training</strong></td><td>✅</td><td>✅</td></tr><tr><td><strong>Monotonic constraints</strong></td><td>✅</td><td>✅</td></tr><tr><td><strong>L1 regularization</strong></td><td>✅</td><td>✅</td></tr><tr><td><strong>Custom objectives</strong></td><td>✅</td><td>✅</td></tr><tr><td><strong>Model serialization</strong></td><td>JSON (documented schema)</td><td>Text/binary</td></tr></tbody></table></div>
+<h3 id="notable-differences">Notable Differences<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#notable-differences" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p><strong>Categorical features</strong>: LightGBM’s gradient-sorted algorithm finds better partitions than XGBoost’s approach for high-cardinality features.</p>
+<p><strong>Model format</strong>: XGBoost’s JSON format has a documented schema, making it easier for third-party tools to parse. LightGBM’s format is simpler but less standardized.</p>
+<p><strong>GPU performance</strong>: XGBoost has a more mature GPU implementation, often faster on GPU than LightGBM.</p>
+<hr/>
+<h2 id="parameter-mapping">Parameter Mapping<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#parameter-mapping" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>When switching between libraries, use this mapping:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>XGBoost</th><th>LightGBM</th><th>Notes</th></tr></thead><tbody><tr><td><code>eta</code></td><td><code>learning_rate</code></td><td>Same meaning</td></tr><tr><td><code>max_depth</code></td><td><code>max_depth</code></td><td>Same, but LightGBM uses <code>num_leaves</code> by default</td></tr><tr><td><code>gamma</code></td><td><code>min_split_gain</code></td><td>Minimum gain for split</td></tr><tr><td><code>min_child_weight</code></td><td><code>min_child_weight</code></td><td>Minimum Hessian sum</td></tr><tr><td><code>lambda</code></td><td><code>reg_lambda</code></td><td>L2 regularization</td></tr><tr><td><code>alpha</code></td><td><code>reg_alpha</code></td><td>L1 regularization</td></tr><tr><td><code>subsample</code></td><td><code>bagging_fraction</code> + <code>bagging_freq</code></td><td>Row sampling</td></tr><tr><td><code>colsample_bytree</code></td><td><code>feature_fraction</code></td><td>Column sampling</td></tr><tr><td><code>n_estimators</code></td><td><code>num_iterations</code></td><td>Number of trees</td></tr></tbody></table></div>
+<blockquote class="callout warning" data-callout="warning">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Default Differences </p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>Even with the same parameter names, defaults differ:</p>
+<ul>
+<li>XGBoost <code>learning_rate</code> default: 0.3</li>
+<li>LightGBM <code>learning_rate</code> default: 0.1</li>
+</ul>
+<p>Always set parameters explicitly for fair comparison.</p>
+</div>
+</blockquote>
+<hr/>
+<h2 id="when-to-choose-xgboost">When to Choose XGBoost<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#when-to-choose-xgboost" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>✅ <strong>Small to medium datasets</strong> (&lt; 100K rows)
+✅ <strong>GPU training</strong> (XGBoost’s GPU is very fast)
+✅ <strong>Reproducibility is critical</strong> (deterministic behavior)
+✅ <strong>Model interoperability</strong> (documented JSON format)
+✅ <strong>You want conservative defaults</strong> (less likely to overfit)
+✅ <strong>Distributed training with Spark/Dask</strong></p>
+<hr/>
+<h2 id="when-to-choose-lightgbm">When to Choose LightGBM<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#when-to-choose-lightgbm" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>✅ <strong>Large datasets</strong> (> 100K rows)
+✅ <strong>Training speed is critical</strong>
+✅ <strong>High-cardinality categorical features</strong>
+✅ <strong>Sparse/one-hot encoded features</strong> (EFB helps)
+✅ <strong>Memory constrained</strong> (lower footprint)
+✅ <strong>Maximum accuracy per training time</strong></p>
+<hr/>
+<h2 id="practical-recommendations">Practical Recommendations<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#practical-recommendations" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<h3 id="starting-point">Starting Point<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#starting-point" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>For most problems, <strong>start with LightGBM</strong>:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">import</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> lightgbm </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">as</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> lgb</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">model </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> lgb.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">LGBMClassifier</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">    n_estimators</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1000</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">    learning_rate</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">0.1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">    num_leaves</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">31</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">    # Enable early stopping</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">model.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">fit</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(X_train, y_train,</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">          eval_set</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">[(X_valid, y_valid)],</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">          callbacks</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">[lgb.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">early_stopping</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">50</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)])</span></span></code></pre></figure>
+<h3 id="when-to-switch">When to Switch<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#when-to-switch" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>Consider XGBoost if:</p>
+<ul>
+<li>LightGBM is overfitting on small data</li>
+<li>You need GPU training</li>
+<li>Model serialization/interoperability matters</li>
+<li>You want more predictable, documented behavior</li>
+</ul>
+<h3 id="both">Both<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#both" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>For production or competitions, <strong>try both and compare</strong>:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Run both with equivalent settings</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Compare validation performance</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Choose winner</span></span></code></pre></figure>
+<p>The best library is the one that works best for your specific data.</p>
+<hr/>
+<h2 id="summary">Summary<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#summary" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Dimension</th><th>XGBoost</th><th>LightGBM</th></tr></thead><tbody><tr><td><strong>Speed</strong></td><td>Good</td><td>Better</td></tr><tr><td><strong>Memory</strong></td><td>Higher</td><td>Lower</td></tr><tr><td><strong>Defaults</strong></td><td>Conservative</td><td>Aggressive</td></tr><tr><td><strong>Categoricals</strong></td><td>Basic</td><td>Advanced</td></tr><tr><td><strong>Documentation</strong></td><td>Excellent</td><td>Good</td></tr><tr><td><strong>GPU</strong></td><td>Excellent</td><td>Good</td></tr><tr><td><strong>Serialization</strong></td><td>JSON (standard)</td><td>Text (simple)</td></tr></tbody></table></div>
+<h3 id="the-bottom-line">The Bottom Line<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-bottom-line" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<ul>
+<li><strong>LightGBM</strong>: Default choice for speed and efficiency</li>
+<li><strong>XGBoost</strong>: When you need compatibility, GPU, or conservative behavior</li>
+</ul>
+<p>Both are excellent. The 5% accuracy difference you might be worrying about is usually recovered by better hyperparameter tuning, not by switching libraries.</p>
+<hr/>
+<h2 id="whats-next">What’s Next<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#whats-next" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>We’ve covered the theory, the algorithms, and the practical usage. In the final post, I’ll share my own journey: building a gradient boosting library from scratch in Rust.</p>
+<p><a href="../gb-part-10" class="internal alias" data-slug="gb-part-10">Boosters: A From-Scratch Implementation in Rust</a> walks through the design decisions, performance optimizations, and lessons learned from implementing everything we’ve discussed in this series.</p>
+<hr/>
+<h2 id="references">References<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#references" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<ol>
+<li>
+<p>Chen, T. &amp; Guestrin, C. (2016). “XGBoost: A Scalable Tree Boosting System”. <em>KDD 2016</em>. <a href="https://arxiv.org/abs/1603.02754" class="external">arXiv<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></p>
+</li>
+<li>
+<p>Ke, G. et al. (2017). “LightGBM: A Highly Efficient Gradient Boosting Decision Tree”. <em>NeurIPS 2017</em>. <a href="https://proceedings.neurips.cc/paper/2017/file/6449f44a102fde848669bdd9eb6b76fa-Paper.pdf" class="external">PDF<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></p>
+</li>
+<li>
+<p><a href="https://xgboost.readthedocs.io/" class="external">XGBoost Documentation<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></p>
+</li>
+<li>
+<p><a href="https://lightgbm.readthedocs.io/" class="external">LightGBM Documentation<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></p>
+</li>
+</ol></article><hr/><div class="page-footer"><nav class="prev-next-nav"><div class="prev-next-links"><div class="nav-link nav-prev"><a href="/blog/2026-01-18-efb-and-categorical-features" rel="prev"><span class="nav-direction">← Older</span><span class="nav-title">Exclusive Feature Bundling and Categorical Features</span></a></div><div class="nav-link nav-next"><a href="/blog/2026-01-10-trees-and-split-gain" rel="next"><span class="nav-direction">Newer →</span><span class="nav-title">Trees and the Split Gain Formula</span></a></div></div></nav></div></div><div class="right sidebar"><div class="toc desktop-only"><button type="button" class="toc-header" aria-controls="toc-13" aria-expanded="true"><h3>Table of Contents</h3><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="fold"><polyline points="6 9 12 15 18 9"></polyline></svg></button><ul id="list-0" class="toc-content overflow"><li class="depth-0"><a href="#design-philosophy" data-for="design-philosophy">Design Philosophy</a></li><li class="depth-1"><a href="#xgboost-correctness-and-compatibility" data-for="xgboost-correctness-and-compatibility">XGBoost: Correctness and Compatibility</a></li><li class="depth-1"><a href="#lightgbm-speed-and-efficiency" data-for="lightgbm-speed-and-efficiency">LightGBM: Speed and Efficiency</a></li><li class="depth-0"><a href="#tree-growth-strategy" data-for="tree-growth-strategy">Tree Growth Strategy</a></li><li class="depth-1"><a href="#practical-impact" data-for="practical-impact">Practical Impact</a></li><li class="depth-0"><a href="#speed-comparison" data-for="speed-comparison">Speed Comparison</a></li><li class="depth-1"><a href="#why-lightgbm-is-faster" data-for="why-lightgbm-is-faster">Why LightGBM is Faster</a></li><li class="depth-1"><a href="#when-xgboost-is-competitive" data-for="when-xgboost-is-competitive">When XGBoost is Competitive</a></li><li class="depth-0"><a href="#accuracy-comparison" data-for="accuracy-comparison">Accuracy Comparison</a></li><li class="depth-0"><a href="#feature-comparison" data-for="feature-comparison">Feature Comparison</a></li><li class="depth-1"><a href="#notable-differences" data-for="notable-differences">Notable Differences</a></li><li class="depth-0"><a href="#parameter-mapping" data-for="parameter-mapping">Parameter Mapping</a></li><li class="depth-0"><a href="#when-to-choose-xgboost" data-for="when-to-choose-xgboost">When to Choose XGBoost</a></li><li class="depth-0"><a href="#when-to-choose-lightgbm" data-for="when-to-choose-lightgbm">When to Choose LightGBM</a></li><li class="depth-0"><a href="#practical-recommendations" data-for="practical-recommendations">Practical Recommendations</a></li><li class="depth-1"><a href="#starting-point" data-for="starting-point">Starting Point</a></li><li class="depth-1"><a href="#when-to-switch" data-for="when-to-switch">When to Switch</a></li><li class="depth-1"><a href="#both" data-for="both">Both</a></li><li class="depth-0"><a href="#summary" data-for="summary">Summary</a></li><li class="depth-1"><a href="#the-bottom-line" data-for="the-bottom-line">The Bottom Line</a></li><li class="depth-0"><a href="#whats-next" data-for="whats-next">What’s Next</a></li><li class="depth-0"><a href="#references" data-for="references">References</a></li><li class="overflow-end"></li></ul></div></div><footer class><ul><li><a href="https://github.com/egordm/">GitHub</a></li><li><a href="https://www.linkedin.com/in/egor-dmitriev/">LinkedIn</a></li><li><a href="/index.xml">RSS Feed</a></li></ul></footer></div></div></body><script type="application/javascript" data-persist="true">function n(){let t=this.parentElement;t.classList.toggle("is-collapsed");let e=t.getElementsByClassName("callout-content")[0];if(!e)return;let l=t.classList.contains("is-collapsed");e.style.gridTemplateRows=l?"0fr":"1fr"}function c(){let t=document.getElementsByClassName("callout is-collapsible");for(let e of t){let l=e.getElementsByClassName("callout-title")[0],s=e.getElementsByClassName("callout-content")[0];if(!l||!s)continue;l.addEventListener("click",n),window.addCleanup(()=>l.removeEventListener("click",n));let o=e.classList.contains("is-collapsed");s.style.gridTemplateRows=o?"0fr":"1fr"}}document.addEventListener("nav",c);
+</script><script type="module" data-persist="true">function E(a,e){if(!a)return;function t(o){o.target===this&&(o.preventDefault(),o.stopPropagation(),e())}function n(o){o.key.startsWith("Esc")&&(o.preventDefault(),e())}a?.addEventListener("click",t),window.addCleanup(()=>a?.removeEventListener("click",t)),document.addEventListener("keydown",n),window.addCleanup(()=>document.removeEventListener("keydown",n))}function f(a){for(;a.firstChild;)a.removeChild(a.firstChild)}var m=class{constructor(e,t){this.container=e;this.content=t;this.setupEventListeners(),this.setupNavigationControls(),this.resetTransform()}isDragging=!1;startPan={x:0,y:0};currentPan={x:0,y:0};scale=1;MIN_SCALE=.5;MAX_SCALE=3;cleanups=[];setupEventListeners(){let e=this.onMouseDown.bind(this),t=this.onMouseMove.bind(this),n=this.onMouseUp.bind(this),o=this.onTouchStart.bind(this),r=this.onTouchMove.bind(this),i=this.onTouchEnd.bind(this),s=this.resetTransform.bind(this);this.container.addEventListener("mousedown",e),document.addEventListener("mousemove",t),document.addEventListener("mouseup",n),this.container.addEventListener("touchstart",o,{passive:!1}),document.addEventListener("touchmove",r,{passive:!1}),document.addEventListener("touchend",i),window.addEventListener("resize",s),this.cleanups.push(()=>this.container.removeEventListener("mousedown",e),()=>document.removeEventListener("mousemove",t),()=>document.removeEventListener("mouseup",n),()=>this.container.removeEventListener("touchstart",o),()=>document.removeEventListener("touchmove",r),()=>document.removeEventListener("touchend",i),()=>window.removeEventListener("resize",s))}cleanup(){for(let e of this.cleanups)e()}setupNavigationControls(){let e=document.createElement("div");e.className="mermaid-controls";let t=this.createButton("+",()=>this.zoom(.1)),n=this.createButton("-",()=>this.zoom(-.1)),o=this.createButton("Reset",()=>this.resetTransform());e.appendChild(n),e.appendChild(o),e.appendChild(t),this.container.appendChild(e)}createButton(e,t){let n=document.createElement("button");return n.textContent=e,n.className="mermaid-control-button",n.addEventListener("click",t),window.addCleanup(()=>n.removeEventListener("click",t)),n}onMouseDown(e){e.button===0&&(this.isDragging=!0,this.startPan={x:e.clientX-this.currentPan.x,y:e.clientY-this.currentPan.y},this.container.style.cursor="grabbing")}onMouseMove(e){this.isDragging&&(e.preventDefault(),this.currentPan={x:e.clientX-this.startPan.x,y:e.clientY-this.startPan.y},this.updateTransform())}onMouseUp(){this.isDragging=!1,this.container.style.cursor="grab"}onTouchStart(e){if(e.touches.length!==1)return;this.isDragging=!0;let t=e.touches[0];this.startPan={x:t.clientX-this.currentPan.x,y:t.clientY-this.currentPan.y}}onTouchMove(e){if(!this.isDragging||e.touches.length!==1)return;e.preventDefault();let t=e.touches[0];this.currentPan={x:t.clientX-this.startPan.x,y:t.clientY-this.startPan.y},this.updateTransform()}onTouchEnd(){this.isDragging=!1}zoom(e){let t=Math.min(Math.max(this.scale+e,this.MIN_SCALE),this.MAX_SCALE),n=this.content.getBoundingClientRect(),o=n.width/2,r=n.height/2,i=t-this.scale;this.currentPan.x-=o*i,this.currentPan.y-=r*i,this.scale=t,this.updateTransform()}updateTransform(){this.content.style.transform=`translate(${this.currentPan.x}px, ${this.currentPan.y}px) scale(${this.scale})`}resetTransform(){let t=this.content.querySelector("svg").getBoundingClientRect(),n=t.width/this.scale,o=t.height/this.scale;this.scale=1,this.currentPan={x:(this.container.clientWidth-n)/2,y:(this.container.clientHeight-o)/2},this.updateTransform()}},T=["--secondary","--tertiary","--gray","--light","--lightgray","--highlight","--dark","--darkgray","--codeFont"],y;document.addEventListener("nav",async()=>{let e=document.querySelector(".center").querySelectorAll("code.mermaid");if(e.length===0)return;y||=await import("https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.4.0/mermaid.esm.min.mjs");let t=y.default,n=new WeakMap;for(let r of e)n.set(r,r.innerText);async function o(){for(let s of e){s.removeAttribute("data-processed");let c=n.get(s);c&&(s.innerHTML=c)}let r=T.reduce((s,c)=>(s[c]=window.getComputedStyle(document.documentElement).getPropertyValue(c),s),{}),i=document.documentElement.getAttribute("saved-theme")==="dark";t.initialize({startOnLoad:!1,securityLevel:"loose",theme:i?"dark":"base",themeVariables:{fontFamily:r["--codeFont"],primaryColor:r["--light"],primaryTextColor:r["--darkgray"],primaryBorderColor:r["--tertiary"],lineColor:r["--darkgray"],secondaryColor:r["--secondary"],tertiaryColor:r["--tertiary"],clusterBkg:r["--light"],edgeLabelBackground:r["--highlight"]}}),await t.run({nodes:e})}await o(),document.addEventListener("themechange",o),window.addCleanup(()=>document.removeEventListener("themechange",o));for(let r=0;r<e.length;r++){let v=function(){let g=l.querySelector("#mermaid-space"),h=l.querySelector(".mermaid-content");if(!h)return;f(h);let w=i.querySelector("svg").cloneNode(!0);h.appendChild(w),l.classList.add("active"),g.style.cursor="grab",u=new m(g,h)},M=function(){l.classList.remove("active"),u?.cleanup(),u=null},i=e[r],s=i.parentElement,c=s.querySelector(".clipboard-button"),d=s.querySelector(".expand-button"),p=window.getComputedStyle(c),L=c.offsetWidth+parseFloat(p.marginLeft||"0")+parseFloat(p.marginRight||"0");d.style.right=`calc(${L}px + 0.3rem)`,s.prepend(d);let l=s.querySelector("#mermaid-container");if(!l)return;let u=null;d.addEventListener("click",v),E(l,M),window.addCleanup(()=>{u?.cleanup(),d.removeEventListener("click",v)})}});
+</script><script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/copy-tex.min.js" type="application/javascript" data-persist="true"></script><script src="../postscript.js" type="module" data-persist="true"></script></html>

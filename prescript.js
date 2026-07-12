@@ -1,0 +1,1 @@
+(function(){document.documentElement.setAttribute("saved-theme","dark"),localStorage.setItem("theme","dark");var e=t=>{let n=new CustomEvent("themechange",{detail:{theme:t}});document.dispatchEvent(n)};e("dark")})();

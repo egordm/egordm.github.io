@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr"><head><title>TensorRT Optimization: 5x Faster Inference with FP16 Precision | egordmitriev.dev</title><meta charset="utf-8"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Inter:ital,wght@0,400;0,600;1,400;1,600&amp;family=JetBrains Mono:wght@400;600&amp;display=swap"/><link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin="anonymous"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="alternate" type="application/rss+xml" title="Egor Dmitriev" href="https://egordmitriev.dev/index.xml"/><meta name="og:site_name" content="Egor Dmitriev"/><meta property="og:title" content="TensorRT Optimization: 5x Faster Inference with FP16 Precision | egordmitriev.dev"/><meta property="og:type" content="article"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="TensorRT Optimization: 5x Faster Inference with FP16 Precision | egordmitriev.dev"/><meta name="twitter:description" content="Taking ONNX models from PyTorch CUDA to 97 FPS with TensorRT mixed-precision engines. Covers CUDA execution providers, engine building, FP16 precision strategies, and debugging a known TensorRT Softmax fusion bug."/><meta property="og:description" content="Taking ONNX models from PyTorch CUDA to 97 FPS with TensorRT mixed-precision engines. Covers CUDA execution providers, engine building, FP16 precision strategies, and debugging a known TensorRT Softmax fusion bug."/><meta property="og:image:alt" content="Taking ONNX models from PyTorch CUDA to 97 FPS with TensorRT mixed-precision engines. Covers CUDA execution providers, engine building, FP16 precision strategies, and debugging a known TensorRT Softmax fusion bug."/><meta property="og:image" content="https://egordmitriev.dev/static/og-image.png"/><meta property="og:image:url" content="https://egordmitriev.dev/static/og-image.png"/><meta name="twitter:image" content="https://egordmitriev.dev/static/og-image.png"/><meta property="og:image:type" content="image/.png"/><meta property="twitter:domain" content="egordmitriev.dev"/><meta property="og:url" content="https://egordmitriev.dev/blog/2026-05-17-optimizing-samurai-part-2"/><meta property="twitter:url" content="https://egordmitriev.dev/blog/2026-05-17-optimizing-samurai-part-2"/><link rel="canonical" href="https://egordmitriev.dev/blog/2026-05-17-optimizing-samurai-part-2"/><link rel="icon" href="../static/icon.png"/><meta name="description" content="Taking ONNX models from PyTorch CUDA to 97 FPS with TensorRT mixed-precision engines. Covers CUDA execution providers, engine building, FP16 precision strategies, and debugging a known TensorRT Softmax fusion bug."/><meta name="generator" content="Quartz"/><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"TensorRT Optimization: 5x Faster Inference with FP16 Precision","description":"Taking ONNX models from PyTorch CUDA to 97 FPS with TensorRT mixed-precision engines. Covers CUDA execution providers, engine building, FP16 precision strategies, and debugging a known TensorRT Softmax fusion bug.","datePublished":"2026-05-17","url":"https://egordmitriev.dev/blog/2026-05-17-optimizing-samurai-part-2","author":{"@type":"Person","name":"Egor Dmitriev","url":"https://egordmitriev.dev"},"publisher":{"@type":"Person","name":"Egor Dmitriev"},"keywords":"deep-learning, computer-vision, tensorrt, optimization, onnx, cuda, nvidia, fp16"}</script><link href="../index.css" rel="stylesheet" type="text/css" data-persist="true"/><style>.expand-button {
+  position: absolute;
+  display: flex;
+  float: right;
+  padding: 0.4rem;
+  margin: 0.3rem;
+  right: 0;
+  color: var(--gray);
+  border-color: var(--dark);
+  background-color: var(--light);
+  border: 1px solid;
+  border-radius: 5px;
+  opacity: 0;
+  transition: 0.2s;
+}
+.expand-button > svg {
+  fill: var(--light);
+  filter: contrast(0.3);
+}
+.expand-button:hover {
+  cursor: pointer;
+  border-color: var(--secondary);
+}
+.expand-button:focus {
+  outline: 0;
+}
+
+pre:hover > .expand-button {
+  opacity: 1;
+  transition: 0.2s;
+}
+
+#mermaid-container {
+  position: fixed;
+  contain: layout;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: none;
+  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.5);
+}
+#mermaid-container.active {
+  display: inline-block;
+}
+#mermaid-container > #mermaid-space {
+  border: 1px solid var(--lightgray);
+  background-color: var(--light);
+  border-radius: 5px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 80vh;
+  width: 80vw;
+  overflow: hidden;
+}
+#mermaid-container > #mermaid-space > .mermaid-content {
+  position: relative;
+  transform-origin: 0 0;
+  transition: transform 0.1s ease;
+  overflow: visible;
+  min-height: 200px;
+  min-width: 200px;
+}
+#mermaid-container > #mermaid-space > .mermaid-content pre {
+  margin: 0;
+  border: none;
+}
+#mermaid-container > #mermaid-space > .mermaid-content svg {
+  max-width: none;
+  height: auto;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: var(--light);
+  border: 1px solid var(--lightgray);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--lightgray);
+  background: var(--light);
+  color: var(--dark);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: var(--bodyFont);
+  transition: all 0.2s ease;
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:hover {
+  background: var(--lightgray);
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:active {
+  transform: translateY(1px);
+}
+#mermaid-container > #mermaid-space > .mermaid-controls .mermaid-control-button:nth-child(2) {
+  width: auto;
+  padding: 0 12px;
+  font-size: 14px;
+}
+/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VSb290IjoiL1VzZXJzL2Vnb3JkbS9wcm9qZWN0cy9hcmQvZWdvcmRtLmdpdGh1Yi5pby9xdWFydHovY29tcG9uZW50cy9zdHlsZXMiLCJzb3VyY2VzIjpbIm1lcm1haWQuaW5saW5lLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7O0FBR0Y7RUFDRTtFQUNBOztBQUdGO0VBQ0U7OztBQUtGO0VBQ0U7RUFDQTs7O0FBSUo7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBOztBQUVBO0VBQ0U7O0FBR0Y7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7O0FBR0Y7RUFDRTtFQUNBOztBQUlKO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTs7QUFFQTtFQUNFO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7O0FBRUE7RUFDRTs7QUFHRjtFQUNFOztBQUlGO0VBQ0U7RUFDQTtFQUNBIiwic291cmNlc0NvbnRlbnQiOlsiLmV4cGFuZC1idXR0b24ge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGZsb2F0OiByaWdodDtcbiAgcGFkZGluZzogMC40cmVtO1xuICBtYXJnaW46IDAuM3JlbTtcbiAgcmlnaHQ6IDA7IC8vIE5PVEU6IHJpZ2h0IHdpbGwgYmUgc2V0IGluIG1lcm1haWQuaW5saW5lLnRzXG4gIGNvbG9yOiB2YXIoLS1ncmF5KTtcbiAgYm9yZGVyLWNvbG9yOiB2YXIoLS1kYXJrKTtcbiAgYmFja2dyb3VuZC1jb2xvcjogdmFyKC0tbGlnaHQpO1xuICBib3JkZXI6IDFweCBzb2xpZDtcbiAgYm9yZGVyLXJhZGl1czogNXB4O1xuICBvcGFjaXR5OiAwO1xuICB0cmFuc2l0aW9uOiAwLjJzO1xuXG4gICYgPiBzdmcge1xuICAgIGZpbGw6IHZhcigtLWxpZ2h0KTtcbiAgICBmaWx0ZXI6IGNvbnRyYXN0KDAuMyk7XG4gIH1cblxuICAmOmhvdmVyIHtcbiAgICBjdXJzb3I6IHBvaW50ZXI7XG4gICAgYm9yZGVyLWNvbG9yOiB2YXIoLS1zZWNvbmRhcnkpO1xuICB9XG5cbiAgJjpmb2N1cyB7XG4gICAgb3V0bGluZTogMDtcbiAgfVxufVxuXG5wcmUge1xuICAmOmhvdmVyID4gLmV4cGFuZC1idXR0b24ge1xuICAgIG9wYWNpdHk6IDE7XG4gICAgdHJhbnNpdGlvbjogMC4ycztcbiAgfVxufVxuXG4jbWVybWFpZC1jb250YWluZXIge1xuICBwb3NpdGlvbjogZml4ZWQ7XG4gIGNvbnRhaW46IGxheW91dDtcbiAgei1pbmRleDogOTk5O1xuICBsZWZ0OiAwO1xuICB0b3A6IDA7XG4gIHdpZHRoOiAxMDB2dztcbiAgaGVpZ2h0OiAxMDB2aDtcbiAgb3ZlcmZsb3c6IGhpZGRlbjtcbiAgZGlzcGxheTogbm9uZTtcbiAgYmFja2Ryb3AtZmlsdGVyOiBibHVyKDRweCk7XG4gIGJhY2tncm91bmQ6IHJnYmEoMCwgMCwgMCwgMC41KTtcblxuICAmLmFjdGl2ZSB7XG4gICAgZGlzcGxheTogaW5saW5lLWJsb2NrO1xuICB9XG5cbiAgJiA+ICNtZXJtYWlkLXNwYWNlIHtcbiAgICBib3JkZXI6IDFweCBzb2xpZCB2YXIoLS1saWdodGdyYXkpO1xuICAgIGJhY2tncm91bmQtY29sb3I6IHZhcigtLWxpZ2h0KTtcbiAgICBib3JkZXItcmFkaXVzOiA1cHg7XG4gICAgcG9zaXRpb246IGZpeGVkO1xuICAgIHRvcDogNTAlO1xuICAgIGxlZnQ6IDUwJTtcbiAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZSgtNTAlLCAtNTAlKTtcbiAgICBoZWlnaHQ6IDgwdmg7XG4gICAgd2lkdGg6IDgwdnc7XG4gICAgb3ZlcmZsb3c6IGhpZGRlbjtcblxuICAgICYgPiAubWVybWFpZC1jb250ZW50IHtcbiAgICAgIHBvc2l0aW9uOiByZWxhdGl2ZTtcbiAgICAgIHRyYW5zZm9ybS1vcmlnaW46IDAgMDtcbiAgICAgIHRyYW5zaXRpb246IHRyYW5zZm9ybSAwLjFzIGVhc2U7XG4gICAgICBvdmVyZmxvdzogdmlzaWJsZTtcbiAgICAgIG1pbi1oZWlnaHQ6IDIwMHB4O1xuICAgICAgbWluLXdpZHRoOiAyMDBweDtcblxuICAgICAgcHJlIHtcbiAgICAgICAgbWFyZ2luOiAwO1xuICAgICAgICBib3JkZXI6IG5vbmU7XG4gICAgICB9XG5cbiAgICAgIHN2ZyB7XG4gICAgICAgIG1heC13aWR0aDogbm9uZTtcbiAgICAgICAgaGVpZ2h0OiBhdXRvO1xuICAgICAgfVxuICAgIH1cblxuICAgICYgPiAubWVybWFpZC1jb250cm9scyB7XG4gICAgICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gICAgICBib3R0b206IDIwcHg7XG4gICAgICByaWdodDogMjBweDtcbiAgICAgIGRpc3BsYXk6IGZsZXg7XG4gICAgICBnYXA6IDhweDtcbiAgICAgIHBhZGRpbmc6IDhweDtcbiAgICAgIGJhY2tncm91bmQ6IHZhcigtLWxpZ2h0KTtcbiAgICAgIGJvcmRlcjogMXB4IHNvbGlkIHZhcigtLWxpZ2h0Z3JheSk7XG4gICAgICBib3JkZXItcmFkaXVzOiA2cHg7XG4gICAgICBib3gtc2hhZG93OiAwIDJweCA0cHggcmdiYSgwLCAwLCAwLCAwLjEpO1xuICAgICAgei1pbmRleDogMjtcblxuICAgICAgLm1lcm1haWQtY29udHJvbC1idXR0b24ge1xuICAgICAgICBkaXNwbGF5OiBmbGV4O1xuICAgICAgICBhbGlnbi1pdGVtczogY2VudGVyO1xuICAgICAgICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjtcbiAgICAgICAgd2lkdGg6IDMycHg7XG4gICAgICAgIGhlaWdodDogMzJweDtcbiAgICAgICAgcGFkZGluZzogMDtcbiAgICAgICAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tbGlnaHRncmF5KTtcbiAgICAgICAgYmFja2dyb3VuZDogdmFyKC0tbGlnaHQpO1xuICAgICAgICBjb2xvcjogdmFyKC0tZGFyayk7XG4gICAgICAgIGJvcmRlci1yYWRpdXM6IDRweDtcbiAgICAgICAgY3Vyc29yOiBwb2ludGVyO1xuICAgICAgICBmb250LXNpemU6IDE2cHg7XG4gICAgICAgIGZvbnQtZmFtaWx5OiB2YXIoLS1ib2R5Rm9udCk7XG4gICAgICAgIHRyYW5zaXRpb246IGFsbCAwLjJzIGVhc2U7XG5cbiAgICAgICAgJjpob3ZlciB7XG4gICAgICAgICAgYmFja2dyb3VuZDogdmFyKC0tbGlnaHRncmF5KTtcbiAgICAgICAgfVxuXG4gICAgICAgICY6YWN0aXZlIHtcbiAgICAgICAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZVkoMXB4KTtcbiAgICAgICAgfVxuXG4gICAgICAgIC8vIFN0eWxlIHRoZSByZXNldCBidXR0b24gZGlmZmVyZW50bHlcbiAgICAgICAgJjpudGgtY2hpbGQoMikge1xuICAgICAgICAgIHdpZHRoOiBhdXRvO1xuICAgICAgICAgIHBhZGRpbmc6IDAgMTJweDtcbiAgICAgICAgICBmb250LXNpemU6IDE0cHg7XG4gICAgICAgIH1cbiAgICAgIH1cbiAgICB9XG4gIH1cbn1cbiJdfQ== */</style><link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet" type="text/css" data-persist="true"/><script src="../prescript.js" type="application/javascript" data-persist="true"></script><script type="application/javascript" data-persist="true">const fetchData = fetch("../static/contentIndex.json").then(data => data.json())</script><link rel="alternate" type="application/rss+xml" title="RSS Feed" href="https://egordmitriev.dev/index.xml"/></head><body data-slug="blog/2026-05-17-optimizing-samurai-part-2"><div id="quartz-root" class="page"><div id="quartz-body"><div class="left sidebar"><h2 class="page-title"><a href="..">Egor Dmitriev</a></h2><div class="spacer mobile-only"></div><div class="search"><button class="search-button"><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title>Search</title><g class="search-path" fill="none"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"></path><circle cx="8" cy="8" r="7"></circle></g></svg><p>Search</p></button><div class="search-container"><div class="search-space"><input autocomplete="off" class="search-bar" name="search" type="text" aria-label="Search for something" placeholder="Search for something"/><div class="search-layout" data-preview="true"></div></div></div></div><div class="sidebar-posts desktop-only"><h3>Recent Posts</h3><ul class="sidebar-posts-ul"><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-07-12-did-your-agent-actually-read-that-file" class="internal sidebar-post-title">Did Your Agent Actually Read That File?</a></div><div class="sidebar-post-meta"><span class="sidebar-post-date"><time datetime="2026-07-11T22:00:00.000Z">Jul 12, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-25-long-term-visual-tracking-for-drones-2026" class="internal sidebar-post-title">Long-Term Visual Tracking for Drones: State of the Art, Open Source, and Edge Inference in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-24T22:00:00.000Z">May 25, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-24-vio-drones-2026" class="internal sidebar-post-title">Visual-Inertial Odometry for Drones: State of the Art, Foundation-3D, and the cuVSLAM Squeeze in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-23T22:00:00.000Z">May 24, 2026</time></span></div></li><li class="sidebar-post-li"><div class="sidebar-post-header"><a href="../blog/2026-05-23-drone-to-satellite-localization-2026" class="internal sidebar-post-title">Drone-to-Satellite Visual Geo-Localization: State of the Art, Open Source, and Edge Inference in 2026</a></div><div class="sidebar-post-meta"><span class="sidebar-series-badge">Research Passes</span><span class="sidebar-post-date"><time datetime="2026-05-22T22:00:00.000Z">May 23, 2026</time></span></div></li></ul><p class="sidebar-browse"><a href="../blog/">All posts →</a></p></div></div><div class="center"><div class="page-header"><div class="popover-hint"><nav class="breadcrumb-container" aria-label="breadcrumbs"><div class="breadcrumb-element"><a href="../">Home</a><p> ❯ </p></div><div class="breadcrumb-element"><a href="../blog/">Blog</a><p> ❯ </p></div><div class="breadcrumb-element"><a href>TensorRT Optimization: 5x Faster Inference with FP16 Precision</a></div></nav><h1 class="article-title">TensorRT Optimization: 5x Faster Inference with FP16 Precision</h1><p show-comma="true" class="content-meta"><time datetime="2026-05-16T22:00:00.000Z">May 17, 2026</time><span>15 min read</span></p><ul class="tags"><li><a href="../tags/deep-learning" class="internal tag-link">deep-learning</a></li><li><a href="../tags/computer-vision" class="internal tag-link">computer-vision</a></li><li><a href="../tags/tensorrt" class="internal tag-link">tensorrt</a></li><li><a href="../tags/optimization" class="internal tag-link">optimization</a></li><li><a href="../tags/onnx" class="internal tag-link">onnx</a></li><li><a href="../tags/cuda" class="internal tag-link">cuda</a></li><li><a href="../tags/nvidia" class="internal tag-link">nvidia</a></li><li><a href="../tags/fp16" class="internal tag-link">fp16</a></li></ul><div class="series-banner"><details class="series-toc"><summary><span class="series-icon">📚</span><a href="/series/optimizing-samurai" class="series-name">Optimizing SAMURAI</a><span class="series-position">Part 2 of 3</span></summary><ol class="series-list"><li class><a href="/blog/2026-05-16-optimizing-samurai-part-1">Optimizing PyTorch Models for Production: ONNX Export with SAM 2</a></li><li class="current"><span class="current-post">TensorRT Optimization: 5x Faster Inference with FP16 Precision</span></li><li class><a href="/blog/2026-05-18-optimizing-samurai-part-3">CoreML Deployment on Apple Silicon: Real-Time Vision Models</a></li></ol></details></div></div></div><article class="popover-hint"><p><a href="../optimizing-samurai-part-1" class="internal alias" data-slug="optimizing-samurai-part-1">Part 1</a> left us with 4 ONNX modules (80 MB total, EfficientTAM-Ti @ 512) verified against PyTorch to <code>max_abs &lt; 1e-3</code>. On CPU the pipeline runs at 187 ms per frame. The ONNX format was the prerequisite, not the destination.</p>
+<p>This post covers what happens when you plug those same <code>.onnx</code> files into NVIDIA’s execution stack: CUDA EP, TensorRT engine building, FP16 precision, and a bug in TensorRT’s fused attention kernel that took days to diagnose and produced eight failed workarounds before I found the fix.</p>
+<h2 id="cuda-execution-provider-the-silent-fallback">CUDA Execution Provider: the silent fallback<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#cuda-execution-provider-the-silent-fallback" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>ONNX Runtime’s <a href="https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html" class="external">CUDA Execution Provider<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> runs ONNX graphs on NVIDIA GPUs. Setup looks trivial:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">import</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> onnxruntime </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">as</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> ort</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">session </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> ort.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">InferenceSession</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">    &quot;image_encoder.onnx&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">    providers</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">[</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;CUDAExecutionProvider&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">]</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span></code></pre></figure>
+<p>Except my first run was suspiciously slow. 34 ms for image_encoder, same as CPU. The issue: <code>onnxruntime-gpu==1.26.0</code> (stable) is built against <strong>CUDA 12</strong> (<code>libcublasLt.so.12</code>), but my workstation has CUDA 13. ORT can’t find the CUDA 12 libraries, so it <strong>silently falls back to <code>CPUExecutionProvider</code></strong> without any error.</p>
+<p>You can detect this:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Always check which provider is actually running</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">session </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> ort.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">InferenceSession</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;model.onnx&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">providers</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">[</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;CUDAExecutionProvider&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">])</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">actual </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> session.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">get_providers</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">()</span></span>
+<span data-line><span style="--shiki-light:#005CC5;--shiki-dark:#56B6C2;">print</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(actual)  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># ['CPUExecutionProvider'] ← bad! Should list CUDA first</span></span></code></pre></figure>
+<p>My initial workaround was installing CUDA 12 runtime alongside CUDA 13 (<code>pip install nvidia-cublas-cu12 nvidia-cudnn-cu12</code>) and prepending those lib dirs to <code>LD_LIBRARY_PATH</code>. That works, but you end up maintaining two CUDA toolchains.</p>
+<p>The actual fix: switch to <a href="https://onnxruntime.ai/docs/install/" class="external">ORT nightly<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> builds which ship with CUDA 13 support:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="bash" data-theme="github-light one-dark-pro"><code data-language="bash" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6F42C1;--shiki-dark:#61AFEF;">pip</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;"> install</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;"> ort-nightly-gpu</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;"> --index-url</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;"> https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/ort-cuda-13-nightly/pypi/simple/</span></span></code></pre></figure>
+<blockquote class="callout warning" data-callout="warning">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Warning</p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>The nightly build bit us later: an engine cache invalidation bug caused TRT to silently load stale <code>.engine</code> files after ONNX changes. The fix was a newer nightly. The tradeoff between nightly (CUDA 13, latest features) and stable (CUDA 12, proven) is real. I chose nightly because the CUDA 12 lib juggling was worse than the occasional regression.</p>
+</div>
+</blockquote>
+<p>The broader lesson: <strong>ORT-GPU and PyTorch-CUDA are independent CUDA toolchains.</strong> They don’t share runtime libraries. Check <code>session.get_providers()</code> before assuming anything.</p>
+<h3 id="the-numbers">The numbers<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-numbers" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>Once CUDA EP is actually running (RTX 4090, FP32 ONNX, 50-iteration steady state):</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Sub-module</th><th>CPU EP</th><th>CUDA EP</th><th>Speedup</th></tr></thead><tbody><tr><td>memory_encoder</td><td>7.06 ms</td><td><strong>0.55 ms</strong></td><td>12.8x</td></tr><tr><td>image_encoder</td><td>34.52 ms</td><td><strong>2.85 ms</strong></td><td>12.1x</td></tr><tr><td>mask_decoder</td><td>3.53 ms</td><td><strong>0.86 ms</strong></td><td>4.1x</td></tr><tr><td>memory_attention</td><td>46.82 ms</td><td><strong>2.36 ms</strong></td><td>19.8x</td></tr><tr><td><strong>Frame total</strong></td><td><strong>91.93 ms</strong></td><td><strong>6.59 ms</strong></td><td><strong>14x</strong></td></tr></tbody></table></div>
+<h3 id="the-surprise">The surprise<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-surprise" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>Here’s the cross-stack comparison that made me double-take:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Stack</th><th>Frame total</th><th>FPS</th></tr></thead><tbody><tr><td>ORT CPU EP, FP32</td><td>91.9 ms</td><td>11</td></tr><tr><td>PyTorch CUDA, FP32</td><td>12.4 ms</td><td>80</td></tr><tr><td>PyTorch CUDA, FP16 (autocast)</td><td>6.1 ms</td><td>163</td></tr><tr><td><strong>ORT CUDA EP, FP32</strong></td><td><strong>6.59 ms</strong></td><td><strong>152</strong></td></tr></tbody></table></div>
+<p>ORT CUDA EP running <strong>FP32 weights</strong> (6.59 ms) essentially matches <strong>PyTorch with FP16 tensor cores</strong> (6.1 ms). The static graph runtime closes the entire FP16 gap without changing precision. How?</p>
+<ul>
+<li><strong>Zero Python dispatch</strong>: no GIL, no <code>torch.Tensor</code> wrapper allocation, no autograd bookkeeping</li>
+<li><strong>Operator fusion</strong>: Conv+BatchNorm, Linear+GELU, and other patterns fused into single kernels</li>
+<li><strong>Persistent launch parameters</strong>: kernel configurations computed once at session init, reused every frame</li>
+<li><strong>Memory planning</strong>: the runtime pre-allocates all intermediate buffers at session creation</li>
+</ul>
+<p>Another interesting shift: under ORT CUDA, <code>memory_attention</code> drops from 61% of frame time to 36%. <code>image_encoder</code> becomes the new bottleneck at 43%. The relative costs change once you remove enough overhead, which means the optimization target shifts.</p>
+<h2 id="tensorrt-where-the-real-2x-lives">TensorRT: where the real 2x lives<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#tensorrt-where-the-real-2x-lives" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>ORT CUDA EP only gains ~9% from switching to FP16 ONNX (6.59 → 6.02 ms). It doesn’t select tensor-core-friendly kernel implementations. For that, you need <a href="https://developer.nvidia.com/tensorrt" class="external">TensorRT<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>.</p>
+<p>TRT goes further than ORT’s CUDA EP: it fuses entire subgraphs (not just adjacent ops), selects tactics per-layer from a library of kernel implementations, performs memory layout optimization, and auto-tunes for the specific GPU at build time. The cost: engine builds take 20-80 seconds per module, and the resulting <code>.engine</code> files are GPU-specific (not portable).</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Using TRT through ORT's TensorRT Execution Provider</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">session </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> ort.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">InferenceSession</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">    &quot;image_encoder.onnx&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">    providers</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">[(</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;TensorrtExecutionProvider&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, {</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">        &quot;trt_fp16_enable&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">True</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">        &quot;trt_engine_cache_enable&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">True</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">        &quot;trt_engine_cache_path&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">: </span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;./trt_cache/&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    })]</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># First call is slow (engine build), subsequent calls use cached .engine</span></span></code></pre></figure>
+<p>Install: <code>pip install tensorrt</code> pulls <code>tensorrt-cu13==10.16.1.11</code> (~700 MB). Add the TRT library path to <code>LD_LIBRARY_PATH</code> for ORT to find it.</p>
+<h3 id="the-numbers-1">The numbers<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-numbers-1" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Stack</th><th>Frame total</th><th>FPS</th><th>vs CUDA EP</th></tr></thead><tbody><tr><td>ORT CUDA EP, FP32</td><td>6.59 ms</td><td>152</td><td>baseline</td></tr><tr><td>ORT CUDA EP, FP16</td><td>6.02 ms</td><td>165</td><td>1.09x</td></tr><tr><td>TRT EP, FP16 (from FP32 .onnx)</td><td>2.86 ms</td><td>349</td><td>2.30x</td></tr><tr><td><strong>TRT EP, FP16 (from native FP16 .onnx)</strong></td><td><strong>2.39 ms</strong></td><td><strong>418</strong></td><td><strong>2.76x</strong></td></tr></tbody></table></div>
+<p>Per-module breakdown with TRT FP16 (from native FP16 ONNX):</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Sub-module</th><th>TRT FP16</th><th>vs ORT CUDA FP16</th></tr></thead><tbody><tr><td>memory_encoder</td><td>0.20 ms</td><td>2.1x</td></tr><tr><td>image_encoder</td><td>0.71 ms</td><td>3.5x</td></tr><tr><td>mask_decoder</td><td>0.35 ms</td><td>2.4x</td></tr><tr><td>memory_attention</td><td>1.13 ms</td><td>2.0x</td></tr><tr><td><strong>Total</strong></td><td><strong>2.39 ms</strong></td><td><strong>2.53x</strong></td></tr></tbody></table></div>
+<p><code>image_encoder</code> gets the biggest TRT speedup (3.5x) because its Conv→LayerNorm→Linear→GELU stack is the ideal fusion target. <code>memory_attention</code> gets the smallest (2.0x) because attention softmax+matmul is already a single fused cuBLAS-LT kernel under CUDA EP.</p>
+<h3 id="why-native-fp16-onnx-is-faster">Why native FP16 ONNX is faster<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#why-native-fp16-onnx-is-faster" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>When TRT receives FP32 ONNX and converts to FP16 internally, it inserts Cast nodes at subgraph partition boundaries. These break some fusion patterns. Exporting a native FP16 ONNX (via <code>model.half()</code> before <code>torch.onnx.export</code>) gives TRT a clean FP16 graph with no boundary Casts, enabling ~17% more aggressive fusion.</p>
+<p>The FP16 export requires patching two hardcoded FP32 assumptions in EfficientTAM:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Patch 1: PositionEmbeddingRandom hardcodes float32</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Original: pe = torch.randn(..., dtype=torch.float32)</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Fix: follow the buffer's dtype</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">pe </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> torch.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">randn</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">...</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">dtype</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#E5C07B;">self</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">.positional_encoding_gaussian_matrix.dtype)</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Patch 2: PromptEncoder initializes sparse_embeddings as FP32</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Original: sparse_embeddings = torch.empty(...)</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Fix: match the weight dtype</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">sparse_embeddings </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> torch.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">empty</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">...</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">dtype</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#E5C07B;">self</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">.point_embeddings[</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">].weight.dtype)</span></span></code></pre></figure>
+<h2 id="from-isolated-modules-to-a-real-pipeline">From isolated modules to a real pipeline<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#from-isolated-modules-to-a-real-pipeline" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>418 FPS sounds incredible. It’s also misleading. That’s four isolated module calls with pre-allocated tensors and no state management. A real tracking pipeline adds: frame preprocessing (resize + normalize), memory bank state updates between frames, Python orchestration logic, and the overhead of multiple TRT engines sharing a single CUDA stream.</p>
+<p>Real-video chained inference (150 frames, RTX 4090):</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Config</th><th>Preprocess</th><th>Inference modules</th><th>Total</th><th>FPS</th></tr></thead><tbody><tr><td>CPU EP</td><td>8.1 ms</td><td>113.4 ms</td><td>121.5 ms</td><td>8.2</td></tr><tr><td>CUDA EP FP32</td><td>4.0 ms</td><td>11.4 ms</td><td>15.4 ms</td><td>65</td></tr><tr><td>TRT FP16 (initial)</td><td>3.8 ms</td><td>7.8 ms</td><td>11.6 ms</td><td>86</td></tr><tr><td><strong>TRT FP16 (optimized)</strong></td><td><strong>0.5 ms</strong></td><td><strong>8.7 ms</strong></td><td><strong>9.15 ms</strong></td><td><strong>109</strong></td></tr></tbody></table></div>
+<h3 id="closing-the-preprocessing-gap">Closing the preprocessing gap<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#closing-the-preprocessing-gap" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>The biggest non-model cost was NumPy preprocessing: normalize + transpose was taking 3.9 ms per frame, 40%+ of the total pipeline time. The fix was straightforward: in-place operations instead of allocating new arrays:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Before: 3.91 ms, allocates 3 new arrays</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">image </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> (image </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">/</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;"> 255.0</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;"> -</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> mean) </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">/</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> std</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">image </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> image.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">transpose</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">2</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># HWC → CHW</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># After: 0.48 ms, in-place ops, single allocation</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">image </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> image.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">astype</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(np.float32)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">np.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">subtract</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(image, mean </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">*</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;"> 255</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">out</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">image)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">np.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">multiply</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(image, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1.0</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;"> /</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> (std </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">*</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;"> 255</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">), </span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">out</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">image)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">image </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> np.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">ascontiguousarray</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(image.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">transpose</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">2</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">))</span></span></code></pre></figure>
+<h3 id="baking-operations-into-the-onnx-graph">Baking operations into the ONNX graph<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#baking-operations-into-the-onnx-graph" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>Two more pipeline wins came from moving Python-level tensor operations <em>into</em> the ONNX graph. The idea: any operation you do in Python between model calls (reshape, upsample, transpose) could instead be an ONNX node. Once inside the graph, TRT can fuse it with adjacent layers or eliminate it entirely through layout optimization.</p>
+<p>Here’s what that looks like concretely using the <a href="https://onnx.ai/onnx/api/helper.html" class="external">ONNX helper API<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>:</p>
+<p><strong>1. Upsample baked into mask_decoder</strong></p>
+<p>The mask decoder outputs 128x128 logits. The pipeline upsamples to 512x512 in Python before computing the mask. Moving that into the graph:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">import</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> onnx</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">from</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> onnx </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">import</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> helper, TensorProto</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">model </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> onnx.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">load</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;mask_decoder.onnx&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">graph </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> model.graph</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Add a Resize node after the final output</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">resize_node </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> helper.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">make_node</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">    &quot;Resize&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">    inputs</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">[graph.output[</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">].name, </span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;scales&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">],</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">    outputs</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">[</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;mask_upsampled&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">],</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">    mode</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;linear&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># bilinear</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">graph.node.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">append</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(resize_node)</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Add scales as initializer: [1, 1, 4, 4] for 128→512</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">scales </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> helper.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">make_tensor</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;scales&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, TensorProto.</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">FLOAT</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, [</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">4</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">], [</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">4</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">4</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">])</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">graph.initializer.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">append</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(scales)</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Update graph output to the new node</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># ...</span></span></code></pre></figure>
+<p>TRT fuses this Resize with the preceding transposed convolution into a single kernel.</p>
+<p><strong>2. Transpose baked into memory_attention</strong></p>
+<p>The memory module expected <code>(T, B, C)</code> layout but the pipeline stored features as <code>(B, T, C)</code>. Rather than a Python <code>permute()</code> call every frame:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Add Transpose at the input</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">transpose_node </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> helper.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">make_node</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span></span>
+<span data-line><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">    &quot;Transpose&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">,</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">    inputs</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">[</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;memory_input&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">],</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">    outputs</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">[</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;memory_input_transposed&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">],</span></span>
+<span data-line><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">    perm</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">[</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">2</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">],  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># (B, T, C) → (T, B, C)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">graph.node.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">insert</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, transpose_node)</span></span></code></pre></figure>
+<p>TRT typically eliminates these transposes entirely by choosing a compatible memory layout for the preceding layer’s output.</p>
+<p><strong>3. Low-resolution bounding box</strong>: computing bboxes from the 128x128 mask directly (scaling coordinates instead of pixels) avoids the upsample entirely when you only need bounding box coordinates, not the full-resolution mask.</p>
+<p>Each individually small (5-15%), but they compound.</p>
+<h3 id="the-memory_attention-gap">The memory_attention gap<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-memory_attention-gap" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>One number stood out: <code>memory_attention</code> took 1.13 ms in isolation but 3.31 ms in the chained pipeline. The cause: four TRT engines share a single CUDA stream (the default). Each engine call forces a context switch. With async execution, the GPU pipeline bubbles between engines. This is addressable with multi-stream execution, but I left it on the table for now since the pipeline already exceeds real-time.</p>
+<h2 id="the-fp16-softmax-catastrophe">The FP16 Softmax catastrophe<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-fp16-softmax-catastrophe" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>Here’s where the story gets interesting. Everything above assumed FP16 “just works” on TRT. For three of four modules, it does. For image_encoder, it catastrophically doesn’t.</p>
+<h3 id="the-symptom">The symptom<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-symptom" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>Enabling TRT FP16 on the full pipeline:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Module precision</th><th>mIoU</th><th>FPS</th></tr></thead><tbody><tr><td>All FP32 (TRT)</td><td>0.988</td><td>88</td></tr><tr><td><strong>All FP16 (TRT)</strong></td><td><strong>0.119</strong></td><td><strong>112</strong></td></tr><tr><td>image_encoder FP32, rest FP16</td><td>0.982</td><td>103</td></tr></tbody></table></div>
+<p>mIoU collapses from 0.98 to 0.12. The model produces random-looking masks. Per-module bisection pinpoints <code>image_encoder</code> as the sole regressor: swapping just that one module to TRT FP16 destroys accuracy, while the other three pass cleanly.</p>
+<h3 id="the-trt-build-warning">The TRT build warning<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-trt-build-warning" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>During engine building, TRT emits:</p>
+<pre><code>[TRT] [W] Detected layernorm nodes in FP16. Running layernorm after 
+self-attention with FP16 Reduce or Pow may cause overflow.
+</code></pre>
+<p>This looks like the answer. It isn’t.</p>
+<h3 id="the-actual-root-cause">The actual root cause<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-actual-root-cause" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>I enabled verbose tactic logging in the TRT builder:</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">import</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> tensorrt </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">as</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> trt</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">config </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> builder.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">create_builder_config</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">()</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">config.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">set_flag</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(trt.BuilderFlag.</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">FP16</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Enable verbose logging to see kernel selection</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">logger </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> trt.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">Logger</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(trt.Logger.</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">VERBOSE</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span></code></pre></figure>
+<p>The log reveals: in FP16 mode, <strong>all 12 attention blocks</strong> select the <code>_gemm_mha_v2</code> kernel. In FP32 mode: zero selections (uses unfused matmul/softmax tactics instead).</p>
+<p><code>_gemm_mha_v2</code> is TRT’s fused Multi-Head Attention kernel. It computes <code>Q·K^T → Softmax → ·V</code> as a single kernel with FP16 I/O. The problem: <strong>it materializes the raw attention scores <code>Q·K^T</code> as FP16 <em>before</em> applying Softmax.</strong> For ViT attention logits where values exceed ~11, <code>exp(z) >= 65504 = FP16_MAX</code>, and the Softmax overflows to Inf.</p>
+<p>This is a <a href="https://github.com/NVIDIA/TensorRT/issues/4723" class="external">known issue in TRT 10.x<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>. The standard mitigation in attention implementations is to compute <code>softmax(x - max(x))</code> which shifts values into a safe range. But TRT’s fused kernel skips this stabilization step.</p>
+<h3 id="proving-it-the-probe-model-experiment">Proving it: the probe model experiment<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#proving-it-the-probe-model-experiment" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>To confirm the fusion is the culprit, I modified the ONNX graph to materialize attention intermediate outputs (adding Identity nodes after each block’s attention scores). With 12 extra outputs added, TRT can no longer form the <code>_gemm_mha_v2</code> fusion. Result: <strong>correct output with the extra nodes, garbage without them.</strong> Breaking the fusion fixes the accuracy.</p>
+<p>The error also compounds: forcing just one block to materialize drops rel_err from 1.05 to 1.03. All 12 blocks: drops to 0.007. Each block adds a small FP16 overflow error that accumulates through the residual stream.</p>
+<h3 id="eight-workarounds-that-failed">Eight workarounds that failed<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#eight-workarounds-that-failed" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>I tried every ORT TRT EP knob available:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Strategy</th><th>Result</th><th>Why it failed</th></tr></thead><tbody><tr><td><code>trt_layer_norm_fp32_fallback=True</code></td><td>No effect</td><td>LayerNorm isn’t the issue</td></tr><tr><td>Force Pow/Sqrt/ReduceMean to FP32</td><td>No effect</td><td>Same reason</td></tr><tr><td><code>trt_op_types_to_exclude=&quot;Softmax&quot;</code></td><td>Accuracy fixed, no speedup</td><td>Graph fragments into 13 partitions</td></tr><tr><td>Insert Cast(fp16→fp32) around Softmax in ONNX</td><td>No effect</td><td>TRT constant-folds the Casts away</td></tr><tr><td>Cast-wrap + <code>trt_strict_type_constraints</code></td><td>0.16% error, 2.58 ms</td><td>Strict kills ALL fusion</td></tr><tr><td>Manual <code>softmax(x - max(x))</code> in ONNX graph</td><td>No effect</td><td>TRT pattern-matches and re-fuses</td></tr><tr><td><code>trt_builder_optimization_level</code> 0 vs 5</td><td>Identical</td><td>Bug is in tactic selection, not opt level</td></tr><tr><td>BF16 flag</td><td>Same error</td><td>Same <code>_gemm_mha_v2</code> kernel selected</td></tr></tbody></table></div>
+<p>The BF16 result is particularly instructive: BF16 has FP32’s dynamic range, which should avoid the overflow. But TRT selects the same broken kernel regardless of the precision flag. The kernel implementation has hardcoded FP16 intermediate storage.</p>
+<h3 id="the-fix-raw-tensorrt-api">The fix: raw TensorRT API<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-fix-raw-tensorrt-api" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>ORT’s TensorRT EP doesn’t expose per-layer precision control at the granularity needed. The fix: bypass ORT entirely for engine building and use the <a href="https://docs.nvidia.com/deeplearning/tensorrt/developer-guide/index.html" class="external">TRT Python API<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> directly.</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">import</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> tensorrt </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">as</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> trt</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">def</span><span style="--shiki-light:#6F42C1;--shiki-dark:#61AFEF;"> build_mixed_precision_engine</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#24292E;--shiki-light-font-style:inherit;--shiki-dark:#D19A66;--shiki-dark-font-style:italic;">onnx_path</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">):</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    logger </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> trt.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">Logger</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(trt.Logger.</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">WARNING</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    builder </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> trt.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">Builder</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(logger)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    network </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> builder.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">create_network</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span></span>
+<span data-line><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">        1</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;"> &lt;&lt;</span><span style="--shiki-light:#005CC5;--shiki-dark:#56B6C2;"> int</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(trt.NetworkDefinitionCreationFlag.</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">EXPLICIT_BATCH</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    )</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    parser </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> trt.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">OnnxParser</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(network, logger)</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">    with</span><span style="--shiki-light:#005CC5;--shiki-dark:#56B6C2;"> open</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(onnx_path, </span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;">&quot;rb&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">as</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> f:</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">        parser.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">parse</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(f.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">read</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">())</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    config </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> builder.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">create_builder_config</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">()</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    config.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">set_flag</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(trt.BuilderFlag.</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">FP16</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">    # Mark specific layers as FP32</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">    for</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> i </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">in</span><span style="--shiki-light:#005CC5;--shiki-dark:#56B6C2;"> range</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(network.num_layers):</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">        layer </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> network.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">get_layer</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(i)</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">        # Force the score MatMul and Softmax to FP32</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">        # This prevents _gemm_mha_v2 selection</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">        if</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> layer.type </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">==</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> trt.LayerType.</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">MATRIX_MULTIPLY</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">:</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">            if</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;"> &quot;attn&quot;</span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;"> in</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> layer.name </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">and</span><span style="--shiki-light:#032F62;--shiki-dark:#98C379;"> &quot;score&quot;</span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;"> in</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> layer.name:</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">                layer.precision </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> trt.float32</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">                layer.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">set_output_type</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, trt.float32)</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">        elif</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> layer.type </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">==</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> trt.LayerType.</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">SOFTMAX</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">:</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">            layer.precision </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> trt.float32</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">            layer.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">set_output_type</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">0</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">, trt.float32)</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    config.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">set_flag</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(trt.BuilderFlag.</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">OBEY_PRECISION_CONSTRAINTS</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    engine </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> builder.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">build_serialized_network</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(network, config)</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">    return</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> engine</span></span></code></pre></figure>
+<p>The key difference from ORT’s approach: setting <code>precision</code> and <code>output_type</code> on individual layers, combined with <code>OBEY_PRECISION_CONSTRAINTS</code>, forces TRT to respect the per-layer precision requests. ORT’s <code>trt_op_types_to_exclude</code> takes a different approach (pulling ops out of TRT entirely), which fragments the graph.</p>
+<p>Results:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Engine</th><th>Latency</th><th>Rel error vs FP32</th></tr></thead><tbody><tr><td>FP16 (broken)</td><td>0.81 ms</td><td>69.2%</td></tr><tr><td><strong>Mixed (Softmax + score MatMul FP32)</strong></td><td><strong>0.84 ms</strong></td><td><strong>0.50%</strong></td></tr><tr><td>FP32</td><td>1.40 ms</td><td>0.04%</td></tr></tbody></table></div>
+<p>The mixed engine is 3.7% slower than broken-FP16 but <strong>40% faster than pure FP32</strong>. Accuracy is gold.</p>
+<h3 id="ort-vs-raw-trt-when-to-use-which">ORT vs raw TRT: when to use which<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#ort-vs-raw-trt-when-to-use-which" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>ORT’s TensorRT EP is excellent for the common case: drop in your ONNX, set <code>trt_fp16_enable=True</code>, and get 2-3x speedup. For three of my four modules, it worked perfectly with zero configuration.</p>
+<p>The raw TRT API is needed when:</p>
+<ul>
+<li>You need per-layer precision control (this bug)</li>
+<li>ORT’s EP knobs can’t express your constraint</li>
+<li>You want to inspect tactic selections and fusion patterns</li>
+</ul>
+<p>The cost: you own the memory management, stream synchronization, and I/O binding. That’s manageable for 4 modules; it would be painful for 40.</p>
+<h2 id="the-cuda-stream-race">The CUDA stream race<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-cuda-stream-race" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>A brief war story from the raw-TRT integration. After building the mixed-precision engine and wiring it into the pipeline, all modes (including FP32) produced mIoU 0.28. Not an FP16 issue since even the FP32 engine was wrong.</p>
+<p>The bug: host-to-device copies used <code>non_blocking=True</code> on the default CUDA stream, but <code>execute_async_v3</code> ran on a custom stream. The TRT engine read stale (uninitialized) GPU memory.</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Bug: copy on default stream, execute on custom stream</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">input_tensor.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">copy_</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(data, </span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">non_blocking</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">True</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># default stream</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">context.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">execute_async_v3</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">stream_handle</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#E5C07B;">self</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">._stream)  </span><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># custom stream</span></span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># TRT may execute before the copy finishes!</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Fix: ensure copy and execute share the same stream</span></span>
+<span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">with</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> torch.cuda.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">stream</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#E5C07B;">self</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">._stream):</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    input_tensor.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">copy_</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(data, </span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">non_blocking</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#D19A66;">True</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    context.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">execute_async_v3</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">stream_handle</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#E5C07B;">self</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">._stream.cuda_stream)</span></span></code></pre></figure>
+<p>This is a classic async GPU bug: operations on different streams have no ordering guarantee unless you explicitly synchronize. It manifested as a “precision issue” (because the stale memory contained semi-plausible floating point values), which sent me down the wrong debugging path for an hour.</p>
+<h2 id="dropping-pytorch-cuda-python">Dropping PyTorch: cuda-python<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#dropping-pytorch-cuda-python" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>The raw TRT session needs exactly four CUDA operations: allocate device memory, copy host→device, execute, copy device→host. Using <code>torch.cuda</code> for this works, but it pulls ~2 GB of transitive dependencies (PyTorch + all its CUDA libs). For a deployment runtime, that’s excessive.</p>
+<p>Replacement: <a href="https://nvidia.github.io/cuda-python/" class="external">cuda-python<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a> (~5 MB). Direct CUDA runtime bindings.</p>
+<figure data-rehype-pretty-code-figure><pre tabindex="0" data-language="python" data-theme="github-light one-dark-pro"><code data-language="python" data-theme="github-light one-dark-pro" style="display:grid;"><span data-line><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">from</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> cuda.bindings </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">import</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> runtime </span><span style="--shiki-light:#D73A49;--shiki-dark:#C678DD;">as</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> cudart</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Allocate device memory</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">err, d_ptr </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> cudart.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">cudaMalloc</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(nbytes)</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Create a stream</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">err, stream </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> cudart.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">cudaStreamCreate</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">()</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Copy host → device (async)</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(err,) </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> cudart.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">cudaMemcpyAsync</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    d_ptr, h_ptr, nbytes,</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    cudart.cudaMemcpyKind.cudaMemcpyHostToDevice,</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    stream</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Execute TRT engine</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">context.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">execute_async_v3</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span><span style="--shiki-light:#E36209;--shiki-light-font-style:inherit;--shiki-dark:#E06C75;--shiki-dark-font-style:italic;">stream_handle</span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#56B6C2;">int</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(stream))</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Copy device → host</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(err,) </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> cudart.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">cudaMemcpyAsync</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    h_ptr, d_ptr, nbytes,</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    cudart.cudaMemcpyKind.cudaMemcpyDeviceToHost,</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">    stream</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">)</span></span>
+<span data-line> </span>
+<span data-line><span style="--shiki-light:#6A737D;--shiki-light-font-style:inherit;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;"># Synchronize</span></span>
+<span data-line><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(err,) </span><span style="--shiki-light:#D73A49;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;"> cudart.</span><span style="--shiki-light:#24292E;--shiki-dark:#61AFEF;">cudaStreamSynchronize</span><span style="--shiki-light:#24292E;--shiki-dark:#ABB2BF;">(stream)</span></span></code></pre></figure>
+<p>Three gotchas for anyone adopting cuda-python 13.x:</p>
+<ol>
+<li><strong>Import path changed</strong>: <code>from cuda.bindings import runtime as cudart</code> (not the old <code>from cuda import cudart</code>)</li>
+<li><strong>Void functions return 1-tuples</strong>: <code>cudaMemcpyAsync</code> returns <code>(err,)</code> not bare <code>err</code>. Miss the comma and you get a confusing tuple-is-not-an-error TypeError.</li>
+<li><strong>Stream handles need <code>int()</code></strong>: TRT’s <code>execute_async_v3</code> expects a raw integer handle. The <code>cudaStream_t</code> wrapper from cuda-python needs explicit <code>int()</code> conversion.</li>
+</ol>
+<p>Result: 91 → <strong>97 FPS</strong> (+7%) just from eliminating torch’s import and dispatch overhead. Same model, same precision, same GPU. The runtime overhead of having PyTorch loaded (even unused) was measurable.</p>
+<h2 id="where-we-landed">Where we landed<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#where-we-landed" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<p>Final validation (RTX 4090, 4 LaSOT person clips, 250 frames each):</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Clip</th><th>mIoU</th><th>FPS (p50)</th></tr></thead><tbody><tr><td>person-1</td><td>0.907</td><td>97.6</td></tr><tr><td>person-5</td><td>0.639</td><td>96.7</td></tr><tr><td>person-10</td><td>0.873</td><td>97.4</td></tr><tr><td>person-15</td><td>0.781</td><td>96.8</td></tr><tr><td><strong>Mean</strong></td><td><strong>0.800</strong></td><td><strong>97.1</strong></td></tr></tbody></table></div>
+<p>The full pipeline configuration:</p>
+<ul>
+<li><strong>Precision</strong>: mixed (image_encoder attention Softmax/MatMul in FP32, everything else FP16)</li>
+<li><strong>Runtime</strong>: raw TRT engines via cuda-python, no PyTorch at inference time</li>
+<li><strong>Model</strong>: EfficientTAM-Ti @ 512, 80 MB ONNX bundle, ~200 MB TRT engines (GPU-specific, cached)</li>
+</ul>
+<h3 id="the-performance-arc-through-this-post">The performance arc through this post<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#the-performance-arc-through-this-post" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h3>
+<p>Two views of progress. First, the isolated module benchmark (same 4 modules, same RTX 4090, no pipeline overhead, apples-to-apples):</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Stack</th><th>Frame total</th><th>FPS</th><th>mIoU</th></tr></thead><tbody><tr><td>PyTorch CUDA FP32 (Part 1 baseline)</td><td>12.4 ms</td><td>80</td><td>0.988</td></tr><tr><td>ORT CUDA EP FP32</td><td>6.59 ms</td><td>152</td><td>0.988</td></tr><tr><td>ORT CUDA EP FP16</td><td>6.02 ms</td><td>165</td><td>0.986</td></tr><tr><td>TRT FP16 (all modules)</td><td>2.39 ms</td><td>418</td><td>0.119 (broken)</td></tr><tr><td><strong>TRT mixed precision (Softmax fix)</strong></td><td><strong>2.58 ms</strong></td><td><strong>388</strong></td><td><strong>0.982</strong></td></tr></tbody></table></div>
+<p>Second, the real end-to-end pipeline (150+ frames, video input, all overhead included):</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-container"><table><thead><tr><th>Configuration</th><th>FPS</th><th>mIoU</th><th>Note</th></tr></thead><tbody><tr><td>PyTorch CUDA FP32</td><td>80</td><td>0.988</td><td>Part 1 baseline</td></tr><tr><td>ORT CUDA EP FP32 pipeline</td><td>65</td><td>0.988</td><td>Python orchestration overhead</td></tr><tr><td>TRT FP16 pipeline (naive)</td><td>86</td><td>0.119</td><td>Broken accuracy</td></tr><tr><td>TRT mixed precision pipeline</td><td>91</td><td>0.982</td><td>FP16 Softmax fixed</td></tr><tr><td>+ Preprocessing optimized</td><td>109</td><td>0.982</td><td>In-place numpy</td></tr><tr><td>+ Baked ONNX ops</td><td>109</td><td>0.982</td><td>Removes Python tensor ops</td></tr><tr><td><strong>+ cuda-python (drop PyTorch)</strong></td><td><strong>97</strong></td><td><strong>0.800</strong></td><td><strong>Final (different eval clips)</strong></td></tr></tbody></table></div>
+<blockquote class="callout note" data-callout="note">
+<div class="callout-title">
+                  <div class="callout-icon"></div>
+                  <div class="callout-title-inner"><p>Note</p></div>
+                  
+                </div>
+<div class="callout-content">
+<p>The final 97 FPS number comes from the full LaSOT validation set (4 clips, 250 frames each), which is a harder evaluation than the 150-frame single-clip benchmarks above. The accuracy drop from 0.982 to 0.800 mIoU is the evaluation set difference, not a regression.</p>
+</div>
+</blockquote>
+<p>The gap between isolated modules (388 FPS) and real pipeline (97 FPS) is the engineering reality: preprocessing, state management, multi-engine stream serialization, and evaluation on harder clips. Each component is individually addressable, but together they define the current ceiling.</p>
+<p>97 FPS at 0.800 mIoU exceeds the 30 FPS real-time bar by 3x on an RTX 4090. For the drone cinematography use case, this is more than sufficient on desktop-class hardware.</p>
+<p><strong>Next up</strong>: <a href="../optimizing-samurai-part-3" class="internal alias" data-slug="optimizing-samurai-part-3">Part 3</a> takes the same ONNX models to Apple Silicon with CoreML, where the constraints are completely different: no CUDA, no TensorRT, unified memory architecture, and a Neural Engine that only speaks certain graph patterns.</p>
+<hr/>
+<h2 id="references">References<a role="anchor" aria-hidden="true" tabindex="-1" data-no-popover="true" href="#references" class="internal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></a></h2>
+<ul>
+<li><a href="https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html" class="external">ONNX Runtime CUDA EP docs<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></li>
+<li><a href="https://onnxruntime.ai/docs/execution-providers/TensorRT-ExecutionProvider.html" class="external">ONNX Runtime TensorRT EP docs<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></li>
+<li><a href="https://docs.nvidia.com/deeplearning/tensorrt/developer-guide/index.html" class="external">TensorRT Developer Guide<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></li>
+<li><a href="https://github.com/NVIDIA/TensorRT/issues/4723" class="external">NVIDIA/TensorRT#4723<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, FP16 MHA overflow bug</li>
+<li><a href="https://github.com/microsoft/onnxruntime/issues/22713" class="external">microsoft/onnxruntime#22713<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, TRT cache + exclude interaction</li>
+<li><a href="https://nvidia.github.io/cuda-python/" class="external">cuda-python<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a>, NVIDIA CUDA Python bindings</li>
+<li><a href="https://github.com/yformer/EfficientTAM" class="external">EfficientTAM<svg aria-hidden="true" class="external-icon" style="max-width:0.8em;max-height:0.8em;" viewBox="0 0 512 512"><path d="M320 0H288V64h32 82.7L201.4 265.4 178.7 288 224 333.3l22.6-22.6L448 109.3V192v32h64V192 32 0H480 320zM32 32H0V64 480v32H32 456h32V480 352 320H424v32 96H64V96h96 32V32H160 32z"></path></svg></a></li>
+</ul></article><hr/><div class="page-footer"><nav class="prev-next-nav"><div class="prev-next-links"><div class="nav-link nav-prev"><a href="/blog/2026-05-16-optimizing-samurai-part-1" rel="prev"><span class="nav-direction">← Older</span><span class="nav-title">Optimizing PyTorch Models for Production: ONNX Export with SAM 2</span></a></div><div class="nav-link nav-next"><a href="/blog/2026-05-18-optimizing-samurai-part-3" rel="next"><span class="nav-direction">Newer →</span><span class="nav-title">CoreML Deployment on Apple Silicon: Real-Time Vision Models</span></a></div></div></nav></div></div><div class="right sidebar"><div class="toc desktop-only"><button type="button" class="toc-header" aria-controls="toc-16" aria-expanded="true"><h3>Table of Contents</h3><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="fold"><polyline points="6 9 12 15 18 9"></polyline></svg></button><ul id="list-0" class="toc-content overflow"><li class="depth-0"><a href="#cuda-execution-provider-the-silent-fallback" data-for="cuda-execution-provider-the-silent-fallback">CUDA Execution Provider: the silent fallback</a></li><li class="depth-1"><a href="#the-numbers" data-for="the-numbers">The numbers</a></li><li class="depth-1"><a href="#the-surprise" data-for="the-surprise">The surprise</a></li><li class="depth-0"><a href="#tensorrt-where-the-real-2x-lives" data-for="tensorrt-where-the-real-2x-lives">TensorRT: where the real 2x lives</a></li><li class="depth-1"><a href="#the-numbers-1" data-for="the-numbers-1">The numbers</a></li><li class="depth-1"><a href="#why-native-fp16-onnx-is-faster" data-for="why-native-fp16-onnx-is-faster">Why native FP16 ONNX is faster</a></li><li class="depth-0"><a href="#from-isolated-modules-to-a-real-pipeline" data-for="from-isolated-modules-to-a-real-pipeline">From isolated modules to a real pipeline</a></li><li class="depth-1"><a href="#closing-the-preprocessing-gap" data-for="closing-the-preprocessing-gap">Closing the preprocessing gap</a></li><li class="depth-1"><a href="#baking-operations-into-the-onnx-graph" data-for="baking-operations-into-the-onnx-graph">Baking operations into the ONNX graph</a></li><li class="depth-1"><a href="#the-memory_attention-gap" data-for="the-memory_attention-gap">The memory_attention gap</a></li><li class="depth-0"><a href="#the-fp16-softmax-catastrophe" data-for="the-fp16-softmax-catastrophe">The FP16 Softmax catastrophe</a></li><li class="depth-1"><a href="#the-symptom" data-for="the-symptom">The symptom</a></li><li class="depth-1"><a href="#the-trt-build-warning" data-for="the-trt-build-warning">The TRT build warning</a></li><li class="depth-1"><a href="#the-actual-root-cause" data-for="the-actual-root-cause">The actual root cause</a></li><li class="depth-1"><a href="#proving-it-the-probe-model-experiment" data-for="proving-it-the-probe-model-experiment">Proving it: the probe model experiment</a></li><li class="depth-1"><a href="#eight-workarounds-that-failed" data-for="eight-workarounds-that-failed">Eight workarounds that failed</a></li><li class="depth-1"><a href="#the-fix-raw-tensorrt-api" data-for="the-fix-raw-tensorrt-api">The fix: raw TensorRT API</a></li><li class="depth-1"><a href="#ort-vs-raw-trt-when-to-use-which" data-for="ort-vs-raw-trt-when-to-use-which">ORT vs raw TRT: when to use which</a></li><li class="depth-0"><a href="#the-cuda-stream-race" data-for="the-cuda-stream-race">The CUDA stream race</a></li><li class="depth-0"><a href="#dropping-pytorch-cuda-python" data-for="dropping-pytorch-cuda-python">Dropping PyTorch: cuda-python</a></li><li class="depth-0"><a href="#where-we-landed" data-for="where-we-landed">Where we landed</a></li><li class="depth-1"><a href="#the-performance-arc-through-this-post" data-for="the-performance-arc-through-this-post">The performance arc through this post</a></li><li class="depth-0"><a href="#references" data-for="references">References</a></li><li class="overflow-end"></li></ul></div></div><footer class><ul><li><a href="https://github.com/egordm/">GitHub</a></li><li><a href="https://www.linkedin.com/in/egor-dmitriev/">LinkedIn</a></li><li><a href="/index.xml">RSS Feed</a></li></ul></footer></div></div></body><script type="application/javascript" data-persist="true">function n(){let t=this.parentElement;t.classList.toggle("is-collapsed");let e=t.getElementsByClassName("callout-content")[0];if(!e)return;let l=t.classList.contains("is-collapsed");e.style.gridTemplateRows=l?"0fr":"1fr"}function c(){let t=document.getElementsByClassName("callout is-collapsible");for(let e of t){let l=e.getElementsByClassName("callout-title")[0],s=e.getElementsByClassName("callout-content")[0];if(!l||!s)continue;l.addEventListener("click",n),window.addCleanup(()=>l.removeEventListener("click",n));let o=e.classList.contains("is-collapsed");s.style.gridTemplateRows=o?"0fr":"1fr"}}document.addEventListener("nav",c);
+</script><script type="module" data-persist="true">function E(a,e){if(!a)return;function t(o){o.target===this&&(o.preventDefault(),o.stopPropagation(),e())}function n(o){o.key.startsWith("Esc")&&(o.preventDefault(),e())}a?.addEventListener("click",t),window.addCleanup(()=>a?.removeEventListener("click",t)),document.addEventListener("keydown",n),window.addCleanup(()=>document.removeEventListener("keydown",n))}function f(a){for(;a.firstChild;)a.removeChild(a.firstChild)}var m=class{constructor(e,t){this.container=e;this.content=t;this.setupEventListeners(),this.setupNavigationControls(),this.resetTransform()}isDragging=!1;startPan={x:0,y:0};currentPan={x:0,y:0};scale=1;MIN_SCALE=.5;MAX_SCALE=3;cleanups=[];setupEventListeners(){let e=this.onMouseDown.bind(this),t=this.onMouseMove.bind(this),n=this.onMouseUp.bind(this),o=this.onTouchStart.bind(this),r=this.onTouchMove.bind(this),i=this.onTouchEnd.bind(this),s=this.resetTransform.bind(this);this.container.addEventListener("mousedown",e),document.addEventListener("mousemove",t),document.addEventListener("mouseup",n),this.container.addEventListener("touchstart",o,{passive:!1}),document.addEventListener("touchmove",r,{passive:!1}),document.addEventListener("touchend",i),window.addEventListener("resize",s),this.cleanups.push(()=>this.container.removeEventListener("mousedown",e),()=>document.removeEventListener("mousemove",t),()=>document.removeEventListener("mouseup",n),()=>this.container.removeEventListener("touchstart",o),()=>document.removeEventListener("touchmove",r),()=>document.removeEventListener("touchend",i),()=>window.removeEventListener("resize",s))}cleanup(){for(let e of this.cleanups)e()}setupNavigationControls(){let e=document.createElement("div");e.className="mermaid-controls";let t=this.createButton("+",()=>this.zoom(.1)),n=this.createButton("-",()=>this.zoom(-.1)),o=this.createButton("Reset",()=>this.resetTransform());e.appendChild(n),e.appendChild(o),e.appendChild(t),this.container.appendChild(e)}createButton(e,t){let n=document.createElement("button");return n.textContent=e,n.className="mermaid-control-button",n.addEventListener("click",t),window.addCleanup(()=>n.removeEventListener("click",t)),n}onMouseDown(e){e.button===0&&(this.isDragging=!0,this.startPan={x:e.clientX-this.currentPan.x,y:e.clientY-this.currentPan.y},this.container.style.cursor="grabbing")}onMouseMove(e){this.isDragging&&(e.preventDefault(),this.currentPan={x:e.clientX-this.startPan.x,y:e.clientY-this.startPan.y},this.updateTransform())}onMouseUp(){this.isDragging=!1,this.container.style.cursor="grab"}onTouchStart(e){if(e.touches.length!==1)return;this.isDragging=!0;let t=e.touches[0];this.startPan={x:t.clientX-this.currentPan.x,y:t.clientY-this.currentPan.y}}onTouchMove(e){if(!this.isDragging||e.touches.length!==1)return;e.preventDefault();let t=e.touches[0];this.currentPan={x:t.clientX-this.startPan.x,y:t.clientY-this.startPan.y},this.updateTransform()}onTouchEnd(){this.isDragging=!1}zoom(e){let t=Math.min(Math.max(this.scale+e,this.MIN_SCALE),this.MAX_SCALE),n=this.content.getBoundingClientRect(),o=n.width/2,r=n.height/2,i=t-this.scale;this.currentPan.x-=o*i,this.currentPan.y-=r*i,this.scale=t,this.updateTransform()}updateTransform(){this.content.style.transform=`translate(${this.currentPan.x}px, ${this.currentPan.y}px) scale(${this.scale})`}resetTransform(){let t=this.content.querySelector("svg").getBoundingClientRect(),n=t.width/this.scale,o=t.height/this.scale;this.scale=1,this.currentPan={x:(this.container.clientWidth-n)/2,y:(this.container.clientHeight-o)/2},this.updateTransform()}},T=["--secondary","--tertiary","--gray","--light","--lightgray","--highlight","--dark","--darkgray","--codeFont"],y;document.addEventListener("nav",async()=>{let e=document.querySelector(".center").querySelectorAll("code.mermaid");if(e.length===0)return;y||=await import("https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.4.0/mermaid.esm.min.mjs");let t=y.default,n=new WeakMap;for(let r of e)n.set(r,r.innerText);async function o(){for(let s of e){s.removeAttribute("data-processed");let c=n.get(s);c&&(s.innerHTML=c)}let r=T.reduce((s,c)=>(s[c]=window.getComputedStyle(document.documentElement).getPropertyValue(c),s),{}),i=document.documentElement.getAttribute("saved-theme")==="dark";t.initialize({startOnLoad:!1,securityLevel:"loose",theme:i?"dark":"base",themeVariables:{fontFamily:r["--codeFont"],primaryColor:r["--light"],primaryTextColor:r["--darkgray"],primaryBorderColor:r["--tertiary"],lineColor:r["--darkgray"],secondaryColor:r["--secondary"],tertiaryColor:r["--tertiary"],clusterBkg:r["--light"],edgeLabelBackground:r["--highlight"]}}),await t.run({nodes:e})}await o(),document.addEventListener("themechange",o),window.addCleanup(()=>document.removeEventListener("themechange",o));for(let r=0;r<e.length;r++){let v=function(){let g=l.querySelector("#mermaid-space"),h=l.querySelector(".mermaid-content");if(!h)return;f(h);let w=i.querySelector("svg").cloneNode(!0);h.appendChild(w),l.classList.add("active"),g.style.cursor="grab",u=new m(g,h)},M=function(){l.classList.remove("active"),u?.cleanup(),u=null},i=e[r],s=i.parentElement,c=s.querySelector(".clipboard-button"),d=s.querySelector(".expand-button"),p=window.getComputedStyle(c),L=c.offsetWidth+parseFloat(p.marginLeft||"0")+parseFloat(p.marginRight||"0");d.style.right=`calc(${L}px + 0.3rem)`,s.prepend(d);let l=s.querySelector("#mermaid-container");if(!l)return;let u=null;d.addEventListener("click",v),E(l,M),window.addCleanup(()=>{u?.cleanup(),d.removeEventListener("click",v)})}});
+</script><script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/copy-tex.min.js" type="application/javascript" data-persist="true"></script><script src="../postscript.js" type="module" data-persist="true"></script></html>

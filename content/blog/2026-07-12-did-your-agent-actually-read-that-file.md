@@ -47,7 +47,7 @@ Grading gives us a single number for any (context, frozen answer) pair:
 
 $$\text{score} = \sum_t \log p(\text{answer token}_t \mid \text{everything before it})$$
 
-Read it as: *how confident is the model in this specific answer, given this specific context.*
+Read it as: *how confident is the model in this specific answer, given this specific context.* (Natural log throughout, the ML convention; if you recompute these with $\log_{10}$ you'll get numbers about 2.3x smaller.)
 
 > [!info] Why grading is cheap: prefill vs decode
 > Generation is expensive because it's sequential: one forward pass per new token, and each pass streams all the model's weights to produce a single token. Grading has no unknowns; the full sequence (context + frozen answer) goes through in **one** parallel forward pass, and the causal attention mask guarantees each position is scored using only the tokens before it. The language-model head fires at every position simultaneously. If this feels like a trick, it's literally how models are trained: a training step computes the loss over a known text in one pass, and nobody "rolls out" during training. Grading is a training step without the weight update. A 500-token answer costs 500 tokens of prefill, not 500 sequential steps.
@@ -72,14 +72,14 @@ Frozen answer: "3000"
 
 ```text
 softmax: { "3000": 0.90,  "8080": 0.08,  other: 0.02 }
-score = log(0.90) ≈ −0.11
+score = ln(0.90) ≈ −0.11
 ```
 
 **Now ablate B.** "Ablating" is physically dumb: delete B's tokens from the input. The prompt is just shorter now. Grade the *same* frozen answer:
 
 ```text
 softmax: { "3000": 0.02,  "8080": 0.93,  other: 0.05 }
-score = log(0.02) ≈ −3.9
+score = ln(0.02) ≈ −3.9
 ```
 
 Stare at this for a second, because it's the crux. Without the lsof output, the model *wants* to say "8080" (93%!). But we never let it say anything. We only read off how much probability it still assigns to the frozen "3000": a miserable 2%. The model is telling us, in one number: *without that tool result, I would not have said what I said.*
@@ -103,11 +103,11 @@ Collect the experiments into a table: which sources were kept, and what score ca
 | kept A? | kept B? | score |
 | ------- | ------- | ----- |
 | 1       | 1       | −0.11 |
-| 1       | 0       | −3.9  |
+| 1       | 0       | −3.90 |
 | 0       | 1       | −0.05 |
-| 0       | 0       | −4.2  |
+| 0       | 0       | −3.84 |
 
-Now fit a linear regression: $\text{score} \approx \text{base} + w_A \cdot A + w_B \cdot B$. Out come the attributions: $w_B \approx +3.9$ (the answer *depended* on the lsof output) and $w_A \approx -0.05$ (the config file was mildly hurting). The weights are **signed**, and negative weights are real findings: a source that actively pushed against the answer.
+Now fit a linear regression: $\text{score} \approx \text{base} + w_A \cdot A + w_B \cdot B$. Out come the attributions: $w_B \approx +3.8$ (the answer *depended* on the lsof output) and $w_A \approx -0.06$ (the config file was mildly hurting). Check it against the table: moving B from 0 to 1 lifts the score by ~3.79 whether A is present or not, and moving A from 0 to 1 *costs* ~0.06 either way. The weights are **signed**, and negative weights are real findings: a source that actively pushed against the answer.
 
 ![[blog/assets/ablation-fitted-weights.png|700]]
 
@@ -141,7 +141,7 @@ Proof is replaced by a per-use validity check. That's the right epistemics for a
 
 One more limit, and it's the one worth internalizing before you quote these numbers anywhere.
 
-We measured $w_B = +3.9$: the model's confidence in "3000" craters without the lsof output. Does that tell you what the agent *would have done* without B?
+We measured $w_B = +3.8$: the model's confidence in "3000" craters without the lsof output. Does that tell you what the agent *would have done* without B?
 
 No. And it can't, structurally. The method only ever grades **the answer that actually happened**. It knows that answer becomes unlikely without B; it cannot know what would have replaced it. Maybe a paraphrase ("the server is on port 3000"), in which case the *behavior* didn't depend on B at all, only the exact wording did. Maybe a completely different action. Distinguishing those requires actually generating under the ablated context, a rollout, which is a different (and more expensive) instrument with different validity problems.
 

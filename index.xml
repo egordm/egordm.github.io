@@ -6,6 +6,18 @@
       <description>Last 10 notes on Egor Dmitriev</description>
       <generator>Quartz -- quartz.jzhao.xyz</generator>
       <item>
+    <title>Agent Comprehension Instruments</title>
+    <link>https://egordmitriev.dev/series/agent-comprehension-instruments</link>
+    <guid>https://egordmitriev.dev/series/agent-comprehension-instruments</guid>
+    <description><![CDATA[ Building, from scratch, the instruments that measure whether an agent actually uses and understands its context, and what each one's failure modes are. ]]></description>
+    <pubDate>Sun, 19 Jul 2026 12:55:20 GMT</pubDate>
+  </item><item>
+    <title>Your Agent Read the File. Did It Understand It?</title>
+    <link>https://egordmitriev.dev/blog/2026-07-19-your-agent-read-the-file-but-did-it-understand-it</link>
+    <guid>https://egordmitriev.dev/blog/2026-07-19-your-agent-read-the-file-but-did-it-understand-it</guid>
+    <description><![CDATA[ Ablation attribution can tell you an answer leaned on the right file at rank one, and the answer can still be wrong. Influence isn't comprehension, so this post opens the model to find the difference. ]]></description>
+    <pubDate>Sat, 18 Jul 2026 22:00:00 GMT</pubDate>
+  </item><item>
     <title>Inside Gradient Boosting</title>
     <link>https://egordmitriev.dev/series/inside-gradient-boosting</link>
     <guid>https://egordmitriev.dev/series/inside-gradient-boosting</guid>
@@ -53,18 +65,6 @@
     <guid>https://egordmitriev.dev/projects/research</guid>
     <description><![CDATA[ Pre-build surveys and reference notes for projects I am considering building, plus the artifacts that survive when I decide not to build them. ]]></description>
     <pubDate>Sun, 12 Jul 2026 20:28:38 GMT</pubDate>
-  </item><item>
-    <title>Series</title>
-    <link>https://egordmitriev.dev/series/</link>
-    <guid>https://egordmitriev.dev/series/</guid>
-    <description><![CDATA[ A collection of multi-part blog series exploring technical topics in depth. ]]></description>
-    <pubDate>Sun, 12 Jul 2026 20:28:38 GMT</pubDate>
-  </item><item>
-    <title>Did Your Agent Actually Read That File?</title>
-    <link>https://egordmitriev.dev/blog/2026-07-12-did-your-agent-actually-read-that-file</link>
-    <guid>https://egordmitriev.dev/blog/2026-07-12-did-your-agent-actually-read-that-file</guid>
-    <description><![CDATA[ Your coding agent read twelve files and gave you an answer. Which ones did it actually use? Ablation attribution answers this with ~64 forward passes and a linear regression, and it is more elegant than it has any right to be. ]]></description>
-    <pubDate>Sat, 11 Jul 2026 22:00:00 GMT</pubDate>
   </item>
     </channel>
   </rss>

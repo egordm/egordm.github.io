@@ -13,6 +13,8 @@ aliases:
   - "context-attribution"
 ---
 
+*Part of the [[series/agent-comprehension-instruments|Agent Comprehension Instruments]] series.*
+
 Your coding agent just read twelve files, ran three shell commands, and confidently told you the server config is wrong. Which of those twelve files did it *actually use* to reach that conclusion? Did the `lsof` output matter? Did it ignore the config file it so dutifully opened?
 
 You can't just ask it; models confabulate justifications. Attention maps feel like the answer but are famously unreliable as explanations. And yet there's a method that answers this question with nothing but forward passes and a linear regression, and it's one of the most elegant tricks I've seen in the LLM tooling space. It's called **ablation attribution**, published as [ContextCite](https://arxiv.org/abs/2409.00729) by Cohen-Wang et al. (NeurIPS 2024).

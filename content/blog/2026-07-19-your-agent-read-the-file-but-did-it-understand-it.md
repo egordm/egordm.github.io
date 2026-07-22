@@ -133,24 +133,9 @@ The series signature: never skip the part where the instrument stops working.
 - **Token lineage blurs with depth.** By late layers, the residual stream at position $j$ holds heavily mixed information: earlier layers move content across positions before later ones extract it (Geva et al. trace exactly this, subject-enrichment then extraction to the final position). "This head pulled from position $j$" is not the same claim as "this head pulled from the original token that started at position $j$." What survives cleanly is the circuit-level claim (these heads are necessary for this behavior), not a claim about which exact input token the information began as. The rigorous alternative, path patching against a counterfactual run, would settle the lineage properly, and it's priced out at long context: three forward passes per tested edge plus the same quadratic-memory cost activation patching already has.
 - **The background contrast penalizes broad relevance.** LOCOS's own stated limitation: when distractor content in the background is topically related to the answer, it inflates $\Phi^-$, which can penalize a head that's doing legitimate broad semantic matching rather than narrow needle-reading.
 
-## What we're doing with it: validating the instrument before trusting it
+## Before trusting it
 
-None of the numbers above are ours; they're the published LOCOS and Geva results, ported to check that the mechanism reasons correctly before we trust it on new content. The plan is a paired-item design over the same planted fact, one item phrased for literal copy, one for synthesis, run through both detectors and both interventions, and a fingerprint the instrument has to reproduce or it doesn't get trusted:
-
-| Check | Expected result |
-|---|---|
-| Copy-test detector, copy item | finds heads |
-| Copy-test detector, synthesis item | goes blind |
-| $\phi$ detector, both items | finds heads on both |
-| Head-set overlap between the two detectors | small |
-| Ablate $\phi$-chosen heads, synthesis item | score collapses |
-| Ablate copy-test-chosen heads, synthesis item | score largely stands |
-| Knock out the planted span, either item | both collapse |
-| Parametric control tasks, any of the above | untouched |
-
-One more control rides along for free: project the same captured writes onto a token the context does not support, and demand the contrast stay flat. If $\phi$ lights up for a token nothing in the input argues for, the instrument is finding noise, not signal.
-
-If the fingerprint reproduces, the instrument earns the right to score real agent trajectories, where the interesting question isn't "did the model read the file" (the previous post answers that) but "did it understand what the file said."
+None of the numbers above are ours; they're the published LOCOS and Geva results, ported to check that the mechanism reasons correctly. That is deliberately not the same as trusting the instrument on new content. An instrument earns trust the same way a claim does: by reproducing a pre-registered fingerprint on material where the ground truth is planted and known, with the pass bars fixed before the results exist, and it keeps that trust only at the scope the validation actually covered. The series signature applies to the instruments themselves: the part where they stop working gets measured, never assumed away.
 
 ---
 

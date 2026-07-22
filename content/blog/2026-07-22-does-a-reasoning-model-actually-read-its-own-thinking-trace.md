@@ -55,13 +55,17 @@ We took one sampled reasoning trace per question, frozen, and ran every interven
 
 **Masking every restatement of the derivation.** Not just one sentence: the model tends to re-derive its own intermediate result more than once across a trace ("wait, let me check that again"), so a single cut gets absorbed by its own redundant siblings. We masked every sentence that stated the derived value, using the causal attention-suppression technique from [Thought Anchors](https://arxiv.org/abs/2506.19143) (block every downstream token's attention to the target sentences, across all layers and heads). Correctness on the combination questions: **0.83** (bootstrap CI [0.58, 1.00], wide given how few questions this covers). A KL-divergence readout on the downstream tokens (averaging 5.2) confirms the mask is not inert: it measurably perturbs generation. It does not stop the model reaching the right answer.
 
+![[blog/assets/thought-anchors-methods-overview.png|600]]
+*How a reasoning trace becomes an experimental surface: label the sentences, then intervene on them. The bottom box of panel B is the exact move our masking arms use: block every downstream token's attention to a target sentence and read the effect on what follows. Figure 1 of [Thought Anchors](https://arxiv.org/abs/2506.19143) (CC BY 4.0).*
+
 **A truncation ladder, with a filler-matched twin.** We truncated the trace at increasing points and forced an answer from each truncation point, tracking where the derivation sentence sits on that ladder. On three quarters of the used questions, the answer is already correct before the derivation sentence is even reached. As the control, we ran a second ladder where the truncated remainder is replaced by content-free filler of matched length instead of being cut outright. That filler ladder crosses to correct early too, on 0.83 of questions, meaning the crossing point tracks how many generation steps have elapsed, not whether the derivation has actually appeared.
+
+![[blog/assets/e7-truncation-ladder.png|560]]
+*Both ladders climb together, and before the derivation. Fraction of items answering correctly against how much of the frozen trace is kept; the ticks along the top mark where each item's first derivation sentence appears (median: 62 percent of the trace). The filler companion tracks the truncated trace nearly point for point, so the crossing follows runway length, not derivation content. Our run data, 12 used items.*
 
 **A random-sentence control.** As a check on the masking mechanic itself, rather than blocking derivation sentences, we blocked the same number of sentences chosen at random from elsewhere in the trace. This is the guard against a false positive where masking anything at all collapses the answer, which would make the derivation look causally important for no interesting reason. Correctness under the random mask: **1.00**. The masking mechanic itself is not what breaks the answer.
 
 **Corrupting the derivation.** Rather than remove the derivation, we replaced every restatement of it with the same, single, wrong value, forcing the rest of the trace to work from a false premise. The model follows the corrupted value into its final answer on **0.92** of questions (95 percent CI roughly 0.75 to 1.00). A matched negative control, corrupting an unrelated placeholder sentence instead of the derivation, is followed 0.00 of the time and ignored 1.00 of the time, so the mechanic itself behaves cleanly.
-
-TODO-FIGURE: the truncation-ladder curve (correctness against truncation point, the content ladder plotted beside its filler-matched companion, derivation-sentence position marked). Candidate source: our own run data from this experiment.
 
 ## The reader's second trap: what does 0.83 actually mean
 
@@ -91,7 +95,8 @@ This holds for one 8-billion-parameter model, on questions requiring exactly one
 
 **This bears on the case for latent, non-token reasoning.** Designs like [COCONUT](https://arxiv.org/abs/2412.06769) replace the written trace with continuous latent iterations, aiming to get the extra sequential compute without paying for it in tokens. The standard objection is that you lose the interpretable trace. That objection weakens if the trace is mostly narration to begin with. But the trusted-input channel this result surfaces is exactly what a latent design gives up: there is no longer a note the model can trust or distrust, correctly or otherwise. The open question is where the serial computation has to live: in tokens you can read and edit, or in latent iterations you cannot.
 
-TODO-FIGURE: Thought Anchors' Figure 4 (receiver-head attention pattern; license verified CC BY 4.0, attribution required); illustrates why trace-internal methods have replaced context-to-answer knockout as the standard tool for this kind of question.
+![[blog/assets/thought-anchors-receiver-heads.png|600]]
+*A receiver head at work: a few sentences in a reasoning trace draw outsized attention from everything downstream (the spikes, and the dark vertical stripes in the inset matrix). Trace-internal structure like this is why trace-side instruments have become the standard tool for these questions. Figure 4 of [Thought Anchors](https://arxiv.org/abs/2506.19143) (CC BY 4.0).*
 
 ## The shape of the answer
 

@@ -56,15 +56,20 @@ So on this task, quantization is innocent until roughly 3.5 bits per weight, whi
 The second axis needs no new experiment: [[blog/2026-07-24-is-half-your-context-window-just-marketing|part 4]] already measured it on the same model, at full precision, with the one-fact version of the same task. Perfect recall through 8,000 tokens, 0.900 at 16,000, 0.757 by 24,000, all comfortably inside the native 32,768-token window. No quantization anywhere in the pipeline; ordinary distance does the damage on its own.
 
 ![[blog/assets/latent-length-ladder.png|700]]
-*Retrieval against context length, at full precision, inside the native 32,768-token window. The upper curve is the 1-fact task: perfect through 8K, 0.900 at 16K, 0.757 at 24K. The lower two series are the harder 2-fact join and its 1-hop control; they sit lower and stop near 16K. The shaded band marks where those harder tasks collapse to zero (an estimate from single runs, not a measured rate) while the easier task is still declining through it. Qwen3-8B, thinking on, one RTX 4090.*
+*Retrieval against context length, at full precision, inside the native 32,768-token window. The upper curve is the 1-fact task: perfect through 8K, 0.900 at 16K, 0.757 at 24K. The lower two series are the harder 2-fact join and its 1-hop control: the join runs 0.538 at 4,096 tokens, 0.446 at 7,558, 0.306 at 15,360, and 0.066 at 23,161, below the 0.1619 chance floor. Every point aggregates nine runs per needle pair; error bars span the full range across those runs. Qwen3-8B, thinking on, one RTX 4090.*
 
-The two-fact join tells the same story on its own length axis. Only its shortest window, around 4,000 tokens, clearly passes the bar set before the run; at 8,000 the average is still well above the bar, but the noise band dips below it. And in single spot-checks, even the one-connection control collapses to zero somewhere between 16,000 and 24,000 tokens, inside the model's own window. A harder task fails earlier, but the shape is the same: gradual decline, then collapse, well before the advertised window runs out.
+> [!NOTE]
+> **The setup.** Each length cell runs 38 two-fact join items plus their 38 paired twin controls, nine draws (seeds) per cell: 684 generations per cell. A draw seed varies the sampled decode path; the haystack itself is fixed per item by a held construction seed. Regime pinned throughout: Qwen3-8B, BF16 GGUF, thinking on, temperature 0.6, top_p 0.95, top_k 20, output budget 8,192 tokens, one backend and one code path start to finish. Rates are read on the answer segment only. The chance floor, 0.1619, is set by the construction's own shape; floor comparisons in this post are on the point rate.
+
+The two-fact join tells the same story on its own length axis. Scored accept-form on the answer segment (join subset, n=342 per cell, nine draws per cell), the curve runs 0.538 (0.523-0.550) at 4,096 tokens, 0.446 (0.436-0.459) at 7,558, 0.306 (0.298-0.325) at 15,360, and 0.066 (0.064-0.094) at 23,161, below the chance floor of 0.1619. The join is dead by roughly 23,000 tokens of a 32,768-token window: roughly half the advertised window does not reliably deliver this capability.
+
+The 1-hop control moves the same way: accept-form twin rates of 0.721 at 4,096 tokens, 0.522 at 7,558, 0.269 at 15,360, and 0.092 at 23,161, crossing the 0.1619 floor in the same 15,360-to-23,161 interval as the join. Nine draws per cell give this reading more depth than a single run would. The control declining in step with the join means the depth effect hits the whole capability class, not just the two-fact join: the harder task just starts lower on the same curve.
 
 ## Two axes, opposite verdicts
 
 Same model. Same task family. Opposite verdicts.
 
-Push precision down and the join barely moves until Q3_K_S, about 3.2 bits per weight, a level nobody runs in practice; Q4_K_M and Q5_K_M, the settings people actually deploy, sit flat with the full-precision reference. Push length out instead and the same kind of task is already degrading by 16,000 tokens, less than half of this model's native window, and collapses entirely before the window's edge. One axis costs you almost nothing until far past where anyone actually quantizes. The other starts costing you well inside the box printed on the model card.
+Push precision down and the join barely moves until Q3_K_S, about 3.2 bits per weight, a level nobody runs in practice; Q4_K_M and Q5_K_M, the settings people actually deploy, sit flat with the full-precision reference. Push length out instead and the same kind of task is already declining a few thousand tokens in and is dead by roughly 23,000, still well inside this model's 32,768-token native window. One axis costs you almost nothing until far past where anyone actually quantizes. The other starts costing you well inside the box printed on the model card.
 
 If you had to bet on which one silently corrupts a long-running agent's grip on its own context, precision loss is not the axis to worry about. Distance is.
 
@@ -104,3 +109,9 @@ Precision, next to that, is close to free. Quantize hard for cost and the model'
 - Hsieh, Sun, Kriman, Acharya, Rekesh, Jia, Zhang, Ginsburg, "RULER: What's the Real Context Size of Your Long-Context Language Models?" [arXiv 2404.06654](https://arxiv.org/abs/2404.06654).
 - Meta AI, ["Llama 4: Leading Intelligence"](https://ai.meta.com/blog/llama-4-multimodal-intelligence/) launch blog (pretraining sequence length up to 256K, against the 10M claimed window).
 - Qwen Team, "Qwen3 Technical Report," [arXiv 2505.09388](https://arxiv.org/abs/2505.09388).
+
+---
+
+**Note.**
+
+*2026-08-16: the join-length numbers in this post were re-measured with the model's reasoning mode genuinely enabled; the original run had it disabled by a config default. The conclusions are unchanged in kind, and the collapse onset moved deeper into the window.*

@@ -11,6 +11,8 @@ description: "Ablation attribution can tell you an answer leaned on the right fi
 aliases:
   - "logit-contribution-scoring"
   - "synthesis-heads"
+series: "Agent Comprehension Instruments"
+series_order: 2
 ---
 
 [[blog/2026-07-12-did-your-agent-actually-read-that-file|The previous post]] built ablation attribution: grade the model's frozen answer with a source in and out of context, and the score gap tells you how much the answer leaned on that source. It's a good instrument. It also has a gap you hit the first time you use it for real: an answer can lean on the right source at rank one and still be wrong. The model read the file and misread it.

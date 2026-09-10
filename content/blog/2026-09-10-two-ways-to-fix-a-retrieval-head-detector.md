@@ -11,6 +11,8 @@ description: "Wu's copy-match test for retrieval heads breaks on any question th
 aliases:
   - "detector-frames"
   - "qrhead-vs-locos"
+series: "Agent Comprehension Instruments"
+series_order: 6
 ---
 
 [[blog/2026-07-19-your-agent-read-the-file-but-did-it-understand-it|Part 2 of this series]] built a detector for the heads that carry non-literal retrieval, and it opened with a broken instrument. Wu et al.'s retrieval-head test asks whether the token a head attends to hardest is the token the model then emits. On needle-in-a-haystack that works. On a question whose answer has to be synthesized rather than copied, it collapses: the top-head score falls from 0.97 to 0.03, and ablating the heads it selects can make the task *better*, which is the signature of selecting causally irrelevant heads.

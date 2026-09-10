@@ -11,6 +11,8 @@ description: "Your coding agent read twelve files and gave you an answer. Which 
 aliases:
   - "ablation-attribution"
   - "context-attribution"
+series: "Agent Comprehension Instruments"
+series_order: 1
 ---
 
 *Part of the [[series/agent-comprehension-instruments|Agent Comprehension Instruments]] series.*

@@ -11,6 +11,8 @@ description: "A 32,768-token context window is a claim about attention, not memo
 aliases:
   - "recall-validity"
   - "effective-context-length"
+series: "Agent Comprehension Instruments"
+series_order: 4
 ---
 
 [[blog/2026-07-22-does-a-reasoning-model-actually-read-its-own-thinking-trace|The previous post]] found that a reasoning model can recompute an answer straight from the source text, without needing its own written derivation to survive. The fact doesn't have to live in the trace. It only has to still be reachable in the context. That "still reachable" is the assumption this post tests, because it is not free: a fact sitting far back in a long prompt is not automatically as available as one sitting at the top.

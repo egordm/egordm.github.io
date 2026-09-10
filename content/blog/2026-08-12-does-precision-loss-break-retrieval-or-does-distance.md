@@ -11,6 +11,8 @@ description: "A quantization ladder and a length ladder, run on the same model w
 aliases:
   - "dose-vs-distance"
   - "precision-vs-distance"
+series: "Agent Comprehension Instruments"
+series_order: 5
 ---
 
 [[blog/2026-07-24-is-half-your-context-window-just-marketing|The previous post]] measured one way a model loses its grip on a fact already sitting in its context: distance. Plant a fact early in a long prompt, ask a question that shares no words with it, and the model's chance of making that connection drops well before the prompt runs out. There is a second, entirely separate way the same fact could be lost: precision. Shrink every weight from bf16 down toward 2 bits and, somewhere on that ladder, the network should stop being able to make the same connection.

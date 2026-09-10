@@ -12,6 +12,8 @@ description: "We cut, corrupt, and time a small reasoning model's chain-of-thoug
 aliases:
   - "reasoning-trace-authority"
   - "trace-carried-reasoning"
+series: "Agent Comprehension Instruments"
+series_order: 3
 ---
 
 [[blog/2026-07-19-your-agent-read-the-file-but-did-it-understand-it|The previous post]] built an instrument for scoring what attention heads write, and closed on a discipline: validate against planted ground truth before trusting. Validation had a surprise waiting. The model we pointed the instrument at barely does its combining on the direct-answer surface at all: ask it to merge two facts without letting it think and it mostly fails; let it think and it mostly succeeds. The combining lives in the reasoning trace. This post follows it there.

@@ -1,0 +1,15 @@
+version: 2
+updates:
+  # Add Bun updates when the updater supports our Bun 1.4 lockfile.
+  # https://github.com/dependabot/dependabot-core/issues/15897
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch

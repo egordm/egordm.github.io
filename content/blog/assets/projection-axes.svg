@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="258" viewBox="0 0 840 258" role="img" aria-labelledby="title description">
+  <title id="title">Axes of the per-head projection</title>
+  <desc id="description">The output projection has heads, head_dim and hidden axes. The token direction has a hidden axis. The hidden axes match and are summed over, leaving heads and head_dim in the result.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a5b4c8"/>
+    </marker>
+  </defs>
+  <rect width="840" height="258" rx="14" fill="#101827"/>
+  <g fill="#172338" stroke="#34435b">
+    <rect x="20" y="22" width="280" height="182" rx="10"/>
+    <rect x="326" y="22" width="202" height="182" rx="10"/>
+    <rect x="618" y="22" width="202" height="182" rx="10"/>
+  </g>
+  <g fill="#e7eef8" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="17" text-anchor="middle">
+    <text x="160" y="53">output_projection</text>
+    <text x="427" y="53">token_direction</text>
+    <text x="719" y="53">result</text>
+  </g>
+  <g fill="#183b51" stroke="#479bb8">
+    <rect x="44" y="73" width="232" height="30" rx="6"/>
+    <rect x="44" y="111" width="232" height="30" rx="6"/>
+    <rect x="642" y="73" width="154" height="30" rx="6"/>
+    <rect x="642" y="111" width="154" height="30" rx="6"/>
+  </g>
+  <g fill="#f0bd70" fill-opacity="0.13" stroke="#d9a65e">
+    <rect x="44" y="149" width="232" height="30" rx="6"/>
+    <rect x="350" y="149" width="154" height="30" rx="6"/>
+  </g>
+  <g font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="16" text-anchor="middle">
+    <g fill="#bdeaff">
+      <text x="160" y="94">heads</text>
+      <text x="160" y="132">head_dim</text>
+      <text x="719" y="94">heads</text>
+      <text x="719" y="132">head_dim</text>
+    </g>
+    <g fill="#ffcf8d">
+      <text x="160" y="170">hidden</text>
+      <text x="427" y="170">hidden</text>
+    </g>
+  </g>
+  <path d="M 278 164 H 348" stroke="#d9a65e" stroke-width="2" stroke-dasharray="4 4"/>
+  <path d="M 543 103 H 601" stroke="#a5b4c8" stroke-width="2" marker-end="url(#arrow)"/>
+  <g fill="#c2cede" font-family="system-ui, -apple-system, sans-serif" font-size="13" text-anchor="middle">
+    <text x="573" y="129">sum over</text>
+    <text x="573" y="148">hidden</text>
+    <text x="420" y="235" font-size="15">The hidden axes match. The result keeps heads and head_dim.</text>
+  </g>
+</svg>

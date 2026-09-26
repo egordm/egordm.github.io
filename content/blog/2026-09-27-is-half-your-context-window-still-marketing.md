@@ -1,6 +1,6 @@
 ---
 title: "Is Half Your Context Window Still Marketing in 2026?"
-date: 2026-09-27
+date: 2026-09-26
 draft: false
 series: "LLM Comprehension"
 series_order: 8
@@ -155,7 +155,6 @@ Codex); every number in this post was checked against the stored answers by an i
 review before I wrote it down. The test harness builds on a small research library that is not
 public yet.
 
-*Revised on 2026-09-27: new figures.*
 
 **References.**
 

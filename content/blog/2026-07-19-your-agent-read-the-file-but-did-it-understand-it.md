@@ -104,7 +104,7 @@ For the timeout example, finding the sentence, the mover and the push still leav
 
 ---
 
-*Revised on 2026-09-28: retitled from "Your Agent Read the File. Did It Understand It?" and rewritten as the sequel to [[blog/2026-07-18-which-heads-read-your-context|Which Heads Read Your Context?]], with new figures.*
+*Revised on 2026-09-26: retitled from "Your Agent Read the File. Did It Understand It?" and rewritten as the sequel to [[blog/2026-07-18-which-heads-read-your-context|Which Heads Read Your Context?]], with new figures.*
 
 **References.**
 

@@ -122,7 +122,7 @@ Neither the plain answer surface nor the trace surface, on its own, tells you wh
 
 ---
 
-*Revised on 2026-09-28: new figures, a corrected thinking-on comparison (15 of 16 combination questions), and a new opening that follows the revised previous post.*
+*Revised on 2026-09-26: new figures, a corrected thinking-on comparison (15 of 16 combination questions), and a new opening that follows the revised previous post.*
 
 **References.**
 

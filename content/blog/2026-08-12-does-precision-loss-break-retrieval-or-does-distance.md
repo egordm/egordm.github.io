@@ -118,7 +118,7 @@ For the tasks here, reducing precision to Q4_K_M or Q5_K_M was less damaging tha
 
 The length numbers above were re-measured with thinking on; the quantization ladder was not re-run and remains a thinking-off measurement.
 
-*Revised on 2026-09-27: the thinking setting of each experiment stated, a corrected reading of the Q3_K_S failure and the precision threshold, new figures, and a link to the 2026 frontier measurement.*
+*Revised on 2026-09-26: the thinking setting of each experiment stated, a corrected reading of the Q3_K_S failure and the precision threshold, new figures, and a link to the 2026 frontier measurement.*
 
 **References.**
 

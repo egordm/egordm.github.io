@@ -198,7 +198,7 @@ probabilities.
 
 ---
 
-*Revised on 2026-09-27: retitled from "Did Your Agent Actually Read That File?", with new figures, a few corrections and a validation test.*
+*Revised on 2026-09-26: retitled from "Did Your Agent Actually Read That File?", with new figures, a few corrections and a validation test.*
 
 **References.**
 

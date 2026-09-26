@@ -92,7 +92,7 @@ For important facts, make the connection explicit and keep the relevant text clo
 
 ---
 
-*Revised on 2026-09-27: new figures, the scope of the 16K result stated, and a softer reading of why recall drops.*
+*Revised on 2026-09-26: new figures, the scope of the 16K result stated, and a softer reading of why recall drops.*
 
 **References.**
 

@@ -1,6 +1,6 @@
 ---
 title: "LLM Comprehension"
-description: "What a language model actually does with the text you give it: which sources it used, whether it understood them, and how much of a long context it can still use. Each post builds one measurement from scratch."
+description: "Measuring what a language model actually does with the text you give it, one method per post."
 aliases:
   - "series/agent-comprehension-instruments"
 ---

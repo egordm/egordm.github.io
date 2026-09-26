@@ -1,6 +1,8 @@
 ---
 title: "Does Precision Loss Break Retrieval, or Does Distance?"
 date: 2026-08-12
+series: "LLM Comprehension"
+series_order: 5
 tags:
   - llm
   - agents

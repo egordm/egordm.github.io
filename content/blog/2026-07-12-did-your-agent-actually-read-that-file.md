@@ -163,8 +163,11 @@ at all, only the exact wording did. Finding out requires generating again under 
 which is a different and more expensive experiment.
 
 So read the weights as: *this source supported the answer as written*. That is reliance, not
-understanding. A model can lean on exactly the right file and still misread it, which is the
-subject of [[blog/2026-07-19-your-agent-read-the-file-but-did-it-understand-it|the next post]].
+understanding. A model can lean on exactly the right file and still misread it. The next posts look
+inside the model for that: [[blog/2026-07-17-how-attention-works|how attention carries a source into
+the answer]], [[blog/2026-07-18-which-heads-read-your-context|which heads do it]], and
+[[blog/2026-07-19-your-agent-read-the-file-but-did-it-understand-it|whether they can tell a right
+reading from a wrong one]].
 
 ## Does it find the right source?
 

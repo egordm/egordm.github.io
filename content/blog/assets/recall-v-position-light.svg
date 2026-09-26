@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="352" viewBox="0 0 420 352" role="img" aria-labelledby="title desc">
+<title id="title">Fact position changes recall at 24K</title>
+<desc id="desc">At 24K tokens, middle placement recovered 6 of 14 facts; placement 90% through the document recovered 12 of 14. Equal-length document bars mark the fact position. Each circle represents an item; filled circles count recoveries and are grouped by outcome, not item identity.</desc>
+<defs><pattern id="untested" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M-2 2L2-2M0 8L8 0M6 10L10 6" fill="none" stroke="#d8dcd7" stroke-width="1"/></pattern></defs>
+<rect x="0" y="0" width="420" height="352" rx="0" fill="#ffffff"/>
+<text x="24" y="26" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">Same document length: 24K tokens</text>
+<text x="24" y="64" fill="#252725" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" text-anchor="start">Middle</text>
+<text x="396" y="64" fill="#4557ba" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" text-anchor="end">6 of 14 found</text>
+<rect x="24" y="79" width="372" height="28" rx="4" fill="#eeeFEB" stroke="#d8dcd7"/>
+<rect x="207.0" y="76" width="6" height="34" rx="2" fill="#a8460c"/>
+<text x="210.0" y="129" fill="#a8460c" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">50%</text>
+<circle cx="35" cy="154" r="7" fill="#4557ba"/>
+<circle cx="62" cy="154" r="7" fill="#4557ba"/>
+<circle cx="89" cy="154" r="7" fill="#4557ba"/>
+<circle cx="116" cy="154" r="7" fill="#4557ba"/>
+<circle cx="143" cy="154" r="7" fill="#4557ba"/>
+<circle cx="170" cy="154" r="7" fill="#4557ba"/>
+<circle cx="197" cy="154" r="7" fill="#ffffff" stroke="#595e5b" stroke-width="1.5"/>
+<circle cx="224" cy="154" r="7" fill="#ffffff" stroke="#595e5b" stroke-width="1.5"/>
+<circle cx="251" cy="154" r="7" fill="#ffffff" stroke="#595e5b" stroke-width="1.5"/>
+<circle cx="278" cy="154" r="7" fill="#ffffff" stroke="#595e5b" stroke-width="1.5"/>
+<circle cx="305" cy="154" r="7" fill="#ffffff" stroke="#595e5b" stroke-width="1.5"/>
+<circle cx="332" cy="154" r="7" fill="#ffffff" stroke="#595e5b" stroke-width="1.5"/>
+<circle cx="359" cy="154" r="7" fill="#ffffff" stroke="#595e5b" stroke-width="1.5"/>
+<circle cx="386" cy="154" r="7" fill="#ffffff" stroke="#595e5b" stroke-width="1.5"/>
+<text x="24" y="205" fill="#252725" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" text-anchor="start">Near the end</text>
+<text x="396" y="205" fill="#4557ba" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" text-anchor="end">12 of 14 found</text>
+<rect x="24" y="220" width="372" height="28" rx="4" fill="#eeeFEB" stroke="#d8dcd7"/>
+<rect x="355.8" y="217" width="6" height="34" rx="2" fill="#a8460c"/>
+<text x="358.8" y="270" fill="#a8460c" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">90%</text>
+<circle cx="35" cy="295" r="7" fill="#4557ba"/>
+<circle cx="62" cy="295" r="7" fill="#4557ba"/>
+<circle cx="89" cy="295" r="7" fill="#4557ba"/>
+<circle cx="116" cy="295" r="7" fill="#4557ba"/>
+<circle cx="143" cy="295" r="7" fill="#4557ba"/>
+<circle cx="170" cy="295" r="7" fill="#4557ba"/>
+<circle cx="197" cy="295" r="7" fill="#4557ba"/>
+<circle cx="224" cy="295" r="7" fill="#4557ba"/>
+<circle cx="251" cy="295" r="7" fill="#4557ba"/>
+<circle cx="278" cy="295" r="7" fill="#4557ba"/>
+<circle cx="305" cy="295" r="7" fill="#4557ba"/>
+<circle cx="332" cy="295" r="7" fill="#4557ba"/>
+<circle cx="359" cy="295" r="7" fill="#ffffff" stroke="#595e5b" stroke-width="1.5"/>
+<circle cx="386" cy="295" r="7" fill="#ffffff" stroke="#595e5b" stroke-width="1.5"/>
+<circle cx="30" cy="332" r="5" fill="#4557ba"/>
+<text x="43" y="336" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="start">found</text>
+<circle cx="116" cy="332" r="5" fill="#ffffff" stroke="#595e5b" stroke-width="1.5"/>
+<text x="129" y="336" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="start">missed</text>
+<rect x="289" y="324" width="4" height="14" rx="1" fill="#a8460c"/>
+<text x="302" y="336" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="start">fact position</text>
+</svg>

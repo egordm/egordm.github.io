@@ -2,24 +2,25 @@
 # requires-python = ">=3.9"
 # dependencies = []
 # ///
-"""Rebuild the two figures of "Is Half Your Context Window Just Marketing?", offline.
+"""Build this post's three figures offline at 420 CSS pixels wide.
 
 Run: python3 content/blog/assets/src/recall_visuals.py
-Writes recall-v-{pair,curve}-{light,dark}.svg into assets/, in the style of luna_v_visuals.
-Data: the Qwen3-8B recall grid (14 used needles x 5 positions per length), its item-bootstrapped
-95% intervals, and the keyword version's two tested cells (14 of 14 each on the used set).
+Writes only recall-v-{pair,curve,position}-{light,dark}.svg.
+The verified N5 fact sheet supplies all measurements: 14 scored items,
+one draw per item/length/position, five positions per length. The Greta
+example illustrates construction and was dropped from the scored set.
+Curve segments connect observations; they do not estimate untested lengths.
 """
 
 import sys
-from html import escape
 from pathlib import Path
 
-sys.dont_write_bytecode = True  # no __pycache__ under content/: the site build copies it
+sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from luna_v_visuals import ASSETS, PALETTES, SVG  # noqa: E402
 
-CURVE = [(1000, 1.000, 1.000, 1.000), (4000, 1.000, 1.000, 1.000), (8000, 1.000, 1.000, 1.000),
-         (16000, 0.900, 0.829, 0.957), (24000, 0.757, 0.657, 0.857)]
+CURVE = [(1000, 1.000), (4000, 1.000), (8000, 1.000),
+         (16000, 0.900), (24000, 0.757)]
 WINDOW = 32768
 
 
@@ -28,54 +29,47 @@ def save(svg, name, theme):
     path.write_text("\n".join(svg.parts + ["</svg>"]) + "\n", encoding="utf-8")
 
 
-def raw(svg, markup):
-    svg.parts.append(markup)
+def circle(svg, x, y, radius, fill, stroke=None):
+    svg.parts.append(
+        f'<circle cx="{x}" cy="{y}" r="{radius}" fill="{svg.color(fill)}"'
+        + (f' stroke="{svg.color(stroke)}" stroke-width="1.5"' if stroke else '')
+        + '/>'
+    )
 
 
 def pair(theme):
-    s = SVG(theme, 560, "One fact, two ways to plant it.",
-            "The question asks which character is a Shakespeare devotee. The original needle says "
-            "Greta Simeon can recite Hamlet's soliloquy; answering needs the hop Shakespeare to "
-            "Hamlet to Greta Simeon. The keyword version says Shakespeare's Hamlet, so the question's "
-            "own word sits next to the answer.")
-    s.header("01", "THE PAIR", "One fact, two ways to plant it.", "A real item from the test set.")
-    s.box(24, 112, 372, 70, stroke="line")
-    s.text(40, 136, "THE QUESTION", 12, "muted", 700)
-    s.text(40, 164, "Which character is a Shakespeare devotee?", 15.5, weight=700)
+    s = SVG(theme, 290, "Finding the same name with different clues",
+            "Authored example, later dropped from scoring. The meaning question "
+            "connects Shakespeare to Hamlet to Greta Simeon. Adding Shakespeare "
+            "to the fact allows a direct word match. Arrows show the required "
+            "relations, not measured model internals.")
+    s.text(24, 31, "Which character is a Shakespeare devotee?", 16, weight=700)
 
-    s.box(24, 198, 372, 160, "blue_bg")
-    s.text(40, 224, "ORIGINAL: NO SHARED WORD", 12, "blue", 700)
-    s.text(40, 252, "Greta Simeon can recite Hamlet's soliloquy", 15)
-    s.text(40, 274, "from memory at the slightest invitation.", 15)
-    for x, w, label, color in [(40, 112, "Shakespeare", "blue"), (180, 84, "Hamlet", "blue"),
-                               (292, 88, "Greta", "ink")]:
-        s.box(x, 300, w, 38, "panel")
-        s.text(x + w / 2, 324, label, 14, color, 700, "middle")
-    s.arrow(156, 319, 175, 319, "blue")
-    s.arrow(268, 319, 287, 319, "blue")
+    s.text(24, 78, "By meaning", 14, "blue", 700)
+    for x, width, label in [(24, 106, "Shakespeare"), (156, 80, "Hamlet"),
+                             (262, 134, "Greta Simeon")]:
+        s.box(x, 93, width, 46, "blue_bg", radius=6)
+        s.text(x + width / 2, 121, label, 15, "blue", 700, "middle")
+    s.arrow(136, 116, 150, 116, "blue")
+    s.arrow(242, 116, 256, 116, "blue")
+    s.text(137, 160, "play knowledge", 12, "muted", anchor="middle")
+    s.text(272, 160, "document fact", 12, "muted", anchor="middle")
 
-    s.box(24, 374, 372, 136, "teal_bg")
-    s.text(40, 400, "KEYWORD VERSION: SAME FACT, SHARED WORD", 12, "teal", 700)
-    s.text(40, 428, "Greta Simeon can recite Shakespeare's Hamlet", 15)
-    s.text(40, 450, "soliloquy from memory ...", 15)
-    s.box(40, 464, 112, 34, "panel")
-    s.text(96, 486, "Shakespeare", 14, "teal", 700, "middle")
-    s.arrow(160, 481, 280, 481, "teal")
-    s.box(292, 464, 88, 34, "panel")
-    s.text(336, 486, "Greta", 14, weight=700, anchor="middle")
-
-    s.text(24, 538, "Same answer. Only the clue changes.", 15, weight=700)
+    s.text(24, 202, "Shared word", 14, "teal", 700)
+    for x, width, label in [(24, 106, "Shakespeare"), (262, 134, "Greta Simeon")]:
+        s.box(x, 217, width, 46, "teal_bg", radius=6)
+        s.text(x + width / 2, 245, label, 15, "teal", 700, "middle")
+    s.arrow(138, 240, 254, 240, "teal")
     save(s, "pair", theme)
 
 
 def curve(theme):
-    s = SVG(theme, 512, "Perfect to 8K, then a slide.",
-            "Share of needles the model found, by document length, averaged over five positions: "
-            "100% at 1K, 4K and 8K, 90% at 16K, 76% at 24K, with 95% intervals. It crosses the 85% "
-            "bar between 16K and 24K, inside the advertised 32K window. The keyword version, tested at "
-            "1K and at 24K, found 14 of 14 at both.")
-    s.header("02", "THE RESULT", "Perfect to 8K, then a slide.", "Qwen3-8B, thinking on · 70 answers per length")
-    left, right, top, bottom = 56, 380, 150, 390
+    s = SVG(theme, 390, "Recall and the usable-length bar",
+            "Qwen3-8B with thinking on, 14 scored items and five positions. "
+            "Fact recovery is 100% at 1K, 4K and 8K, 90% at 16K, and 75.7% at "
+            "24K. The 85% bar is crossed between the final two tested lengths. "
+            "There are no measurements beyond 24K, up to the native 32,768 limit.")
+    left, right, top, bottom = 52, 388, 76, 316
 
     def x(tokens):
         return left + (right - left) * tokens / WINDOW
@@ -83,48 +77,64 @@ def curve(theme):
     def y(share):
         return bottom - (bottom - top) * share
 
-    for v in (0, 0.25, 0.5, 0.75, 1.0):
-        s.line(left, y(v), right, y(v), "faint", 1)
-        s.text(left - 8, y(v) + 5, f"{int(v * 100)}%", 12, "muted", anchor="end")
-    raw(s, f'<rect x="{x(16000):.1f}" y="{top - 8}" width="{x(24000) - x(16000):.1f}" '
-           f'height="{bottom - top + 8}" fill="{s.c["amber"]}" fill-opacity="0.13"/>')
-    s.text((x(16000) + x(24000)) / 2, top - 14, "crosses here", 12, "amber", 700, "middle")
-    s.line(left, y(0.85), right, y(0.85), "amber", 1.5, dashed=True)
-    s.text(left + 6, y(0.85) + 17, "85% bar", 12, "amber", 700)
-    s.line(x(WINDOW), top - 30, x(WINDOW), bottom, "muted", 1.5, dashed=True)
-    s.text(x(WINDOW), top - 36, "32K window", 12, "muted", 700, "end")
+    s.text(24, 26, "Facts found · 70 answers per length", 14, "muted")
+    s.box(x(24000), top, right - x(24000), bottom - top, "faint", radius=0)
+    s.text((x(24000) + right) / 2, 230, "untested", 12, "muted", anchor="middle")
+    for value in (0, 0.5, 1):
+        s.line(left, y(value), right, y(value), "line", 1)
+        s.text(left - 8, y(value) + 5, f"{int(value * 100)}%", 12, "muted", anchor="end")
+    s.line(left, y(.85), right, y(.85), "amber", 1.5, dashed=True)
+    s.text(70, y(.85) + 20, "85% bar", 13, "amber", 700)
+    s.line(right, top, right, bottom, "muted", 1.5, dashed=True)
+    s.text(right, 48, "Native limit", 12, "muted", anchor="end")
+    s.text(right, 65, "32,768", 12, "muted", anchor="end")
 
-    c = s.c
-    band = [(x(t), y(hi)) for t, _, _, hi in CURVE] + [(x(t), y(lo)) for t, _, lo, _ in reversed(CURVE)]
-    raw(s, f'<path d="M{" L".join(f"{a:.1f} {b:.1f}" for a, b in band)} Z" fill="{c["blue"]}" fill-opacity="0.18"/>')
-    points = " L".join(f"{x(t):.1f} {y(v):.1f}" for t, v, _, _ in CURVE)
-    raw(s, f'<path d="M{points}" fill="none" stroke="{c["blue"]}" stroke-width="2.5"/>')
-    for t, v, _, _ in CURVE:
-        raw(s, f'<circle cx="{x(t):.1f}" cy="{y(v):.1f}" r="4" fill="{c["blue"]}"/>')
-    for t in (1000, 24000):
-        cx, cy = x(t), y(1.0)
-        raw(s, f'<path d="M{cx:.1f} {cy - 9:.1f} L{cx + 9:.1f} {cy:.1f} L{cx:.1f} {cy + 9:.1f} '
-               f'L{cx - 9:.1f} {cy:.1f} Z" fill="none" stroke="{c["teal"]}" stroke-width="2.5"/>')
-    s.text(x(24000) + 10, y(0.757) + 5, "76%", 13, "blue", 700)
-    s.text(x(16000) + 8, y(0.90) - 10, "90%", 13, "blue", 700)
-
-    for t in (0, 8000, 16000, 24000):
-        s.text(x(t), bottom + 20, "0" if t == 0 else f"{t // 1000}K", 12, "muted", anchor="middle")
-    s.text((left + right) / 2, bottom + 42, "document length (tokens)", 13, "muted", anchor="middle")
-
-    raw(s, f'<circle cx="32" cy="466" r="5" fill="{c["blue"]}"/>')
-    s.text(44, 471, "Original: share found, 95% interval shaded", 13, "ink")
-    cx, cy = 32, 492
-    raw(s, f'<path d="M{cx} {cy - 7} L{cx + 7} {cy} L{cx} {cy + 7} L{cx - 7} {cy} Z" fill="none" '
-           f'stroke="{c["teal"]}" stroke-width="2.5"/>')
-    s.text(44, 497, "Keyword version: 14 of 14 at both cells tested", 13, "ink")
+    points = " L".join(f"{x(t):.2f} {y(v):.2f}" for t, v in CURVE)
+    s.parts.append(f'<path d="M{points}" fill="none" stroke="{s.c["blue"]}" '
+                   'stroke-width="2.5" stroke-linejoin="round"/>')
+    for t, value in CURVE:
+        circle(s, x(t), y(value), 4, "blue")
+        s.line(x(t), bottom, x(t), bottom + 5, "muted", 1)
+        s.text(x(t), bottom + 23, f"{t // 1000}K", 12, "muted", anchor="middle")
+    s.text(x(16000), y(.9) - 13, "90%", 14, "blue", 700, "middle")
+    s.text(x(24000) - 8, y(.757) + 24, "76%", 14, "blue", 700, "end")
+    s.text(220, 367, "Document length (tokens)", 14, "muted", anchor="middle")
     save(s, "curve", theme)
+
+
+def position(theme):
+    s = SVG(theme, 352, "Fact position changes recall at 24K",
+            "At 24K tokens, middle placement recovered 6 of 14 facts; placement "
+            "90% through the document recovered 12 of 14. Equal-length document "
+            "bars mark the fact position. Each circle represents an item; filled "
+            "circles count recoveries and are grouped by outcome, not item identity.")
+    s.text(24, 26, "Same document length: 24K tokens", 14, "muted")
+    for y, label, depth, count in [(64, "Middle", .5, 6),
+                                   (205, "Near the end", .9, 12)]:
+        s.text(24, y, label, 16, weight=700)
+        s.text(396, y, f"{count} of 14 found", 15, "blue", 700, "end")
+        s.box(24, y + 15, 372, 28, "faint", "line", 4)
+        marker = 24 + 372 * depth
+        s.box(marker - 3, y + 12, 6, 34, "amber", radius=2)
+        s.text(marker, y + 65, f"{int(depth * 100)}%", 12, "amber", anchor="middle")
+        for i in range(14):
+            circle(s, 35 + i * 27, y + 90, 7,
+                   "blue" if i < count else "bg",
+                   None if i < count else "muted")
+    circle(s, 30, 332, 5, "blue")
+    s.text(43, 336, "found", 12, "muted")
+    circle(s, 116, 332, 5, "bg", "muted")
+    s.text(129, 336, "missed", 12, "muted")
+    s.box(289, 324, 4, 14, "amber", radius=1)
+    s.text(302, 336, "fact position", 12, "muted")
+    save(s, "position", theme)
 
 
 def main():
     for theme in PALETTES:
         pair(theme)
         curve(theme)
+        position(theme)
 
 
 if __name__ == "__main__":

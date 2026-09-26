@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="364" viewBox="0 0 420 364" role="img" aria-labelledby="title desc">
+<title id="title">task</title>
+<desc id="desc">Invented example. Fact one links Lira Venn to sketching Saturn. Fact two links Lira Venn to signing letters as Sorel Ash. Astronomy enthusiast identifies Lira; alias asks for Sorel. The question shares no words with the facts. The control stops after the first connection.</desc>
+<rect x="0" y="0" width="420" height="364" rx="0" fill="#ffffff"/>
+<rect x="18" y="12" width="384" height="61" rx="7" fill="#e4f3ee" stroke="#00796b"/>
+<text x="32" y="32" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#00796b">Fact one</text>
+<text x="32" y="56" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" fill="#00796b">Lira Venn keeps sketching Saturn.</text>
+<rect x="18" y="83" width="384" height="61" rx="7" fill="#e9edfc" stroke="#4557ba"/>
+<text x="32" y="103" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#4557ba">Fact two</text>
+<text x="32" y="127" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" fill="#4557ba">Lira Venn signs letters as Sorel Ash.</text>
+<text x="210" y="174" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#252725">Which alias belongs to an astronomy enthusiast?</text>
+<rect x="18" y="242" width="114" height="40" rx="7" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="75.0" y="267" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" fill="#595e5b">Astronomy</text>
+<rect x="153" y="242" width="114" height="40" rx="7" fill="#e4f3ee" stroke="#00796b"/>
+<text x="210.0" y="267" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" fill="#00796b">Lira Venn</text>
+<rect x="288" y="242" width="114" height="40" rx="7" fill="#e9edfc" stroke="#4557ba"/>
+<text x="345.0" y="267" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" fill="#4557ba">Sorel Ash</text>
+<path d="M133 262 L151 262" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M145.73450462865776 264.8765532316252 L151 262 L145.73450462865776 259.1234467683748" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M268 262 L286 262" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M280.73450462865776 264.8765532316252 L286 262 L280.73450462865776 259.1234467683748" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="140" y="208" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#00796b">Saturn</text>
+<text x="277" y="230" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#4557ba">signs letters as</text>
+<path d="M140 213 L140 248" fill="none" stroke="#00796b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M277 235 L277 248" fill="none" stroke="#4557ba" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="210" y="306" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#00796b">Control stops here</text>
+<text x="345" y="326" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#4557ba">Join reaches here</text>
+<text x="210" y="352" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">Invented example · no shared words with the question</text>
+</svg>

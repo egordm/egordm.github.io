@@ -1,54 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="420" height="656" viewBox="0 0 420 656" role="img" aria-labelledby="title desc">
-<title id="title">Compact before the fall.</title>
-<desc id="desc">Compaction guide for meaning-based work. The full linear bar runs from zero to the advertised one million tokens, with no measurements beyond 512K. A second linear bar zooms in on the default 272K window. The usable ceilings are 64K with reasoning off and about 128K with reasoning high; the latter varies from 64K to 192K by book. The default compaction point is 95 percent of 272K, about 258K, already past the decline. Usable means keeping at least 85 percent of the short-context score at the longest length.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="364" viewBox="0 0 420 364" role="img" aria-labelledby="title desc">
+<title id="title">Usable context and default compaction</title>
+<desc id="desc">Linear scales. The full one-million-token capacity is measured only through 512K. The lower scale expands the 272K Codex window: usable context reaches 64K with reasoning off and about 128K with reasoning high. Default compaction is about 258K, past both. Usable means retaining at least 85% of the short-context score.</desc>
 <defs><pattern id="untested" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M-2 2L2-2M0 8L8 0M6 10L10 6" fill="none" stroke="#4c504d" stroke-width="1"/></pattern></defs>
-<rect x="0" y="0" width="420" height="656" rx="0" fill="#1e1e1e"/>
-<text x="24" y="30" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="start">03 / THE COMPACTION GUIDE</text>
-<text x="24" y="65" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" text-anchor="start">Compact before the fall.</text>
-<text x="24" y="91" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">Meaning-based work · lengths in tokens</text>
-<rect x="24" y="110" width="179" height="88" rx="12" fill="#253e38"/>
-<text x="40" y="135" fill="#7bd7c8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="start">REASONING OFF</text>
-<text x="40" y="167" fill="#7bd7c8" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" text-anchor="start">64K</text>
-<text x="40" y="187" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">useful ceiling</text>
-<rect x="215" y="110" width="181" height="88" rx="12" fill="#30374f"/>
-<text x="231" y="135" fill="#a6b8ff" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="start">REASONING HIGH</text>
-<text x="231" y="167" fill="#a6b8ff" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" text-anchor="start">≈128K</text>
-<text x="231" y="187" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">useful ceiling</text>
-<text x="24" y="232" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="start">THE ADVERTISED CAPACITY</text>
-<rect x="24.0" y="252" width="23.808" height="24" rx="0" fill="#7bd7c8"/>
-<rect x="47.808" y="252" width="23.808" height="24" rx="0" fill="#a6b8ff"/>
-<rect x="71.616" y="252" width="142.848" height="24" rx="0" fill="#ffa96e"/>
-<rect x="214.464" y="252" width="181.536" height="24" rx="0" fill="#323532"/>
-<rect x="214.464" y="252" width="181.536" height="24" rx="0" fill="url(#untested)"/>
-<text x="24" y="297" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">0</text>
-<text x="214.464" y="297" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle">512K</text>
-<text x="396" y="297" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" text-anchor="end">1M</text>
-<text x="396" y="318" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end">Hatched: beyond the measured range</text>
-<text x="24" y="353" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="start">ZOOM: THE CODEX DEFAULT WINDOW</text>
-<text x="24" y="377" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">0</text>
-<text x="396" y="377" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" text-anchor="end">272K</text>
-<rect x="24.0" y="387" width="87.52941176470588" height="30" rx="0" fill="#7bd7c8"/>
-<rect x="111.52941176470588" y="387" width="87.52941176470588" height="30" rx="0" fill="#a6b8ff"/>
-<rect x="199.05882352941177" y="387" width="196.94117647058823" height="30" rx="0" fill="#ffa96e"/>
-<path d="M111.52941176470588 419L111.52941176470588 428" fill="none" stroke="#7bd7c8" stroke-width="1.5" stroke-linecap="round"/>
-<text x="111.52941176470588" y="447" fill="#7bd7c8" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="middle">64K</text>
-<path d="M199.05882352941177 419L199.05882352941177 428" fill="none" stroke="#a6b8ff" stroke-width="1.5" stroke-linecap="round"/>
-<text x="199.05882352941177" y="447" fill="#a6b8ff" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="middle">≈128K</text>
-<path d="M377.4 381L377.4 454" fill="none" stroke="#1e1e1e" stroke-width="5" stroke-linecap="round"/>
-<path d="M377.4 381L377.4 454" fill="none" stroke="#efefeb" stroke-width="2" stroke-linecap="round"/>
-<text x="396" y="478" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" text-anchor="end">≈258K: default compaction</text>
-<text x="396" y="500" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="end">95% of 272K. Already past the fall.</text>
-<rect x="24" y="519" width="11" height="11" rx="2" fill="#7bd7c8"/>
-<text x="42" y="530" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">Usable: off</text>
-<rect x="154" y="519" width="11" height="11" rx="2" fill="#a6b8ff"/>
-<text x="172" y="530" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">+ high</text>
-<rect x="255" y="519" width="11" height="11" rx="2" fill="#ffa96e"/>
-<text x="273" y="530" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">Degrading</text>
-<path d="M24 548L396 548" fill="none" stroke="#4c504d" stroke-width="1.5" stroke-linecap="round"/>
-<text x="24" y="571" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">Usable = longest length retaining at least</text>
-<text x="24" y="592" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">85% of the short-context score.</text>
-<text x="24" y="613" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">With reasoning high: 64K to 192K by book.</text>
-<a href="https://arxiv.org/abs/2502.05167">
-<text x="24" y="640" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">Luna: this experiment · yardstick: NoLiMa</text>
-</a>
+<rect x="0" y="0" width="420" height="364" rx="0" fill="#1e1e1e"/>
+<text x="28" y="28" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">Measured</text>
+<text x="304" y="28" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle">Unmeasured</text>
+<rect x="28" y="42" width="186.368" height="22" rx="0" fill="#4c504d"/>
+<rect x="214.368" y="42" width="177.632" height="22" rx="0" fill="#323532"/>
+<rect x="214.368" y="42" width="177.632" height="22" rx="0" fill="url(#untested)"/>
+<text x="28" y="84" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">0</text>
+<text x="214.368" y="84" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle">512K</text>
+<text x="392" y="84" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end">1M</text>
+<path d="M28 91L127.00800000000001 91" fill="none" stroke="#bdbdb8" stroke-width="1" stroke-linecap="round"/>
+<path d="M28 87L28 95" fill="none" stroke="#bdbdb8" stroke-width="1" stroke-linecap="round"/>
+<path d="M127.00800000000001 87L127.00800000000001 95" fill="none" stroke="#bdbdb8" stroke-width="1" stroke-linecap="round"/>
+<path d="M28 96L28 124" fill="none" stroke="#4c504d" stroke-width="1" stroke-linecap="round"/>
+<path d="M127.00800000000001 96L392 124" fill="none" stroke="#4c504d" stroke-width="1" stroke-linecap="round"/>
+<text x="28" y="145" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">Codex window: 272K</text>
+<text x="28" y="176" fill="#ffa96e" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">Usable · reasoning off</text>
+<rect x="28" y="186" width="364" height="14" rx="0" fill="#323532"/>
+<rect x="28" y="186" width="85.6470588235294" height="14" rx="0" fill="#ffa96e"/>
+<text x="122.6470588235294" y="198" fill="#ffa96e" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="start">64K</text>
+<text x="28" y="228" fill="#a6b8ff" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">Usable · reasoning high</text>
+<rect x="28" y="238" width="364" height="14" rx="0" fill="#323532"/>
+<rect x="28" y="238" width="171.2941176470588" height="14" rx="0" fill="#a6b8ff"/>
+<text x="208.2941176470588" y="250" fill="#a6b8ff" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="start">128K</text>
+<path d="M28 278L392 278" fill="none" stroke="#4c504d" stroke-width="1" stroke-linecap="round"/>
+<path d="M28 273L28 282" fill="none" stroke="#bdbdb8" stroke-width="1" stroke-linecap="round"/>
+<text x="28" y="299" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="start">0</text>
+<path d="M392 273L392 282" fill="none" stroke="#bdbdb8" stroke-width="1" stroke-linecap="round"/>
+<text x="392" y="299" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">272K</text>
+<path d="M373.8 160L373.8 278" fill="none" stroke="#efefeb" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="4 4"/>
+<path d="M28 324L50 324" fill="none" stroke="#efefeb" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="4 4"/>
+<text x="64" y="329" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">Default compaction ≈258K</text>
+<text x="210" y="353" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">Usable: at least 85% of short-context score.</text>
 </svg>

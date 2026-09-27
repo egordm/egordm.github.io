@@ -22,19 +22,12 @@ with a one-million-token window. When the model has to connect ideas rather than
 useful range is about **64K tokens**, or about **128K with reasoning on**. The hunch holds, and for
 this kind of recall it is, if anything, too generous.
 
-<img class="theme-dark-only figure-narrow" src="/blog/assets/luna-context-curve-dark.svg" alt="Accuracy of GPT-6 Luna against context length: the shared-word control stays near 100%; recall by meaning with reasoning off falls from about 90% to 46% at 224K; with reasoning high it holds near 85% to 128K, then falls to 26% at 512K. Codex's 272K default window and the advertised 1M are marked." />
-<img class="theme-light-only figure-narrow" src="/blog/assets/luna-context-curve-light.svg" alt="Accuracy of GPT-6 Luna against context length (light version of the same chart)." />
-
-*How often Luna finds a planted fact as the context grows. The top line is a control question that
-shares words with the fact; the two lower lines need the fact to be connected by meaning. Each point
-is 28 to 168 questions; the bands show the uncertainty from that sample size.*
-
 ## Two ways to find a fact
 
-Plant one sentence in a long document and ask about it in two ways:
+In an invented example, plant one sentence in a long document and ask about it in two ways:
 
-<img class="theme-dark-only figure-narrow" src="/blog/assets/luna-v-two-paths-dark.svg" alt="The planted fact 'Kai lives next to the Rijksmuseum.' The word-match question 'Who lives next to the Rijksmuseum?' goes straight from the shared word to Kai. The meaning question 'Who has been to Amsterdam?' shares no words and needs a hop: Amsterdam, then Rijksmuseum, then Kai." />
-<img class="theme-light-only figure-narrow" src="/blog/assets/luna-v-two-paths-light.svg" alt="The same two lookups in the light theme." />
+<img class="theme-dark-only figure-center" src="/blog/assets/luna-v-two-paths-dark.svg" alt="An invented example: Kai lives next to the Rijksmuseum. The question Who lives next to the Rijksmuseum goes from the shared word Rijksmuseum to Kai. Who has been to Amsterdam needs the connection from Amsterdam to Rijksmuseum before retrieving Kai." />
+<img class="theme-light-only figure-center" src="/blog/assets/luna-v-two-paths-light.svg" alt="An invented example: Kai lives next to the Rijksmuseum. The question Who lives next to the Rijksmuseum goes from the shared word Rijksmuseum to Kai. Who has been to Amsterdam needs the connection from Amsterdam to Rijksmuseum before retrieving Kai." />
 
 The first question works like a search box. The second needs one small step of reasoning while
 reading: the Rijksmuseum is in Amsterdam, so the sentence about Kai is the answer.
@@ -48,15 +41,15 @@ length. The NoLiMa benchmark (Modarressi et al., [arXiv 2502.05167](https://arxi
 asks the second kind, with invented names so the model cannot know the answer from training. In
 2025 it found GPT-4o, near perfect on short documents, at about 70% by 32K tokens. In
 [[blog/2026-07-24-is-half-your-context-window-just-marketing|the previous post on this]] a small open
-model, Qwen3-8B, kept only about half of its 32K window. The question now: has frontier training
+model, Qwen3-8B, kept only about half of its 32K window on my item set. The question now: has frontier training
 fixed this?
 
 ## The experiment
 
 I ran NoLiMa's published questions on Luna, in documents from 250 tokens to 512K:
 
-<img class="theme-dark-only figure-narrow" src="/blog/assets/luna-v-experiment-dark.svg" alt="The experiment in three steps: grow the document from 250 tokens to 512K; place the fact at 25%, 50% or 75% depth; ask both a meaning question and a shared-words question. With the fact removed, Luna named the right character 0 times out of 28." />
-<img class="theme-light-only figure-narrow" src="/blog/assets/luna-v-experiment-light.svg" alt="The experiment diagram in the light theme." />
+<img class="theme-dark-only figure-center" src="/blog/assets/luna-v-experiment-dark.svg" alt="Document lengths grow from 250 tokens to 512K, shown schematically. Separate runs put one fact at 25%, 50% or 75% depth and ask a meaning question or a shared-word control. With the fact removed, Luna names the right character 0 times out of 28." />
+<img class="theme-light-only figure-center" src="/blog/assets/luna-v-experiment-light.svg" alt="Document lengths grow from 250 tokens to 512K, shown schematically. Separate runs put one fact at 25%, 50% or 75% depth and ask a meaning question or a shared-word control. With the fact removed, Luna names the right character 0 times out of 28." />
 
 What the figure does not show:
 
@@ -86,6 +79,13 @@ of the advertised million.
 
 **Reasoning buys time, not a fix.** With reasoning high the bar is 0.85 × 93 ≈ 79%. Luna clears it
 at 128K (82%) and misses at 192K (76%). Past that the same fall returns, down to 26% at 512K.
+
+<img class="theme-dark-only figure-center" src="/blog/assets/luna-v-curve-dark.svg" alt="Luna accuracy versus context length on a log scale. Shared words stay at 93% or better through 224K. Meaning with reasoning off scores 86% at 64K, 67% at 128K and 46% at 224K. Meaning with reasoning high scores 82% at 128K and 26% at 512K. Bands show 95% Wilson intervals. The 272K Codex window and advertised 1M are marked; no observations extend to 1M." />
+<img class="theme-light-only figure-center" src="/blog/assets/luna-v-curve-light.svg" alt="Luna accuracy versus context length on a log scale. Shared words stay at 93% or better through 224K. Meaning with reasoning off scores 86% at 64K, 67% at 128K and 46% at 224K. Meaning with reasoning high scores 82% at 128K and 26% at 512K. Bands show 95% Wilson intervals. The 272K Codex window and advertised 1M are marked; no observations extend to 1M." />
+
+*How often Luna finds a planted fact as the context grows. The top line is a control question that
+shares words with the fact; the two lower lines need the fact to be connected by meaning. Each point
+is 28 to 168 questions; the bands show the uncertainty from that sample size.*
 
 **The failures are silent.** At long context Luna does not name the wrong person; it names no one.
 That is the worst kind of miss: the fact was in the context, and the model carried on
@@ -128,12 +128,14 @@ measurement above.
 
 ## So where should compaction go?
 
-<img class="theme-dark-only figure-narrow" src="/blog/assets/luna-v-compaction-dark.svg" alt="Compaction guide: the useful ceiling for meaning-based work is 64K with reasoning off and about 128K with reasoning high. On the full 1M bar, everything past 512K is unmeasured. Zoomed on Codex's 272K default window, the default compaction point at about 258K sits well inside the degrading zone." />
-<img class="theme-light-only figure-narrow" src="/blog/assets/luna-v-compaction-light.svg" alt="The compaction guide in the light theme." />
-
 Codex's default compacts Luna at about 258K, deep in the zone where recall by meaning has already
 lost a third to a half of its accuracy. My half-full rule lands close to the 128K line: half of
-Codex's 272K window is 136K. What I do now:
+Codex's 272K window is 136K.
+
+<img class="theme-dark-only figure-center" src="/blog/assets/luna-v-compaction-dark.svg" alt="Two linear scales: the advertised 1M capacity is measured only through 512K, with the rest hatched. A zoom into the 272K Codex window shows usable context of 64K with reasoning off and about 128K with reasoning high. Default compaction at about 258K falls past both. Usable means retaining at least 85% of the short-context score." />
+<img class="theme-light-only figure-center" src="/blog/assets/luna-v-compaction-light.svg" alt="Two linear scales: the advertised 1M capacity is measured only through 512K, with the rest hatched. A zoom into the 272K Codex window shows usable context of 64K with reasoning off and about 128K with reasoning high. Default compaction at about 258K falls past both. Usable means retaining at least 85% of the short-context score." />
+
+What I do now:
 
 - **Compact at half the window, whatever the model.** That is where the Luna numbers put it with
   reasoning on, and a reasonable default for models nobody has measured this way.
@@ -152,6 +154,8 @@ I designed, ran and reviewed these experiments with the assistance of AI agents 
 Codex); every number in this post was checked against the stored answers by an independent
 review before I wrote it down. The test harness builds on a small research library that is not
 public yet.
+
+*Revised on 2026-09-27: new figures.*
 
 **References.**
 

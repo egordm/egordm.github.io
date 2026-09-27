@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="460" viewBox="0 0 420 460" role="img" aria-labelledby="title desc">
+<title id="title">Luna recall as context grows</title>
+<desc id="desc">All observations from luna_context_curve.json, connected without extrapolation. Context length uses a logarithmic scale; accuracy is correct answers divided by calls. Shading shows pointwise 95% Wilson binomial intervals, not variation across books or runs. Control and reasoning off end at 224K; reasoning high ends at 512K. No data at 1M.</desc>
+<defs><pattern id="untested" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M-2 2L2-2M0 8L8 0M6 10L10 6" fill="none" stroke="#d8dcd7" stroke-width="1"/></pattern></defs>
+<rect x="0" y="0" width="420" height="460" rx="0" fill="#ffffff"/>
+<path d="M24 18L46 18" fill="none" stroke="#00796b" stroke-width="2" stroke-linecap="round"/>
+<rect x="32" y="15" width="6" height="6" rx="0" fill="#00796b"/>
+<text x="56" y="22" fill="#00796b" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">Shared words · reasoning off</text>
+<path d="M24 41L46 41" fill="none" stroke="#a8460c" stroke-width="2" stroke-linecap="round"/>
+<circle cx="35" cy="41" r="3" fill="#a8460c"/>
+<text x="56" y="45" fill="#a8460c" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">Meaning · reasoning off</text>
+<path d="M24 64L46 64" fill="none" stroke="#4557ba" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 4"/>
+<path d="M35 60L39 64L35 68L31 64Z" fill="#4557ba"/>
+<text x="56" y="68" fill="#4557ba" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">Meaning · reasoning high</text>
+<text x="16" y="101" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="start">% correct</text>
+<path d="M48 368.0L396 368.0" fill="none" stroke="#d8dcd7" stroke-width="1" stroke-linecap="round"/>
+<text x="39" y="372.0" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">0</text>
+<path d="M48 305.5L396 305.5" fill="none" stroke="#d8dcd7" stroke-width="1" stroke-linecap="round"/>
+<text x="39" y="309.5" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">25</text>
+<path d="M48 243.0L396 243.0" fill="none" stroke="#d8dcd7" stroke-width="1" stroke-linecap="round"/>
+<text x="39" y="247.0" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">50</text>
+<path d="M48 180.5L396 180.5" fill="none" stroke="#d8dcd7" stroke-width="1" stroke-linecap="round"/>
+<text x="39" y="184.5" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">75</text>
+<path d="M48 118.0L396 118.0" fill="none" stroke="#d8dcd7" stroke-width="1" stroke-linecap="round"/>
+<text x="39" y="122.0" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">100</text>
+<path d="M341.37291942115706 110L341.37291942115706 368" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-dasharray="4 4"/>
+<text x="341.37291942115706" y="101" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">272K Codex</text>
+<path d="M396.0 110L396.0 368" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-dasharray="4 4"/>
+<text x="396.0" y="101" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">1M</text>
+<polygon points="48.0,119.63847567254186 77.08292442193458,124.42264027287388 106.16584884386916,118.00000000000003 135.24877326580372,119.63847567254186 164.3316976877383,118.52614577188731 193.4146221096729,118.00000000000006 222.49754653160744,118.00000000000006 251.58047095354206,119.58312996225942 280.6633953754766,119.58312996225942 309.7463197974112,119.58312996225942 326.75873999555046,122.95301602882645 333.2265619772894,119.58312996225942 333.2265619772894,162.2804943583833 326.75873999555046,174.61340642099762 309.7463197974112,162.2804943583833 280.6633953754766,162.2804943583833 251.58047095354206,162.2804943583833 222.49754653160744,148.16082619146144 193.4146221096729,148.16082619146144 164.3316976877383,134.09885937692852 135.24877326580372,138.6786025214248 106.16584884386916,128.932932103665 77.08292442193458,150.9706570565453 48.0,138.6786025214248" fill="#00796b" opacity="0.13"/>
+<polygon points="48.0,130.26292747738987 77.08292442193458,136.68055329235762 106.16584884386916,118.52614577188731 135.24877326580372,145.82797165193236 164.3316976877383,124.42264027287388 193.4146221096729,143.48935537242687 222.49754653160744,155.46505209361277 251.58047095354206,127.27959170732501 280.6633953754766,132.2475132993735 309.7463197974112,178.44303500180172 326.75873999555046,200.03994359339694 333.2265619772894,225.46178984409298 333.2265619772894,277.61442929135956 326.75873999555046,251.80761813569808 309.7463197974112,227.86794236608662 280.6633953754766,196.72450540881326 251.58047095354206,185.98962887168037 222.49754653160744,199.61726786791803 193.4146221096729,183.13259936334975 164.3316976877383,150.9706570565453 135.24877326580372,186.48605612899516 106.16584884386916,134.09885937692852 77.08292442193458,172.8651823079665 48.0,162.20658898748178" fill="#a8460c" opacity="0.13"/>
+<polygon points="106.16584884386916,127.23772380434838 222.49754653160744,141.18327616316378 280.6633953754766,130.26292747738987 309.7463197974112,150.0111704087911 326.75873999555046,163.00011604404847 333.2265619772894,186.4252962725506 355.84166441748505,200.03994359339694 367.9121686412804,276.7876568498305 367.9121686412804,323.0538040531861 355.84166441748505,251.80761813569808 333.2265619772894,236.96190023079023 326.75873999555046,194.9749000493866 309.7463197974112,178.867258433152 280.6633953754766,162.20658898748178 222.49754653160744,179.74660552746204 106.16584884386916,146.35718925975985" fill="#4557ba" opacity="0.13"/>
+<path d="M48.0 123.95238095238096 L77.08292442193458 132.88095238095238 L106.16584884386916 118.0 L135.24877326580372 123.95238095238096 L164.3316976877383 120.97619047619045 L193.4146221096729 118.0 L222.49754653160744 118.0 L251.58047095354206 126.92857142857142 L280.6633953754766 126.92857142857142 L309.7463197974112 126.92857142857142 L326.75873999555046 135.85714285714286 L333.2265619772894 126.92857142857142" fill="none" stroke="#00796b" stroke-width="2" stroke-linejoin="round"/>
+<g data-series="literal_reasoning_off" data-tokens="250" data-correct="82" data-total="84"><title>250 tokens: 82/84 correct</title>
+<rect x="45.0" y="120.95238095238096" width="6" height="6" rx="0" fill="#00796b"/>
+</g>
+<g data-series="literal_reasoning_off" data-tokens="500" data-correct="79" data-total="84"><title>500 tokens: 79/84 correct</title>
+<rect x="74.08292442193458" y="129.88095238095238" width="6" height="6" rx="0" fill="#00796b"/>
+</g>
+<g data-series="literal_reasoning_off" data-tokens="1000" data-correct="84" data-total="84"><title>1000 tokens: 84/84 correct</title>
+<rect x="103.16584884386916" y="115.0" width="6" height="6" rx="0" fill="#00796b"/>
+</g>
+<g data-series="literal_reasoning_off" data-tokens="2000" data-correct="82" data-total="84"><title>2000 tokens: 82/84 correct</title>
+<rect x="132.24877326580372" y="120.95238095238096" width="6" height="6" rx="0" fill="#00796b"/>
+</g>
+<g data-series="literal_reasoning_off" data-tokens="4000" data-correct="83" data-total="84"><title>4000 tokens: 83/84 correct</title>
+<rect x="161.3316976877383" y="117.97619047619045" width="6" height="6" rx="0" fill="#00796b"/>
+</g>
+<g data-series="literal_reasoning_off" data-tokens="8000" data-correct="28" data-total="28"><title>8000 tokens: 28/28 correct</title>
+<rect x="190.4146221096729" y="115.0" width="6" height="6" rx="0" fill="#00796b"/>
+</g>
+<g data-series="literal_reasoning_off" data-tokens="16000" data-correct="28" data-total="28"><title>16000 tokens: 28/28 correct</title>
+<rect x="219.49754653160744" y="115.0" width="6" height="6" rx="0" fill="#00796b"/>
+</g>
+<g data-series="literal_reasoning_off" data-tokens="32000" data-correct="27" data-total="28"><title>32000 tokens: 27/28 correct</title>
+<rect x="248.58047095354206" y="123.92857142857142" width="6" height="6" rx="0" fill="#00796b"/>
+</g>
+<g data-series="literal_reasoning_off" data-tokens="64000" data-correct="27" data-total="28"><title>64000 tokens: 27/28 correct</title>
+<rect x="277.6633953754766" y="123.92857142857142" width="6" height="6" rx="0" fill="#00796b"/>
+</g>
+<g data-series="literal_reasoning_off" data-tokens="128000" data-correct="27" data-total="28"><title>128000 tokens: 27/28 correct</title>
+<rect x="306.7463197974112" y="123.92857142857142" width="6" height="6" rx="0" fill="#00796b"/>
+</g>
+<g data-series="literal_reasoning_off" data-tokens="192000" data-correct="26" data-total="28"><title>192000 tokens: 26/28 correct</title>
+<rect x="323.75873999555046" y="132.85714285714286" width="6" height="6" rx="0" fill="#00796b"/>
+</g>
+<g data-series="literal_reasoning_off" data-tokens="224000" data-correct="27" data-total="28"><title>224000 tokens: 27/28 correct</title>
+<rect x="330.2265619772894" y="123.92857142857142" width="6" height="6" rx="0" fill="#00796b"/>
+</g>
+<path d="M48.0 141.8095238095238 L77.08292442193458 150.73809523809524 L106.16584884386916 120.97619047619045 L135.24877326580372 162.64285714285714 L164.3316976877383 132.88095238095238 L193.4146221096729 159.66666666666666 L222.49754653160744 174.54761904761904 L251.58047095354206 144.78571428571428 L280.6633953754766 153.71428571428572 L309.7463197974112 201.33333333333334 L326.75873999555046 225.14285714285714 L333.2265619772894 251.92857142857144" fill="none" stroke="#a8460c" stroke-width="2" stroke-linejoin="round"/>
+<g data-series="latent_reasoning_off" data-tokens="250" data-correct="76" data-total="84"><title>250 tokens: 76/84 correct</title>
+<circle cx="48.0" cy="141.8095238095238" r="3" fill="#a8460c"/>
+</g>
+<g data-series="latent_reasoning_off" data-tokens="500" data-correct="73" data-total="84"><title>500 tokens: 73/84 correct</title>
+<circle cx="77.08292442193458" cy="150.73809523809524" r="3" fill="#a8460c"/>
+</g>
+<g data-series="latent_reasoning_off" data-tokens="1000" data-correct="83" data-total="84"><title>1000 tokens: 83/84 correct</title>
+<circle cx="106.16584884386916" cy="120.97619047619045" r="3" fill="#a8460c"/>
+</g>
+<g data-series="latent_reasoning_off" data-tokens="2000" data-correct="69" data-total="84"><title>2000 tokens: 69/84 correct</title>
+<circle cx="135.24877326580372" cy="162.64285714285714" r="3" fill="#a8460c"/>
+</g>
+<g data-series="latent_reasoning_off" data-tokens="4000" data-correct="79" data-total="84"><title>4000 tokens: 79/84 correct</title>
+<circle cx="164.3316976877383" cy="132.88095238095238" r="3" fill="#a8460c"/>
+</g>
+<g data-series="latent_reasoning_off" data-tokens="8000" data-correct="70" data-total="84"><title>8000 tokens: 70/84 correct</title>
+<circle cx="193.4146221096729" cy="159.66666666666666" r="3" fill="#a8460c"/>
+</g>
+<g data-series="latent_reasoning_off" data-tokens="16000" data-correct="65" data-total="84"><title>16000 tokens: 65/84 correct</title>
+<circle cx="222.49754653160744" cy="174.54761904761904" r="3" fill="#a8460c"/>
+</g>
+<g data-series="latent_reasoning_off" data-tokens="32000" data-correct="25" data-total="28"><title>32000 tokens: 25/28 correct</title>
+<circle cx="251.58047095354206" cy="144.78571428571428" r="3" fill="#a8460c"/>
+</g>
+<g data-series="latent_reasoning_off" data-tokens="64000" data-correct="24" data-total="28"><title>64000 tokens: 24/28 correct</title>
+<circle cx="280.6633953754766" cy="153.71428571428572" r="3" fill="#a8460c"/>
+</g>
+<g data-series="latent_reasoning_off" data-tokens="128000" data-correct="56" data-total="84"><title>128000 tokens: 56/84 correct</title>
+<circle cx="309.7463197974112" cy="201.33333333333334" r="3" fill="#a8460c"/>
+</g>
+<g data-series="latent_reasoning_off" data-tokens="192000" data-correct="48" data-total="84"><title>192000 tokens: 48/84 correct</title>
+<circle cx="326.75873999555046" cy="225.14285714285714" r="3" fill="#a8460c"/>
+</g>
+<g data-series="latent_reasoning_off" data-tokens="224000" data-correct="39" data-total="84"><title>224000 tokens: 39/84 correct</title>
+<circle cx="333.2265619772894" cy="251.92857142857144" r="3" fill="#a8460c"/>
+</g>
+<path d="M106.16584884386916 134.36904761904762 L222.49754653160744 156.6904761904762 L280.6633953754766 141.8095238095238 L309.7463197974112 162.64285714285714 L326.75873999555046 177.52380952380955 L333.2265619772894 210.26190476190476 L355.84166441748505 225.14285714285714 L367.9121686412804 302.5238095238095" fill="none" stroke="#4557ba" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<g data-series="latent_reasoning_high" data-tokens="1000" data-correct="157" data-total="168"><title>1000 tokens: 157/168 correct</title>
+<path d="M106.16584884386916 130.36904761904762L110.16584884386916 134.36904761904762L106.16584884386916 138.36904761904762L102.16584884386916 134.36904761904762Z" fill="#4557ba"/>
+</g>
+<g data-series="latent_reasoning_high" data-tokens="16000" data-correct="71" data-total="84"><title>16000 tokens: 71/84 correct</title>
+<path d="M222.49754653160744 152.6904761904762L226.49754653160744 156.6904761904762L222.49754653160744 160.6904761904762L218.49754653160744 156.6904761904762Z" fill="#4557ba"/>
+</g>
+<g data-series="latent_reasoning_high" data-tokens="64000" data-correct="76" data-total="84"><title>64000 tokens: 76/84 correct</title>
+<path d="M280.6633953754766 137.8095238095238L284.6633953754766 141.8095238095238L280.6633953754766 145.8095238095238L276.6633953754766 141.8095238095238Z" fill="#4557ba"/>
+</g>
+<g data-series="latent_reasoning_high" data-tokens="128000" data-correct="138" data-total="168"><title>128000 tokens: 138/168 correct</title>
+<path d="M309.7463197974112 158.64285714285714L313.7463197974112 162.64285714285714L309.7463197974112 166.64285714285714L305.7463197974112 162.64285714285714Z" fill="#4557ba"/>
+</g>
+<g data-series="latent_reasoning_high" data-tokens="192000" data-correct="128" data-total="168"><title>192000 tokens: 128/168 correct</title>
+<path d="M326.75873999555046 173.52380952380955L330.75873999555046 177.52380952380955L326.75873999555046 181.52380952380955L322.75873999555046 177.52380952380955Z" fill="#4557ba"/>
+</g>
+<g data-series="latent_reasoning_high" data-tokens="224000" data-correct="53" data-total="84"><title>224000 tokens: 53/84 correct</title>
+<path d="M333.2265619772894 206.26190476190476L337.2265619772894 210.26190476190476L333.2265619772894 214.26190476190476L329.2265619772894 210.26190476190476Z" fill="#4557ba"/>
+</g>
+<g data-series="latent_reasoning_high" data-tokens="384000" data-correct="48" data-total="84"><title>384000 tokens: 48/84 correct</title>
+<path d="M355.84166441748505 221.14285714285714L359.84166441748505 225.14285714285714L355.84166441748505 229.14285714285714L351.84166441748505 225.14285714285714Z" fill="#4557ba"/>
+</g>
+<g data-series="latent_reasoning_high" data-tokens="512000" data-correct="22" data-total="84"><title>512000 tokens: 22/84 correct</title>
+<path d="M367.9121686412804 298.5238095238095L371.9121686412804 302.5238095238095L367.9121686412804 306.5238095238095L363.9121686412804 302.5238095238095Z" fill="#4557ba"/>
+</g>
+<path d="M48.0 368L48.0 373" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round"/>
+<text x="48.0" y="391" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">250</text>
+<path d="M106.16584884386916 368L106.16584884386916 373" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round"/>
+<text x="106.16584884386916" y="391" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">1K</text>
+<path d="M222.49754653160744 368L222.49754653160744 373" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round"/>
+<text x="222.49754653160744" y="391" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">16K</text>
+<path d="M309.7463197974112 368L309.7463197974112 373" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round"/>
+<text x="309.7463197974112" y="391" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">128K</text>
+<path d="M396.0 368L396.0 373" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round"/>
+<text x="396.0" y="391" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">1M</text>
+<text x="222" y="416" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle">Context length · tokens (log scale)</text>
+<text x="210" y="444" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">Bands: 95% Wilson intervals · no data at 1M</text>
+</svg>

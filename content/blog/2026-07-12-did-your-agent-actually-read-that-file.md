@@ -1,160 +1,200 @@
 ---
-title: "Did Your Agent Actually Read That File?"
+title: "Did Your LLM Actually Read That File?"
 date: 2026-07-12
 draft: false
 series: "LLM Comprehension"
 series_order: 1
 tags:
   - llm
-  - agents
   - interpretability
   - attribution
-description: "Your coding agent read twelve files and gave you an answer. Which ones did it actually use? Ablation attribution answers this with ~64 forward passes and a linear regression, and it is more elegant than it has any right to be."
+description: "Your LLM read twelve files and gave you an answer. Which ones did the answer rest on? Ablation attribution (ContextCite) answers that with a few dozen forward passes and a linear regression, and on planted-fact tests it finds the right source every time."
 aliases:
   - "ablation-attribution"
   - "context-attribution"
 ---
 
-*Part of the [[series/llm-comprehension|LLM Comprehension]] series.*
+Your coding agent just read twelve files, ran three shell commands, and confidently told you the
+server config is wrong. Or you pasted those files into a chat and asked the same question. Either
+way, the LLM answered from a long context. Which of those twelve files did its answer actually rest
+on? Did the `lsof`
+output matter? Did it ignore the config file it so dutifully opened?
 
-Your coding agent just read twelve files, ran three shell commands, and confidently told you the server config is wrong. Which of those twelve files did it *actually use* to reach that conclusion? Did the `lsof` output matter? Did it ignore the config file it so dutifully opened?
+You can't just ask it; models make up plausible justifications. Attention maps feel like the answer
+but are famously unreliable as explanations. There is a better way, and it needs nothing but
+forward passes and a linear regression: **ablation attribution**, published as
+[ContextCite](https://arxiv.org/abs/2409.00729) by Cohen-Wang et al. (NeurIPS 2024). The whole idea
+fits in one picture:
 
-You can't just ask it; models confabulate justifications. Attention maps feel like the answer but are famously unreliable as explanations. And yet there's a method that answers this question with nothing but forward passes and a linear regression, and it's one of the most elegant tricks I've seen in the LLM tooling space. It's called **ablation attribution**, published as [ContextCite](https://arxiv.org/abs/2409.00729) by Cohen-Wang et al. (NeurIPS 2024).
+<img class="theme-dark-only figure-narrow" src="/blog/assets/attribution-v-ablate-dark.svg" alt="Two sources: a config file saying port 8080 and an lsof tool result saying the server listens on 3000. The recorded answer 3000 stays locked. The model gives it 90% with both sources, 95% with the config removed, and 2% with the lsof result removed." />
+<img class="theme-light-only figure-narrow" src="/blog/assets/attribution-v-ablate-light.svg" alt="The same experiment in the light theme." />
 
-This post builds it from scratch, following the exact path of confusions I went through when learning it. If you make it to the end, you'll also know precisely what the method *cannot* tell you, which is where it gets scientifically interesting.
+Keep the model's answer fixed, remove one source at a time, and measure how much less likely that
+same answer becomes. A source whose removal makes the answer collapse is a source the answer rested
+on. This post builds the method from scratch, following the confusions I had when learning it. It
+ends with what the method cannot tell you, and with a test of whether it finds the right source
+when we know the answer.
+
+## Two corrections to the first instinct
+
+If you come from classical ML, "attribute the output to the input" sounds like a saliency map: an
+importance score for every input token. That instinct is half right (this method is a cousin of
+SHAP), but it needs two corrections.
+
+**Attribute to sources, not tokens.** Nobody cares whether input token 4,812 mattered. You care
+whether *the config file* mattered. So the context is cut into a handful of **sources**: one file
+read, one tool result, one instruction block. A real context has maybe 5 to 50 sources, not
+30,000 tokens. Call that number $d$; keeping it small is what makes everything affordable.
+
+**Never attribute the generation; attribute the score of a *fixed* answer.** An LLM's output is
+sampled: run it twice and you may get different answers. "How much did source B influence the
+output" is ill-defined when the output itself is a dice roll. So the model generates its answer
+exactly **once**, and from then on we never generate again. We use the model's other mode:
+
+- **Generate**: "here's a prompt, produce an answer." Sampled, slow, one token at a time.
+- **Grade**: "here's a prompt *and* a finished answer; how probable would you have found these
+  exact tokens?" Deterministic, no sampling at all.
+
+Grading gives one number for any context: the probability $p$ the model assigns to the recorded
+answer (for a multi-token answer, the product over its tokens). ContextCite works with its
+**log-odds**:
+
+$$\text{score} = \log \frac{p}{1 - p}$$
+
+Why log-odds and not $p$ itself? Probabilities are squeezed into $[0, 1]$, so near the edges big
+changes look tiny: going from 90% to 95% barely moves $p$, but it doubles the odds (9 to 1 becomes
+19 to 1). Log-odds stretch the scale so that such changes count, which is what a linear regression
+needs.
+
+> [!info]- Why grading is cheap: one pass instead of many
+> Generation is sequential: one forward pass per new token. Grading has no unknowns; the full
+> sequence (context plus fixed answer) goes through in **one** parallel forward pass, and the causal
+> attention mask makes sure each position is scored using only the tokens before it. It is exactly
+> how models are trained: a training step scores a known text in one pass. Grading is a training
+> step without the weight update. A 500-token answer costs one pass over 500 tokens, not 500
+> sequential steps.
+
+We have turned a sampling machine into a deterministic function: give it any *modified* context
+plus the fixed answer, get back one score. Now we can experiment on that function.
+
+## The toy example, step by step
+
+The context holds a question ("What port is the server on? Reply with just the number."), a config
+file that says `port = 8080`, and an `lsof` tool result that says the server listens on port 3000.
+The model answered once: **3000**. (The probabilities below are invented for illustration, and I
+treat "3000" as a single token.)
+
+- **Both sources kept.** The model gives "3000" a probability of 90%.
+- **The `lsof` result removed.** "Ablating" is physically dumb: delete the source's tokens and grade
+  the same answer again. Now the model would much rather say "8080" (93%), but we never let it say
+  anything. We only read the probability of the recorded "3000": a miserable 2%. This exact answer
+  became 45 times less likely.
+- **The config file removed.** "3000" goes *up*, to 95%. The config file was a distractor, mildly
+  pushing against the answer.
+
+## From ablations to attributions
+
+Collect the experiments into a table, including one with both sources removed:
+
+| config file | lsof result | $p$("3000") | log-odds |
+|---|---|---|---|
+| kept | kept | 0.90 | +2.20 |
+| kept | removed | 0.02 | −3.89 |
+| removed | kept | 0.95 | +2.94 |
+| removed | removed | 0.04 | −3.14 |
+
+Now fit a linear regression: $\text{score} \approx \text{base} + w_{\text{config}} \cdot
+\text{config} + w_{\text{lsof}} \cdot \text{lsof}$, where each source is 1 when kept and 0 when
+removed. (The invented values were chosen so this fit is exact.)
+
+<img class="theme-dark-only figure-narrow" src="/blog/assets/attribution-v-weights-dark.svg" alt="Fitted weights in log-odds: the lsof result +6.1, the config file -0.75. Kept, the lsof result multiplies the odds of 3000 by 441; the config file multiplies them by 0.47." />
+<img class="theme-light-only figure-narrow" src="/blog/assets/attribution-v-weights-light.svg" alt="The fitted weights in the light theme." />
+
+The weights are **signed**, and a negative weight is a real finding: a source that pushed against
+the answer. They also have a clean reading. Because they add in log-odds, each kept source
+*multiplies* the odds of the answer by $e^{w}$: the `lsof` result by about 440, the config file by
+about one half.
+
+A single ablation only tells you about one *combination* of sources. The regression over many
+combinations is what separates each source's individual share. The linear model is not the idea;
+it is the tool that turns mixed evidence into one number per source.
+
+## "But that's $2^d$ forward passes!"
+
+With $d$ sources there are $2^d$ possible subsets to remove. For 30 sources, a billion. Luckily you
+don't need all of them. You need $d + 1$ regression coefficients, and fitting $d + 1$ unknowns needs
+on the order of $d$ measurements, not $2^d$, for the same reason fitting a plane doesn't require
+measuring every point in space.
+
+So: sample a few dozen random keep-or-remove masks (each source kept with probability ½), grade
+each one, fit the regression. The paper's default is 32 masks. It also fits with **Lasso**, betting
+that only a handful of sources really matter, which lets it get away with even fewer. On a single
+consumer GPU with a 7B model, this takes a few minutes per answer.
+
+## Checking the fit, per answer
+
+At this point you should be suspicious. A *linear* stand-in for a transformer, fitted on 32
+samples?
+
+You don't have to take it on faith; you can check it. Keep some sampled masks out of the fit, ask
+the fitted line to *predict* their scores, and compare with what the model actually gave, using a
+rank correlation. The paper calls this the **linear datamodeling score** (LDS) and uses it to
+evaluate the method. You can run the same check on any single answer: a high score means the
+linear story predicts what removing things does *for this answer*; a low score means the weights
+are not worth quoting here.
+
+> [!warning] Where linearity breaks: redundant sources
+> Suppose two sources carry the *same fact* (a file read twice, or a tool result quoting the file).
+> Remove either alone: nothing happens. Remove both: the score collapses. That is an OR, and a
+> linear model cannot represent it at any sample size; more samples reduce noise, not the wrong
+> shape of the model. The authors document this case. The danger is that the check above can look
+> fine while the two copies quietly split or hide their credit. If your context repeats itself,
+> add targeted experiments that remove both copies together.
+
+## What it can never tell you
+
+We measured that the probability of "3000" collapses without the `lsof` result. Does that tell you
+what the model *would have done* without it?
+
+No, and it can't. The method only grades **the answer that actually happened**. It knows that
+answer becomes unlikely without the source; it cannot know what would have replaced it. Maybe a
+paraphrase ("the server is on port 3000"), in which case the *behavior* didn't depend on the source
+at all, only the exact wording did. Finding out requires generating again under the ablated context,
+which is a different and more expensive experiment.
+
+So read the weights as: *this source supported the answer as written*. That is reliance, not
+understanding. A model can lean on exactly the right file and still misread it, which is the
+subject of [[blog/2026-07-19-your-agent-read-the-file-but-did-it-understand-it|the next post]].
+
+## Does it find the right source?
+
+A method like this is only worth using if it finds the right source when we know what the right
+source is. So I tested it. I wrote 12 small contexts, each with 10 sources: nine realistic snippets
+from real open-source projects, and one that plants an invented fact the question needs (invented,
+so the model cannot know it from training). Qwen2.5-Coder-7B answered each question 5 times, and
+ContextCite ranked the sources for every answer. One context failed a check set in advance and was
+dropped, leaving 11.
+
+The planted source came out **first in 55 of 55 runs**. Picking at random would get that right 10%
+of the time. A keyword search (BM25) that matches the question's words against the sources ranked
+the planted source first for only 4 of the 11 contexts, so the method is not just matching words.
+And the same method on a copy of the model with *random* weights ranked it first for only 2 of 11,
+so the signal comes from what the trained model actually does with the text.
+
+Within its scope, that is a remarkable deal: a per-answer, testable attribution for the price of a
+few dozen forward passes and a Lasso fit, with no access to the model's insides beyond
+probabilities.
 
 ---
 
-## The Wrong First Instinct
+*Revised on 2026-09-27: retitled from "Did Your Agent Actually Read That File?", with new figures, a
+few corrections and a validation test.*
 
-If you come from classical ML, "attribute the output to the input" sounds like a saliency map: for every output token, a heat map over input tokens. Something SHAP-shaped.
+**References.**
 
-That instinct is half right (this method is a cousin of SHAP), but it needs two corrections, and the second one is the whole trick.
-
-**Correction 1: attribute to sources, not tokens.** We don't care whether input token 4,812 mattered. We care whether *the config file* mattered, whether *the lsof output* mattered. So the context gets partitioned into a handful of **sources**: one file read, one tool result, one instruction block. A real agent trajectory has maybe 5 to 50 sources, not 30,000 tokens. Keep that number $d$ in mind; it's what makes everything affordable.
-
-![[blog/assets/ablation-saliency-vs-sources.png|700]]
-*A saliency map (top) assigns an importance weight to every input token; useful for models, overwhelming for humans. We want the bottom picture: one signed weight per source the agent saw. (Numbers illustrative.)*
-
-**Correction 2: never attribute the generation. Attribute the score of the *frozen* generation.** This one deserves its own section.
-
-## The Move That Makes It Work
-
-Here's the problem correction 2 solves. An LLM's output is sampled: run it twice and you may get different answers. "How much did source B influence the output" is ill-defined when the output itself is a dice roll.
-
-The fix: the agent generates its answer exactly **once**, the real run, and we save the answer's exact tokens. From then on we never generate again. Instead we use the model's other mode:
-
-- **Generate**: "here's a prompt, produce an answer." Sampled, slow, one token at a time.
-- **Grade**: "here's a prompt *and* a finished answer; tell me, token by token, how probable you would have found each of these exact tokens." Deterministic. No sampling happens at all.
-
-Grading gives us a single number for any (context, frozen answer) pair:
-
-$$\text{score} = \sum_t \log p(\text{answer token}_t \mid \text{everything before it})$$
-
-Read it as: *how confident is the model in this specific answer, given this specific context.* (Natural log throughout, the ML convention; if you recompute these with $\log_{10}$ you'll get numbers about 2.3x smaller.)
-
-> [!info] Why grading is cheap: prefill vs decode
-> Generation is expensive because it's sequential: one forward pass per new token, and each pass streams all the model's weights to produce a single token. Grading has no unknowns; the full sequence (context + frozen answer) goes through in **one** parallel forward pass, and the causal attention mask guarantees each position is scored using only the tokens before it. The language-model head fires at every position simultaneously. If this feels like a trick, it's literally how models are trained: a training step computes the loss over a known text in one pass, and nobody "rolls out" during training. Grading is a training step without the weight update. A 500-token answer costs 500 tokens of prefill, not 500 sequential steps.
-
-So we've turned a stochastic generator into a deterministic function: feed it any *modified* context plus the frozen answer, get back one score.
-
-Now we can do experiments on that function.
-
-## A Toy Example You Can Hold in Your Head
-
-The agent's context ended up with an instruction and two sources, and it answered once, for real:
-
-```text
-[INSTRUCTION]  "What port is the server on? Reply with just the number."
-[SOURCE A]     file read:   "config.port = 8080"
-[SOURCE B]     tool result: "$ lsof: server listening on port 3000"
-
-Frozen answer: "3000"
-```
-
-**Grading pass 1, full context.** Glue the frozen answer onto the context, one forward pass, read the probability at the answer position:
-
-```text
-softmax: { "3000": 0.90,  "8080": 0.08,  other: 0.02 }
-score = ln(0.90) ≈ −0.11
-```
-
-**Now ablate B.** "Ablating" is physically dumb: delete B's tokens from the input. The prompt is just shorter now. Grade the *same* frozen answer:
-
-```text
-softmax: { "3000": 0.02,  "8080": 0.93,  other: 0.05 }
-score = ln(0.02) ≈ −3.9
-```
-
-Stare at this for a second, because it's the crux. Without the lsof output, the model *wants* to say "8080" (93%!). But we never let it say anything. We only read off how much probability it still assigns to the frozen "3000": a miserable 2%. The model is telling us, in one number: *without that tool result, I would not have said what I said.*
-
-![[blog/assets/ablation-grading-softmax.png|700]]
-*Grading, not generating: the softmax at the answer position under both contexts. The red "8080" bar is what the model would rather say; we never let it. Only the "3000" bars are ever read.*
-
-**Ablate A instead:**
-
-```text
-softmax: { "3000": 0.95,  "8080": 0.01,  other: 0.04 }
-score ≈ −0.05    (slightly BETTER than with the full context)
-```
-
-Interesting: removing the config file made the model *more* confident. The 8080 file was a distractor.
-
-## From Ablations to Attributions
-
-Collect the experiments into a table: which sources were kept, and what score came out.
-
-| kept A? | kept B? | score |
-| ------- | ------- | ----- |
-| 1       | 1       | −0.11 |
-| 1       | 0       | −3.90 |
-| 0       | 1       | −0.05 |
-| 0       | 0       | −3.84 |
-
-Now fit a linear regression: $\text{score} \approx \text{base} + w_A \cdot A + w_B \cdot B$. Out come the attributions: $w_B \approx +3.8$ (the answer *depended* on the lsof output) and $w_A \approx -0.06$ (the config file was mildly hurting). Check it against the table: moving B from 0 to 1 lifts the score by ~3.79 whether A is present or not, and moving A from 0 to 1 *costs* ~0.06 either way. The weights are **signed**, and negative weights are real findings: a source that actively pushed against the answer.
-
-![[blog/assets/ablation-fitted-weights.png|700]]
-
-There's an elegant reading hiding here: the weights are additive in log space, which means each kept source *multiplies* the answer's probability by its own factor $e^{w_j}$. Independent multiplicative contributions; a natural grammar for probabilities.
-
-And notice what the regression is doing for us conceptually: a single ablation row only tells you about that particular *combination* of sources. The regression across many random combinations is what disentangles each source's individual share. The linear model isn't the idea; it's the computational aid that turns mixed evidence into per-source numbers.
-
-## "But That's $2^d$ Forward Passes!"
-
-With $d$ sources there are $2^d$ possible subsets. For 30 sources, a billion. Enumerating them is hopeless, and here's where the method earns its keep.
-
-You don't need the exact ablation function. You need $d + 1$ regression coefficients. And fitting $d+1$ unknowns needs on the order of $d$ equations, not $2^d$, for the same reason fitting a plane doesn't require measuring every point in space:
-
-- Unknowns grow **linearly** with $d$.
-- Subsets grow **exponentially** with $d$.
-
-So: sample ~64 random keep/drop masks (each source kept with probability ½), grade each one (64 forward passes), fit the regression. For 30 sources you visit 64 corners of a billion-corner hypercube and let linearity carry you everywhere else. The paper adds one more refinement: fit with **Lasso**, betting that attributions are sparse (only a handful of sources genuinely matter), which drives the sample count down further. On a single consumer GPU with a 7B model, the whole thing costs a few minutes per answer.
-
-## The Honesty Mechanism
-
-At this point you should be suspicious. A *linear* surrogate of a transformer? Extrapolated from 64 samples to a billion subsets?
-
-The method's best idea is that it doesn't ask you to believe this. It **checks it, per answer**. Hold a slice of the sampled masks out of the fit. Ask the fitted line to *predict* the scores of those held-out ablations. Compare predictions to reality with a rank correlation. This is called the **LDS** (linear datamodeling score): high LDS means the linear story genuinely predicts what removing things does *for this specific answer*, so the weights mean something; low LDS means the fit is fiction *here*, discard it.
-
-Proof is replaced by a per-use validity check. That's the right epistemics for a method built on an approximation.
-
-> [!warning] Where linearity genuinely breaks
-> Suppose sources B and C carry the *same fact* (a file read twice, a tool result quoting the file). Drop either alone: nothing happens. Drop both: the score craters. That's an OR, an interaction term, and a linear model structurally cannot represent it at any sample size; more samples reduce variance, never wrongness of the model class. Redundancy is the known hard case (the authors document it), and the subtle danger is that LDS can look fine while redundant sources quietly split or hide their credit. If your contexts are redundancy-heavy, budget extra skepticism (and targeted pair-drop experiments).
-
-## What It Can Never Tell You
-
-One more limit, and it's the one worth internalizing before you quote these numbers anywhere.
-
-We measured $w_B = +3.8$: the model's confidence in "3000" craters without the lsof output. Does that tell you what the agent *would have done* without B?
-
-No. And it can't, structurally. The method only ever grades **the answer that actually happened**. It knows that answer becomes unlikely without B; it cannot know what would have replaced it. Maybe a paraphrase ("the server is on port 3000"), in which case the *behavior* didn't depend on B at all, only the exact wording did. Maybe a completely different action. Distinguishing those requires actually generating under the ablated context, a rollout, which is a different (and more expensive) instrument with different validity problems.
-
-So read the weights as: *this source supported the answer as produced*. Reliance, not counterfactual behavior. The method also can't see sources whose influence was **suppressing** something the model never wrote; grading the produced answer is blind to the unproduced.
-
-## Why I'm Excited Anyway
-
-Within its scope, this is a remarkable deal: a behaviorally grounded, causally flavored, per-answer-validated attribution for the price of ~64 prefill passes and a Lasso fit. No white-box access needed beyond logprobs. No trusting attention maps. A built-in gate that refuses to hand you numbers when its own assumption fails.
-
-We're using it to study a question anyone building agents eventually faces: when an agent accumulates a long working context (files read, tool outputs, its own notes), *how much of that context does it actually use?* The instrument above is the foundation; the interesting science starts when the numbers come back.
-
-If you want to go deeper: the paper is [ContextCite: Attributing Model Generation to Context](https://arxiv.org/abs/2409.00729) (Cohen-Wang, Shah, Georgiev, Madry; NeurIPS 2024), and the reference implementation is at [MadryLab/context-cite](https://github.com/MadryLab/context-cite). The four documented failure modes in their Appendix C.4 are worth your time; knowing where a tool breaks is half of owning it.
+- Cohen-Wang, Shah, Georgiev, Madry, "ContextCite: Attributing Model Generation to Context,"
+  NeurIPS 2024, [arXiv 2409.00729](https://arxiv.org/abs/2409.00729); reference implementation
+  [MadryLab/context-cite](https://github.com/MadryLab/context-cite). Their Appendix C.4 lists four
+  documented failure modes and is worth reading.
+- Robertson and Zaragoza, "The Probabilistic Relevance Framework: BM25 and Beyond," Foundations and
+  Trends in Information Retrieval, 2009.

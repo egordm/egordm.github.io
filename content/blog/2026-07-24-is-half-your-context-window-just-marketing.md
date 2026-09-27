@@ -113,9 +113,7 @@ the model card says.
 
 ---
 
-*Revised on 2026-09-27: rewritten to lead with the example, with new figures. The results are
-unchanged. Two claims are narrower than before: the keyword twin was tested at two cells only, and
-the position result no longer leans on another study's explanation.*
+*Revised on 2026-09-27: rewritten for readability, with new figures and a few narrower claims.*
 
 **References.**
 

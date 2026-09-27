@@ -34,3 +34,10 @@ img.figure-narrow {
     max-width: min(100%, 460px);
     margin-inline: 0;
 }
+
+// Illustrations (diagrams that are mostly drawing, not text) sit centred.
+img.figure-center {
+    display: block;
+    max-width: min(100%, 460px);
+    margin-inline: auto;
+}

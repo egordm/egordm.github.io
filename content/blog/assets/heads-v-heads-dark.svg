@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="353" viewBox="0 0 420 353" role="img" aria-labelledby="title desc">
+<title id="title">heads</title>
+<desc id="desc">Invented roles inspired by real heads. A matches the question to the fact: close attention, small push toward 30. B moves content toward the output: less fact attention, strong push toward 30. C rests on the first token regardless of the question. Arrows illustrate behaviour, not a numeric scale.</desc>
+<rect x="0" y="0" width="420" height="353" rx="0" fill="#1e1e1e"/>
+<rect x="16" y="12" width="388" height="98" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="30" y="35" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#7bd7c8">Head A · matcher</text>
+<text x="112" y="59" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">Close attention</text>
+<text x="302" y="59" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">Small push</text>
+<rect x="30" y="70" width="83" height="27" rx="4" fill="#253e38" stroke="#7bd7c8"/>
+<text x="71" y="88" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#7bd7c8">fact tokens</text>
+<path d="M121 83 L187 83" fill="none" stroke="#7bd7c8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M179.97933950487703 86.83540430883363 L187 83 L179.97933950487703 79.16459569116638" fill="none" stroke="#7bd7c8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<circle cx="210" cy="83" r="14" fill="#1e1e1e" stroke="#7bd7c8" stroke-width="1.5"/>
+<text x="210" y="89" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#7bd7c8">A</text>
+<path d="M234 83 L331 83" fill="none" stroke="#7bd7c8" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M325.73450462865776 85.87655323162522 L331 83 L325.73450462865776 80.12344676837478" fill="none" stroke="#7bd7c8" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="342" y="70" width="45" height="27" rx="4" fill="#1e1e1e" stroke="#4c504d"/>
+<text x="365" y="89" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#7bd7c8">30</text>
+<rect x="16" y="120" width="388" height="98" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="30" y="143" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#a6b8ff">Head B · mover</text>
+<text x="112" y="167" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">Less attention</text>
+<text x="302" y="167" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">Strong push</text>
+<rect x="30" y="178" width="83" height="27" rx="4" fill="#30374f" stroke="#a6b8ff"/>
+<text x="71" y="196" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#a6b8ff">fact tokens</text>
+<path d="M121 191 L187 191" fill="none" stroke="#a6b8ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M181.73450462865776 193.87655323162522 L187 191 L181.73450462865776 188.12344676837478" fill="none" stroke="#a6b8ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<circle cx="210" cy="191" r="14" fill="#1e1e1e" stroke="#a6b8ff" stroke-width="1.5"/>
+<text x="210" y="197" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#a6b8ff">B</text>
+<path d="M234 191 L331 191" fill="none" stroke="#a6b8ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M323.97933950487703 194.83540430883363 L331 191 L323.97933950487703 187.16459569116637" fill="none" stroke="#a6b8ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="342" y="178" width="45" height="27" rx="4" fill="#1e1e1e" stroke="#4c504d"/>
+<text x="365" y="197" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#a6b8ff">30</text>
+<rect x="16" y="228" width="388" height="92" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="30" y="251" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#ffa96e">Head C · resting head</text>
+<rect x="30" y="267" width="83" height="30" rx="4" fill="#443226" stroke="#ffa96e"/>
+<text x="71" y="287" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffa96e">first token</text>
+<path d="M123 282 L187 282" fill="none" stroke="#ffa96e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M179.97933950487703 285.83540430883363 L187 282 L179.97933950487703 278.16459569116637" fill="none" stroke="#ffa96e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<circle cx="210" cy="282" r="14" fill="#1e1e1e" stroke="#ffa96e" stroke-width="1.5"/>
+<text x="210" y="288" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#ffa96e">C</text>
+<text x="244" y="278" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#bdbdb8">Parks here,</text>
+<text x="244" y="297" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#bdbdb8">any question</text>
+<text x="210" y="343" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#bdbdb8">Illustrative roles · arrows show information flow</text>
+</svg>

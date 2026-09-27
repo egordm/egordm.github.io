@@ -3,7 +3,7 @@ title: "Is Half Your Context Window Just Marketing?"
 date: 2026-07-24
 draft: false
 series: "LLM Comprehension"
-series_order: 4
+series_order: 6
 tags:
   - llm
   - interpretability

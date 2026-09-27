@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="420" viewBox="0 0 420 420" role="img" aria-labelledby="title desc">
+<title id="title">wu</title>
+<desc id="desc">Wu checks the most-attended source token against the emitted token, and requires it to lie in the fact. No 30 exists in half a minute. In the copy version Head A attends most to 30 and scores 1.</desc>
+<rect x="0" y="0" width="420" height="420" rx="0" fill="#ffffff"/>
+<rect x="16" y="12" width="388" height="171" rx="7" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="30" y="36" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#252725">The timeout is half a minute.</text>
+<text x="112" y="65" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">Inside the fact</text>
+<text x="320" y="65" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">Emitted token</text>
+<rect x="44" y="77" width="136" height="42" rx="7" fill="#faebdf" stroke="#a8460c"/>
+<text x="112" y="104" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#a8460c">no “30” token</text>
+<text x="218" y="105" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="400" fill="#595e5b">≠</text>
+<rect x="284" y="77" width="72" height="42" rx="7" fill="#e9edfc" stroke="#4557ba"/>
+<text x="320" y="105" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#4557ba">30</text>
+<text x="210" y="157" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#a8460c">No possible match · all heads score 0</text>
+<rect x="16" y="199" width="388" height="205" rx="7" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="30" y="225" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" fill="#252725">Copy version: The timeout is 30 seconds.</text>
+<text x="112" y="255" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#00796b">A’s most-attended</text>
+<text x="112" y="273" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#00796b">token inside the fact</text>
+<path d="M112 281 L112 298" fill="none" stroke="#00796b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M109.12344676837478 292.73450462865776 L112 298 L114.87655323162522 292.73450462865776" fill="none" stroke="#00796b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="320" y="273" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">Emitted token</text>
+<rect x="76" y="304" width="72" height="42" rx="7" fill="#e4f3ee" stroke="#00796b"/>
+<text x="112" y="332" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#00796b">30</text>
+<text x="218" y="332" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="400" fill="#595e5b">=</text>
+<rect x="284" y="304" width="72" height="42" rx="7" fill="#e9edfc" stroke="#4557ba"/>
+<text x="320" y="332" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#4557ba">30</text>
+<text x="210" y="386" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#00796b">Same token, inside the fact · A scores 1</text>
+</svg>

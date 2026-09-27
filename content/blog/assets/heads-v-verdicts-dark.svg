@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="228" viewBox="0 0 420 228" role="img" aria-labelledby="title desc">
+<title id="title">verdicts</title>
+<desc id="desc">Verdicts on half a minute: Wu selects none, QRHead selects A the matcher, LOCOS selects B the mover. In the copy version Wu detects A too.</desc>
+<rect x="0" y="0" width="420" height="228" rx="0" fill="#1e1e1e"/>
+<text x="28" y="24" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#bdbdb8">Same fact: “half a minute” · answer: “30”</text>
+<rect x="16" y="38" width="388" height="46" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="28" y="56" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#ffa96e">Wu</text>
+<text x="28" y="74" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">No “30” to copy</text>
+<text x="389" y="66" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#ffa96e">None</text>
+<rect x="16" y="92" width="388" height="46" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="28" y="110" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#7bd7c8">QRHead</text>
+<text x="28" y="128" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">Question draws attention</text>
+<text x="389" y="120" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#7bd7c8">A · matcher</text>
+<rect x="16" y="146" width="388" height="46" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="28" y="164" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#a6b8ff">LOCOS</text>
+<text x="28" y="182" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">Write pushes toward “30”</text>
+<text x="389" y="174" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#a6b8ff">B · mover</text>
+<text x="210" y="218" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#bdbdb8">Copy version: Wu detects A too</text>
+</svg>

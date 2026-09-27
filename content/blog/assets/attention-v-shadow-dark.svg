@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="550" viewBox="0 0 420 550" role="img" aria-labelledby="title desc">
+<title id="title">shadow</title>
+<desc id="desc">Identical coordinate scales show how each fact write is weighted then projected onto the unit answer direction. A: 0.70 times (0.1, 1.0), shadow 0.07. B: 0.30 times (3.0, 0.2), shadow 0.90.</desc>
+<rect x="0" y="0" width="420" height="550" rx="0" fill="#1e1e1e"/>
+<text x="204" y="58" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#7bd7c8">Head A</text>
+<text x="204" y="80" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#bdbdb8">attention 0.70</text>
+<path d="M58 186 L58 66" fill="none" stroke="#4c504d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M60.876553231625216 71.26549537134224 L58 66 L55.123446768374784 71.26549537134224" fill="none" stroke="#4c504d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M58 186 L364 186" fill="none" stroke="#bdbdb8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M358.73450462865776 188.87655323162522 L364 186 L358.73450462865776 183.12344676837478" fill="none" stroke="#bdbdb8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="27" y="56" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">other</text>
+<text x="384" y="191" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="19" fill="#bdbdb8"><tspan font-style="italic">u</tspan><tspan baseline-shift="sub" font-size="70%">30</tspan></text>
+<path d="M58 186 L66.8 98.0" fill="none" stroke="#7bd7c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+<path d="M69.1383410731494 103.52559146387266 L66.8 98.0 L63.413786182977766 102.9531359748555" fill="none" stroke="#7bd7c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+<path d="M58 186 L64.16 124.4" fill="none" stroke="#7bd7c8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M67.27778809753255 131.76745528516355 L64.16 124.4 L59.64504824397036 131.00418129980733" fill="none" stroke="#7bd7c8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M64.16 124.4 L64.16 186" fill="none" stroke="#7bd7c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1" stroke-dasharray="4 5"/>
+<path d="M58 186 L64.16 186" fill="none" stroke="#7bd7c8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="83.8" y="88.0" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#bdbdb8">(0.1, 1.0)</text>
+<path d="M64.16 194 L64.16 212 L98 212" fill="none" stroke="#7bd7c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="106" y="217" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#7bd7c8">0.07</text>
+<text x="363" y="217" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#bdbdb8">toward “30”</text>
+<text x="204" y="310" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#a6b8ff">Head B</text>
+<text x="204" y="332" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#bdbdb8">attention 0.30</text>
+<path d="M58 438 L58 318" fill="none" stroke="#4c504d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M60.876553231625216 323.26549537134224 L58 318 L55.123446768374784 323.26549537134224" fill="none" stroke="#4c504d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M58 438 L364 438" fill="none" stroke="#bdbdb8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M358.73450462865776 440.8765532316252 L364 438 L358.73450462865776 435.1234467683748" fill="none" stroke="#bdbdb8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="27" y="308" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">other</text>
+<text x="384" y="443" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="19" fill="#bdbdb8"><tspan font-style="italic">u</tspan><tspan baseline-shift="sub" font-size="70%">30</tspan></text>
+<path d="M58 438 L322.0 420.4" fill="none" stroke="#a6b8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+<path d="M316.9375123443987 423.62043766231926 L322.0 420.4 L316.5548213950254 417.8800734217191" fill="none" stroke="#a6b8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+<path d="M58 438 L137.2 432.72" fill="none" stroke="#a6b8ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M130.45001645919828 437.0139168830924 L137.2 432.72 L129.93976186003383 429.3600978956255" fill="none" stroke="#a6b8ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M137.2 432.72 L137.2 438" fill="none" stroke="#a6b8ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1" stroke-dasharray="4 5"/>
+<path d="M58 438 L137.2 438" fill="none" stroke="#a6b8ff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="317.0" y="406.4" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#bdbdb8">(3.0, 0.2)</text>
+<text x="97.6" y="469" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#a6b8ff">0.90</text>
+<text x="363" y="469" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#bdbdb8">toward “30”</text>
+<path d="M26 260 L394 260" fill="none" stroke="#4c504d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="210" y="527" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">Faint: write · solid: weighted · axis: shadow</text>
+</svg>

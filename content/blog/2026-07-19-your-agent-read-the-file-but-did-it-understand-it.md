@@ -1,152 +1,116 @@
 ---
-title: "Your Agent Read the File. Did It Understand It?"
+title: "Your LLM Read the File. Did It Understand It?"
 date: 2026-07-19
 draft: false
 series: "LLM Comprehension"
-series_order: 2
+series_order: 4
 tags:
   - llm
-  - agents
   - interpretability
   - attention
-description: "Ablation attribution can tell you an answer leaned on the right file at rank one, and the answer can still be wrong. Influence isn't comprehension, so this post opens the model to find the difference."
+description: "LOCOS finds the heads that push a fact toward an answer, even a wrong one. Ablation and attention knockout held up, but the write score rated clean answers below flawed ones. Finding the source and testing understanding need different tools."
 aliases:
   - "logit-contribution-scoring"
   - "synthesis-heads"
 ---
 
-[[blog/2026-07-12-did-your-agent-actually-read-that-file|The previous post]] built ablation attribution: grade the model's frozen answer with a source in and out of context, and the score gap tells you how much the answer leaned on that source. It's a good instrument. It also has a gap you hit the first time you use it for real: an answer can lean on the right source at rank one and still be wrong. The model read the file and misread it.
+In [[blog/2026-07-18-which-heads-read-your-context|the previous post]], the small LLM, Qwen3-0.6B, read “The timeout is half a minute.” and answered **“The timeout is half a minute, which is 300 seconds.”** An attribution tool would point at the right sentence. The answer is still wrong.
 
-Attribution answers "which source mattered." It cannot answer "did the model get that source right." Those are different questions, and splitting them means opening the model past the input/output boundary attribution stays at. This post builds the instrument that does that: a way to score, per attention head, whether what got *written* into the answer pushed toward the right token or the wrong one, and then a way to test whether the answer actually depended on that write. Two published methods do the work: **attention knockout** ([Geva et al., EMNLP 2023](https://arxiv.org/abs/2304.14767)) for the dependence half, and **LOCOS** ([Gema, Alex, Minervini, 2026](https://arxiv.org/abs/2607.01002)) for the scoring half, with Wu et al.'s [retrieval heads](https://arxiv.org/abs/2404.15574) as the instructive failure that motivates both. As before, we build them from scratch, following the exact path of confusions a smart reader actually hits.
+“Which source did the answer rest on?” and “Did the LLM get that source right?” are different questions. Does looking inside the LLM close that gap? **The tools that find where a fact enters the answer held up; the score that looked like it would say how well did not.** The LOCOS head list survived ablation in the paper and in my reproduction on Qwen3-8B. Attention knockout held up in my tests on Qwen2.5-Coder-7B. But using the LOCOS write score as a meter for understanding gave the wrong result: clean answers scored lower than flawed ones.
 
----
+## From the read to the push
 
-## Sixty seconds inside a transformer
+We met the **matcher**, which gives the relevant fact close attention, and the **mover**, which writes strongly toward the answer. In our example, both can read “half a minute”, but the mover delivers the larger push toward “30” at the **answer position**. That is the position whose vector predicts the next answer token.
 
-The two-minute tour, so the rest of the post has something concrete to hang on. Input text becomes **tokens**; each token becomes an embedding vector; from there the model is a stack of identical **blocks**, and at the top an **output matrix** (the *unembedding*) turns each position's final vector into a score (a **logit**) for every token in the vocabulary. Softmax those scores and you have the next-token distribution.
+LOCOS measures that push. It projects a head's write from source position $j$ onto the answer token's output direction $u_y$:
 
-Each block does two things at every position: **attention**, where the position looks back at earlier positions (causal masking: never forward) and pulls information from them, and an **MLP**, which processes the position's own vector in place. Attention is the only mechanism that moves information *between* positions; it's how a fact sitting 3,000 tokens back can reach the position that's about to produce the answer. One block gives one hop; a deep stack gives the model many chances to fetch, combine, and re-fetch.
+$$
+\phi_j = u_y\cdot\left(\alpha_j W_Ov_j\right).
+$$
 
-![[blog/assets/geva-information-flow.png|450]]
-*Information on the move inside a transformer: MLP blocks enrich a position in place (green), attention carries content between positions (purple), and late layers extract it to the position producing the answer. Figure 1 of [Geva et al., 2023](https://arxiv.org/abs/2304.14767) (CC BY 4.0).*
+The attention weight $\alpha_j$ scales the write $W_Ov_j$; the dot product measures how much it points toward the chosen answer token. LOCOS then sums those pushes over the fact and subtracts the push from the remaining context, rescaled to the fact's token length. It is **fact minus rescaled background**, with the question held fixed. The [[blog/2026-07-18-which-heads-read-your-context|previous post]] walks through the read, the write and that subtraction. ([LOCOS paper](https://arxiv.org/abs/2607.01002))
 
-## The stream is a sum, not a pipeline
+We now have a head list and a score. We can test them separately: does the LLM need these heads, and does a larger push mean a better answer?
 
-Now the detail the tour usually skips, which everything below depends on: the blocks don't transform the representation in place, stage by stage. Each attention head and each MLP reads the running vector at a position (the **residual stream**) and **adds** its own contribution back into it. The final vector that produces the answer is a sum:
+## Do the LOCOS heads matter?
 
-```text
-final_state = embedding + head_1_write + head_2_write + ... + mlp_1_write + ...
-```
+The direct test is **ablation**: switch the heads off and see what breaks. The LOCOS paper does this on Qwen3-8B with NoLiMa, where the question shares no words with the fact needed to answer it. The answer score is ROUGE-L: how much of the reference answer the LLM still produces.
 
-Every head's contribution is a separate additive term, sitting in the same vector space, at the same position, added into the same sum. That's what makes it possible to isolate one head's write and ask what it alone contributed: you don't have to unwind a pipeline, you just read off one term of a sum.
+With no heads off, the published score is 0.401. Switching off the top 50 LOCOS heads takes it to **0.000**. Switching off the top 50 heads from Wu's copy test leaves 0.292. Arithmetic and plain factual recall stay near their normal level, so these heads are specific to this job. ([LOCOS](https://arxiv.org/abs/2607.01002), [Wu's copy test](https://arxiv.org/abs/2404.15574), [NoLiMa](https://arxiv.org/abs/2502.05167))
 
-## One head, two circuits
+I reproduced the comparison before relying on the head list. My scores were 0.412 with no heads off, **0.000** with the LOCOS heads off, and 0.342 with Wu's heads off. Switching off 50 random heads left 0.391. Here are the published results beside mine.
 
-A single attention head does two jobs, and they're computed by different weight matrices:
+<img class="theme-dark-only figure-center" src="/blog/assets/heads-v-ablation-dark.svg" alt="Qwen3-8B on NoLiMa. ROUGE-L with no heads off: 0.401 published, 0.412 in my reproduction. Top 50 LOCOS heads off: 0.000 in both. Top 50 Wu heads off: 0.292 and 0.342. Random 50 heads off: 0.391, reproduction only." />
+<img class="theme-light-only figure-center" src="/blog/assets/heads-v-ablation-light.svg" alt="Qwen3-8B on NoLiMa. ROUGE-L with no heads off: 0.401 published, 0.412 in my reproduction. Top 50 LOCOS heads off: 0.000 in both. Top 50 Wu heads off: 0.292 and 0.342. Random 50 heads off: 0.391, reproduction only." />
 
-- **QK decides WHERE to read.** The query and key projections produce the attention weights $\alpha$: how much this head looks at each earlier position.
-- **OV decides WHAT to write.** The value projection packages up each attended position's content; the output projection $W_O$ turns that package into the vector actually added to the residual stream.
+Qwen3-8B has 1,152 heads. Switching off these 50 is enough to erase the inferred answer on this test. The head list finds machinery the LLM needs. That gives us a reason to trust it for locating the work, but we have not yet tested whether its score measures how well that work was done.
 
-A head can nail the first job and blow the second: attend heavily to exactly the right span, and still write something that pushes the answer in the wrong direction. Reading where a head looks tells you nothing about what it does with what it sees.
+## Can the push measure understanding?
 
+The tempting next step is to turn the push into a quality meter. If the mover carries the fact into the answer, perhaps a larger write toward the right answer means the LLM understood the fact better.
 
-## The detector problem: which of ~800 heads mattered
+I tested this on **Qwen3-8B**, using NoLiMa-style questions whose answer is a character's name and whose question shares no words with the sentence giving it. At about 15K tokens, 15 questions drew 197 answers. A **clean answer** gave the right name alone. A **flawed answer** gave the right name with several wrong candidates alongside it; 43 of the 197 did this. I scored both kinds on the right name.
 
-A 7B-class model has on the order of 28 layers times 28 heads, roughly 800 attention heads. Most contribute nothing to a given answer. You need a cheap way to shortlist the ones that carried context into the output, before you can even ask whether they carried it correctly.
+If the write score tracked quality, clean minus flawed should be positive. It was **negative**: $-0.035$ over all heads, with a 95% interval from $-0.052$ to $-0.020$, and $-0.093$ over the top 50 heads, with an interval from $-0.165$ to $-0.041$. Both intervals sit entirely below zero. The flawed answers scored higher.
 
-Wu et al.'s **retrieval-head** test ([arXiv 2404.15574](https://arxiv.org/abs/2404.15574)) is the obvious first move: a head "retrieves" at a decode step if the token it attends to most equals the token it generates. Run this over hundreds of needle-in-a-haystack trials, and a small, stable set of heads (3-6% of all heads) shows up as consistent copiers across models.
+<img class="theme-dark-only figure-center" src="/blog/assets/heads-v-quality-dark.svg" alt="Clean minus flawed write score on Qwen3-8B. All heads: minus 0.035, 95% interval minus 0.052 to minus 0.020. Top 50 heads: minus 0.093, interval minus 0.165 to minus 0.041. Both intervals are below zero: flawed answers score higher." />
+<img class="theme-light-only figure-center" src="/blog/assets/heads-v-quality-light.svg" alt="Clean minus flawed write score on Qwen3-8B. All heads: minus 0.035, 95% interval minus 0.052 to minus 0.020. Top 50 heads: minus 0.093, interval minus 0.165 to minus 0.041. Both intervals are below zero: flawed answers score higher." />
 
-Carry one toy pair through the rest of this post:
+A shorter run at about 4K tokens pointed the same way, but had only 6 flawed answers over 4 questions, too few to read. The write term itself sits clearly above zero on these answers, so it is not noise. It measures a push. That push does not measure answer quality.
 
-```text
-COPY CASE
-  context:  "The client retries after 30 seconds."
-  question: "After how many seconds does the client retry?"
-  answer:   "30"   <- appears verbatim in the context
+## A strong push can point at the wrong answer
 
-SYNTHESIS CASE
-  context:  "The timeout is half a minute."
-  question: "How many seconds is the timeout?"
-  answer:   "30"   <- appears NOWHERE in the input
-```
+Let us return to “half a minute”. In the previous post, we measured the mover's write along $u_{30}$, the direction for “30”. Now suppose the LLM misreads the fact as a full minute and answers “60”. If we score that answer, we measure along **$u_{60}$**. A head whose write strongly pushes “60” scores high. Nothing in that number says “60” is wrong.
 
-![[blog/assets/locos-literal-vs-nonliteral.png|450]]
-*The paper's own version of the same split: one needle, a literal question answered by copying and a non-literal one answered by synthesis. Figure 1 of [LOCOS](https://arxiv.org/abs/2607.01002) (CC BY 4.0).*
+The picture below repeats the write and its projection from the previous post. Each panel chooses the direction of the answer being scored as its horizontal axis. The arrows are schematic: we are comparing what the measurement asks, not assigning new scores.
 
-Both are the same fact. Only the first is a copy. The retrieval-head test scores the copy case fine: the head that attends to "30" and emits "30" lights up. On the synthesis case, there's no matching source token to attend to and copy: "30" doesn't exist in the input for any head to point at. The test has nothing to find.
+<img class="theme-dark-only figure-center" src="/blog/assets/heads-v-direction-dark.svg" alt="The same half-a-minute fact, with schematic writes at the answer position. Scoring 30 projects the write along the output direction for 30. Scoring a mistaken 60 projects along the direction for 60 instead. A strong push can support either token; the projection does not test correctness." />
+<img class="theme-light-only figure-center" src="/blog/assets/heads-v-direction-light.svg" alt="The same half-a-minute fact, with schematic writes at the answer position. Scoring 30 projects the write along the output direction for 30. Scoring a mistaken 60 projects along the direction for 60 instead. A strong push can support either token; the projection does not test correctness." />
 
-> [!WARNING]
-> **Paraphrasing doesn't hurt the model, it blinds the detector.** The model solves both cases; a 7B-class model reading "half a minute" and answering "30" is unremarkable. The copy test only sees the first case, because it's built to look for a literal match. It isn't measuring whether the model understood; it's measuring whether the model happened to quote.
+We choose which token to measure. The score tells us how strongly the write supports that token; it does not check the token against the meaning of “half a minute”. This also explains what it misses in the quality test: the flawed answers contain the right name, and the heads push it. A score along that name's direction does not judge the extra wrong names. I have not pinned down why flawed answers scored *higher* rather than equal. For a quality meter, the sign alone disqualifies it.
 
-The published evidence for this gap is stark. Wu's own top-scoring head, evaluated on NIAH (literal needle-in-a-haystack, verbatim recall) versus NoLiMa (answers synthesized from meaning, not copied), collapses 30x: 0.97 down to 0.03. Worse, when you use the copy test's own scores to pick heads to *ablate* on a synthesis task, removing them can *raise* the score at intermediate $k$. The detector isn't just blind on synthesis, it can point at heads that are causally irrelevant there.
+The real **Qwen3-0.6B** replay makes the problem concrete. In the previous post, I supplied the correct answer “30” to compare the detectors. The LLM's own answer was “300”. When I score “300” instead, LOCOS selects the same top head, **layer 20, head 13**, with **0.33**, against **0.434** on “30”. And **9 of its top 10 heads are the same**.
 
-## Scoring the write, not the read: LOCOS's $\phi$
+This is one item on a small LLM, an illustration. It shows why a familiar head list and a substantial push are not a verdict on correctness. The same top head supports the supplied right answer and the LLM's wrong answer. LOCOS can help us find that head in either case.
 
-LOCOS ([Gema, Alex, Minervini, arXiv 2607.01002](https://arxiv.org/abs/2607.01002)) fixes this by scoring the OV write directly instead of the QK read. Build it bottom-up:
+## Does the answer need this fact?
 
-```text
-v(t,j)   = the head's packaged content of source position j, at decode step t
-w(t,j)   = W_O @ v(t,j)                  the full-strength write, if the head attended fully
-o(t,j)   = alpha(t,j) * w(t,j)           the write actually shipped, scaled by attention weight
-phi(t,j) = u(y_t) . o(t,j)               the write's push toward the answer token, in logit units
-```
+We can still ask a useful causal question: would the answer survive if the answer positions could no longer read the fact? **Attention knockout** blocks attention from those positions to the fact's tokens. We cut the read that feeds the write, then check the answer. The method comes from Geva et al. ([Paper](https://arxiv.org/abs/2304.14767))
 
-$u(y_t)$ is the row of the model's **output (unembedding) matrix** for the token the model actually generated at step $t$. Every vocabulary token has one; it's always available, whatever the answer is and whatever the input contains. In the running example the model emits "30", so $u(y_t)$ is literally the output matrix's row for the token "30": the direction the final vector has to point in for "30" to win the softmax. $\phi$ asks of each head's write: *how far did you push along that direction?*
+I blocked that attention **at every layer**. Blocking only one layer can let the LLM route around the obstruction, the “hydra effect” described by McGrath et al. A surviving answer after that smaller intervention need not mean the fact was unnecessary. ([Paper](https://arxiv.org/abs/2307.15771))
 
-> [!IMPORTANT]
-> **The answer token doesn't need to appear anywhere in the input.** $u$ comes from the output side of the model, not from anything in the context. This is exactly what lets $\phi$ score the synthesis case: there's no "30" in the input to attend to, but there's always a $u_{\text{"30"}}$ to project onto.
+On **Qwen2.5-Coder-7B**, I used planted facts the answers depend on. Blocking the read at every layer dropped correctness to **0.00**, for both the copy version and the version needing inference of each question. A separate sweep blocking five layers at a time placed the loss in **layers 19 to 27**. Below, our timeout example illustrates the blocked read; the correctness result is from the planted-fact tests.
 
-> [!NOTE]
-> **Components, yes; PCA, no.** The right picture is force decomposition from physics: many forces act on an object, you pick the axis you care about (here: "toward the answer token"), and project each force onto it. Positive projections helped, negative ones opposed, and they sum to the net push. The axis is *chosen by the question*, which is the one way this differs from PCA, where the axes are discovered from the data's own variance. If your brain jumped to PCA at the word "components," you had the decomposition half right; only the origin of the axis is different.
+<img class="theme-dark-only figure-center" src="/blog/assets/heads-v-knockout-dark.svg" alt="Attention from the answer position to the half-a-minute fact is crossed out throughout a schematic layer stack. In the Qwen2.5-Coder-7B experiment, blocking every layer dropped correctness to 0.00 for both copy and inference versions. A separate sweep blocking five layers at a time placed the loss in layers 19 to 27." />
+<img class="theme-light-only figure-center" src="/blog/assets/heads-v-knockout-light.svg" alt="Attention from the answer position to the half-a-minute fact is crossed out throughout a schematic layer stack. In the Qwen2.5-Coder-7B experiment, blocking every layer dropped correctness to 0.00 for both copy and inference versions. A separate sweep blocking five layers at a time placed the loss in layers 19 to 27." />
 
-![[blog/assets/locos-qk-ov-circuits.png|700]]
-*The whole pipeline in the paper's own diagram: attention-based detection stops at $\alpha$ (left branch); logit-contribution scoring runs the full path down to $\phi$. The two-head comparison on the right is the punchline: Head A attends harder ($\alpha = 0.3$) but writes orthogonally to the answer ($\phi \approx 0$); Head B attends less and pushes the answer up ($\phi = 1.3$). An attention-based detector picks A; the write-based one picks B. Figure 2 of [LOCOS](https://arxiv.org/abs/2607.01002) (CC BY 4.0).*
+Knockout answers “Does the answer need this read?” In these tests, yes. It does not answer “Did the LLM get the fact right?” Cutting a path can show that the answer depends on it without judging what travelled along it. This is evidence about where, not how well.
 
-$\phi(t,j)$ is signed and per-source-position. A head can attend to the right span and still write *away* from the answer, and $\phi$ catches that: it's exactly the "attended correctly, wrote wrong" failure the copy test structurally cannot see, because the copy test never looks at what got written, only at where the head looked.
+> [!note]- Where these tools break
+> - **The active heads change between examples.** A head list computed once overlaps the heads active on a given example by a Jaccard index of only 0.18 to 0.46. A fixed list is an approximation. ([arXiv 2602.11162](https://arxiv.org/abs/2602.11162))
+> - **Positions blur with depth.** A later position's vector mixes information from many tokens. Reading position $j$ does not mean reading only the original token at $j$. The claim that survives is at the circuit level: these heads are needed for this behaviour.
+> - **Related background can lower the score.** LOCOS's own caveat is that background on the same topic can penalize heads doing legitimate broad matching when its push is subtracted from the fact's.
 
-LOCOS turns this into a per-head score by contrasting needle positions against everything else: $\Phi^+$ sums $\phi$ over the planted fact's positions, $\Phi^-$ sums it over the background (length-rescaled so a longer background doesn't automatically win by volume), and the head's score is $\Phi^+ - \Phi^-$, averaged over decode steps of trials the model actually gets right.
+## So, did it understand?
 
-## Why a memorized answer scores flat
+We can now put each tool beside the question it answers. In the [[blog/2026-07-12-did-your-agent-actually-read-that-file|first post]], ContextCite ranked the planted source first in **55 of 55 runs**. Here, ablation supported the LOCOS head list, and knockout showed that the answers needed the read. The proposed quality meter failed.
 
-If the model already knows the fact from pretraining and never needs the context at all, does $\phi$ falsely credit some head with "finding" it? No, and the reason follows straight from the definition: $\phi$ is computed **per source position** $j$. A parametric, memory-driven answer has no source position; it enters the residual stream through the MLP blocks and the embedding pathway, not through an attention head reading a context span. Contrast a purely memorized answer against the needle and the background, and both $\Phi^+$ and $\Phi^-$ come out near zero: nothing in the *context* is doing the pushing either way. Flat is the correct reading, not a blind spot.
+<img class="theme-dark-only figure-center" src="/blog/assets/comprehension-v-toolbox-dark.svg" alt="ContextCite: can we locate the source the answer rests on? Yes. LOCOS head list: can we locate heads needed to carry the fact? Yes. Attention knockout: can we test whether the answer needs the read? Yes. LOCOS write score: can we judge answer quality? No." />
+<img class="theme-light-only figure-center" src="/blog/assets/comprehension-v-toolbox-light.svg" alt="ContextCite: can we locate the source the answer rests on? Yes. LOCOS head list: can we locate heads needed to carry the fact? Yes. Attention knockout: can we test whether the answer needs the read? Yes. LOCOS write score: can we judge answer quality? No." />
 
-That same additive picture is also the whole story behind confidently-wrong answers. The answer's logit is a sum of context-writes and memory-writes; if the model states something false with total confidence, that isn't mysterious, it's arithmetic. Two routes get you there: **propagation failure** (the context never actually arrives at the answer position, so the prior wins by default) and **prior override** (the context does arrive, but the memory term pushes harder and wins the sum anyway). Either is checkable with exactly the same $\phi$ decomposition: is the context term present and pushing the right way, and does it win the sum.
+For the timeout example, finding the sentence, the mover and the push still leaves us with “300”. To test understanding, we have to check what the LLM can do with the fact: ask questions that require it to connect information rather than simply copy words, and judge the answers.
 
-## Measurement is not causation
-
-A head with a high $\phi$ score told you it wrote toward the answer. It did not tell you the answer *needed* that write. Transformers self-repair: knock out a head that's genuinely doing work, and parallel heads elsewhere in the network can compensate, restoring most of the output (the "hydra effect," McGrath et al., arXiv 2307.15771; extended by Rushing & Nanda, arXiv 2402.15390, who find the compensation is imperfect and noisy, not a clean guarantee). A high-$\phi$ head can be redundant. A low-$\phi$ head can still be necessary if it feeds something else that does the pushing. Scoring writes and testing necessity are two different experiments.
-
-**The removal test.** LOCOS's causal check: mean-ablate a head by replacing its post-projection, pre-RoPE query vector with a calibration mean, computed from 50 passing calibration trials. RoPE then rotates that fixed query per position, which makes the head's attention pattern approximately content-independent rather than simply switched off, a gentler intervention than zeroing. Ablation is swept in **groups** (top-$k$ for $k \in \{0, 5, 10, 20, 30, 40, 50\}$), never single heads: hydra-effect self-repair is far easier to defeat by removing several redundant paths at once than by removing one and hoping nothing steps in.
-
-The **dissociation control** checks the ablation is hitting the right target: alongside the synthesis-task score, LOCOS tracks parametric recall (city-country pairs, PopQA) and two-operand arithmetic. If ablating the $\phi$-selected heads also tanked arithmetic, you'd have found "heads that matter for everything," not "heads that carry synthesis." They stay near baseline.
-
-Published numbers, on Qwen3-8B: top-50 LOCOS-selected heads, ablated together, drive NoLiMa ROUGE-L from **0.401 to 0.000**. The strongest Wu-style baseline, ablated the same way, only gets it down to **0.292**. The head sets barely overlap: **2 of the top 10** LOCOS heads are also in Wu's top 10. Different heads, doing different work, and the copy-test-selected set is the wrong one to remove if you want the synthesis behavior gone.
-
-![[blog/assets/locos-ablation-curves.png|700]]
-*The removal test across six models: ablating LOCOS-selected heads (blue) collapses the synthesis task while Wu-selected and random baselines barely move it. The top-left panel is the Qwen3-8B collapse quoted above. Figure 3 of [LOCOS](https://arxiv.org/abs/2607.01002) (CC BY 4.0).*
-
-**Attention knockout is the necessity-side sibling.** Geva et al. (EMNLP 2023, arXiv 2304.14767) test necessity a different way: mask the pre-softmax attention score to $-\infty$ for a query-source edge, over a window of 5 to 9 consecutive layers (a single layer underestimates necessity, because nearby layers offer redundant paths around it), restricted to the specific query positions under test rather than the whole sequence. It's a coarser, cheaper cousin of $\phi$-based ablation: it tells you the edge carried something the answer needed, not that what traveled through it was correct. That's exactly why the two belong together, one screens for correctness of write, the other confirms necessity of the edge that carried it.
-
-## Where it breaks
-
-The series signature: never skip the part where the instrument stops working.
-
-- **The active head set churns.** A fixed head list computed once and reused overlaps the true per-instance, per-decode-step active set at a Jaccard of only 0.18 to 0.46 (the dynamic-heads finding, arXiv 2602.11162). Masking the true per-step heads collapses accuracy to zero; masking an equal-count static set does far less damage. A one-time head list is a documented failure mode, not a simplifying assumption you can wave off.
-- **Token lineage blurs with depth.** By late layers, the residual stream at position $j$ holds heavily mixed information: earlier layers move content across positions before later ones extract it (Geva et al. trace exactly this, subject-enrichment then extraction to the final position). "This head pulled from position $j$" is not the same claim as "this head pulled from the original token that started at position $j$." What survives cleanly is the circuit-level claim (these heads are necessary for this behavior), not a claim about which exact input token the information began as. The rigorous alternative, path patching against a counterfactual run, would settle the lineage properly, and it's priced out at long context: three forward passes per tested edge plus the same quadratic-memory cost activation patching already has.
-- **The background contrast penalizes broad relevance.** LOCOS's own stated limitation: when distractor content in the background is topically related to the answer, it inflates $\Phi^-$, which can penalize a head that's doing legitimate broad semantic matching rather than narrow needle-reading.
-
-## Before trusting it
-
-None of the numbers above are ours; they're the published LOCOS and Geva results, ported to check that the mechanism reasons correctly. That is deliberately not the same as trusting the instrument on new content. An instrument earns trust the same way a claim does: by reproducing a pre-registered fingerprint on material where the ground truth is planted and known, with the pass bars fixed before the results exist, and it keeps that trust only at the scope the validation actually covered. The series signature applies to the instruments themselves: the part where they stop working gets measured, never assumed away.
+**The test of understanding is behavioural.** Attribution and the internal tools tell us where to look; the answer tells us whether the LLM used the fact correctly. That is the test the rest of this series builds on, from [[blog/2026-07-22-does-a-reasoning-model-actually-read-its-own-thinking-trace|an LLM's own reasoning trace]] to [[blog/2026-07-24-is-half-your-context-window-just-marketing|how much of the context window it can still use]].
 
 ---
+
+*Revised on 2026-09-28: retitled from "Your Agent Read the File. Did It Understand It?" and rewritten as the sequel to [[blog/2026-07-18-which-heads-read-your-context|Which Heads Read Your Context?]], with new figures.*
 
 **References.**
 
 - Gema, Alex, Minervini, "Logit-Contribution Scoring Identifies Non-Literal Retrieval Heads" (LOCOS), [arXiv 2607.01002](https://arxiv.org/abs/2607.01002); code at [github.com/aryopg/locos](https://github.com/aryopg/locos).
-- Geva, Bastings, Filippova, Globerson, "Dissecting Recall of Factual Associations in Auto-Regressive Language Models," EMNLP 2023, [arXiv 2304.14767](https://arxiv.org/abs/2304.14767).
 - Wu, Wang, Xiao, Peng, Fu, "Retrieval Head Mechanistically Explains Long-Context Factuality," [arXiv 2404.15574](https://arxiv.org/abs/2404.15574).
+- Modarressi et al., "NoLiMa: Long-Context Evaluation Beyond Literal Matching," [arXiv 2502.05167](https://arxiv.org/abs/2502.05167).
+- Geva, Bastings, Filippova, Globerson, "Dissecting Recall of Factual Associations in Auto-Regressive Language Models," EMNLP 2023, [arXiv 2304.14767](https://arxiv.org/abs/2304.14767).
 - McGrath, Rahtz, Kramár, Mikulik, Legg, "The Hydra Effect: Emergent Self-repair in Language Model Computations," [arXiv 2307.15771](https://arxiv.org/abs/2307.15771).
-- Rushing, Nanda, "Explorations of Self-Repair in Language Models," [arXiv 2402.15390](https://arxiv.org/abs/2402.15390).
-- On the per-instance churn of the active head set: [arXiv 2602.11162](https://arxiv.org/abs/2602.11162).
-- On whether attention weights are explanations at all: Jain, Wallace, "Attention is not Explanation," [arXiv 1902.10186](https://arxiv.org/abs/1902.10186), and the rebuttal, Wiegreffe, Pinter, "Attention is not not Explanation," [arXiv 1908.04626](https://arxiv.org/abs/1908.04626).
+- On the per-example churn of the active head set: [arXiv 2602.11162](https://arxiv.org/abs/2602.11162).

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="512" viewBox="0 0 420 512" role="img" aria-labelledby="title desc">
+<title id="title">Perfect to 8K, then a slide.</title>
+<desc id="desc">Share of needles the model found, by document length, averaged over five positions: 100% at 1K, 4K and 8K, 90% at 16K, 76% at 24K, with 95% intervals. It crosses the 85% bar between 16K and 24K, inside the advertised 32K window. The keyword twin, tested at 1K and at 24K, found 14 of 14 at both.</desc>
+<defs><pattern id="untested" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M-2 2L2-2M0 8L8 0M6 10L10 6" fill="none" stroke="#4c504d" stroke-width="1"/></pattern></defs>
+<rect x="0" y="0" width="420" height="512" rx="0" fill="#1e1e1e"/>
+<text x="24" y="30" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="start">02 / THE RESULT</text>
+<text x="24" y="65" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" text-anchor="start">Perfect to 8K, then a slide.</text>
+<text x="24" y="91" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">Qwen3-8B, thinking on · 70 answers per length</text>
+<path d="M56 390L380 390" fill="none" stroke="#323532" stroke-width="1" stroke-linecap="round"/>
+<text x="48" y="395" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">0%</text>
+<path d="M56 330.0L380 330.0" fill="none" stroke="#323532" stroke-width="1" stroke-linecap="round"/>
+<text x="48" y="335.0" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">25%</text>
+<path d="M56 270.0L380 270.0" fill="none" stroke="#323532" stroke-width="1" stroke-linecap="round"/>
+<text x="48" y="275.0" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">50%</text>
+<path d="M56 210.0L380 210.0" fill="none" stroke="#323532" stroke-width="1" stroke-linecap="round"/>
+<text x="48" y="215.0" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">75%</text>
+<path d="M56 150.0L380 150.0" fill="none" stroke="#323532" stroke-width="1" stroke-linecap="round"/>
+<text x="48" y="155.0" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">100%</text>
+<rect x="214.2" y="142" width="79.1" height="248" fill="#ffa96e" fill-opacity="0.13"/>
+<text x="253.75390625" y="136" fill="#ffa96e" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="middle">crosses here</text>
+<path d="M56 186.0L380 186.0" fill="none" stroke="#ffa96e" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="4 4"/>
+<text x="62" y="203.0" fill="#ffa96e" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="start">85% bar</text>
+<path d="M380.0 120L380.0 390" fill="none" stroke="#bdbdb8" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="4 4"/>
+<text x="380.0" y="114" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="end">32K window</text>
+<path d="M65.9 150.0 L95.6 150.0 L135.1 150.0 L214.2 160.3 L293.3 184.3 L293.3 232.3 L214.2 191.0 L135.1 150.0 L95.6 150.0 L65.9 150.0 Z" fill="#a6b8ff" fill-opacity="0.18"/>
+<path d="M65.9 150.0 L95.6 150.0 L135.1 150.0 L214.2 174.0 L293.3 208.3" fill="none" stroke="#a6b8ff" stroke-width="2.5"/>
+<circle cx="65.9" cy="150.0" r="4" fill="#a6b8ff"/>
+<circle cx="95.6" cy="150.0" r="4" fill="#a6b8ff"/>
+<circle cx="135.1" cy="150.0" r="4" fill="#a6b8ff"/>
+<circle cx="214.2" cy="174.0" r="4" fill="#a6b8ff"/>
+<circle cx="293.3" cy="208.3" r="4" fill="#a6b8ff"/>
+<path d="M65.9 141.0 L74.9 150.0 L65.9 159.0 L56.9 150.0 Z" fill="none" stroke="#7bd7c8" stroke-width="2.5"/>
+<path d="M293.3 141.0 L302.3 150.0 L293.3 159.0 L284.3 150.0 Z" fill="none" stroke="#7bd7c8" stroke-width="2.5"/>
+<text x="303.3046875" y="213.32" fill="#a6b8ff" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" text-anchor="start">76%</text>
+<text x="222.203125" y="164.0" fill="#a6b8ff" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" text-anchor="start">90%</text>
+<text x="56.0" y="410" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">0</text>
+<text x="135.1015625" y="410" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">8K</text>
+<text x="214.203125" y="410" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">16K</text>
+<text x="293.3046875" y="410" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">24K</text>
+<text x="218.0" y="432" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle">document length (tokens)</text>
+<circle cx="32" cy="466" r="5" fill="#a6b8ff"/>
+<text x="44" y="471" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">Original: share found, 95% interval shaded</text>
+<path d="M32 485 L39 492 L32 499 L25 492 Z" fill="none" stroke="#7bd7c8" stroke-width="2.5"/>
+<text x="44" y="497" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">Keyword twin: 14 of 14 at both cells tested</text>
+</svg>

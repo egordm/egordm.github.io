@@ -1,7 +1,7 @@
 ---
 title: "Is Half Your Context Window Still Marketing in 2026?"
 date: 2026-09-27
-draft: true
+draft: false
 series: "LLM Comprehension"
 series_order: 6
 tags:
@@ -108,16 +108,36 @@ as if it was not.
 That is real progress since 2025, when GPT-4o's usable range on this test was well under 32K. But
 holding a million tokens and reasoning over them are still two different things.
 
+## It is not just Luna
+
+Luna is the only model I measured here, but nothing in the result is specific to it. The NoLiMa
+authors tested 13 models that claim at least 128K tokens of context: at 32K, 11 of them fell below
+half of their short-context score, and neither reasoning models nor chain-of-thought prompting held
+up. RULER (Hsieh et al., [arXiv 2404.06654](https://arxiv.org/abs/2404.06654)) found the same shape
+on 17 models and a wider set of tasks: nearly perfect on the plain needle test, yet only half of
+them still performed well at 32K. The earlier post found it on Qwen3-8B.
+
+NoLiMa's authors trace the cause to attention itself. Without a shared word to latch onto, picking
+out the one relevant sentence gets harder the more text surrounds it. As far as I know, no model or
+technique has removed this. Newer models push the drop further out; none has made it go away.
+
+So the question for any model is not *whether* it falls, but *how early*. I have not measured
+Claude Opus 5.5 or the other GPT-6 models (Sol, Astra) this way. In daily use their drop comes early
+too, around half the window. That is an impression, not a measurement, but it matches every
+measurement above.
+
 ## So where should compaction go?
 
 <img class="theme-dark-only figure-narrow" src="/blog/assets/luna-v-compaction-dark.svg" alt="Compaction guide: the useful ceiling for meaning-based work is 64K with reasoning off and about 128K with reasoning high. On the full 1M bar, everything past 512K is unmeasured. Zoomed on Codex's 272K default window, the default compaction point at about 258K sits well inside the degrading zone." />
 <img class="theme-light-only figure-narrow" src="/blog/assets/luna-v-compaction-light.svg" alt="The compaction guide in the light theme." />
 
 Codex's default compacts Luna at about 258K, deep in the zone where recall by meaning has already
-lost a third to a half of its accuracy. My half-full rule lands close to the 128K line. What I do
-now:
+lost a third to a half of its accuracy. My half-full rule lands close to the 128K line: half of
+Codex's 272K window is 136K. What I do now:
 
-- **Compact at about 128K** for work that connects ideas across the session, or 64K with
+- **Compact at half the window, whatever the model.** That is where the Luna numbers put it with
+  reasoning on, and a reasonable default for models nobody has measured this way.
+- **For Luna, compact at about 128K** for work that connects ideas across the session, or 64K with
   reasoning off. Compact by hand when a task changes direction.
 - **Keep reasoning on in long sessions.** It doubles the usable range.
 - **Restate what matters, in the same words.** Word matching survived every length, so repeating a

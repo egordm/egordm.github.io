@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="490" viewBox="0 0 420 490" role="img" aria-labelledby="title desc">
+<title id="title">locos write</title>
+<desc id="desc">A source value becomes a full-strength write, then an attention-scaled write, then a projection onto the answer direction. The example plots use identical scales and summarize the fact tokens: A has a projection 0.07, B 0.90. Faint arrows are full strength, solid arrows are delivered.</desc>
+<rect x="0" y="0" width="420" height="490" rx="0" fill="#ffffff"/>
+<rect x="14" y="30" width="194" height="72" rx="7" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="111" y="60" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="23" fill="#252725"><tspan font-style="italic">v</tspan><tspan baseline-shift="sub" font-size="70%">j</tspan></text>
+<text x="111" y="85" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">packaged source content</text>
+<path d="M111 107 L111 134" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M108.12344676837478 128.73450462865776 L111 134 L113.87655323162522 128.73450462865776" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="14" y="140" width="194" height="72" rx="7" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="111" y="170" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="23" fill="#252725"><tspan font-style="italic">W</tspan><tspan baseline-shift="sub" font-size="70%">O</tspan><tspan font-style="italic">v</tspan><tspan baseline-shift="sub" font-size="70%">j</tspan></text>
+<text x="111" y="195" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">full-strength write</text>
+<path d="M111 217 L111 244" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M108.12344676837478 238.73450462865776 L111 244 L113.87655323162522 238.73450462865776" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="14" y="250" width="194" height="72" rx="7" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="111" y="280" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="23" fill="#252725"><tspan font-style="italic">α</tspan><tspan baseline-shift="sub" font-size="70%">j</tspan><tspan font-style="italic">W</tspan><tspan baseline-shift="sub" font-size="70%">O</tspan><tspan font-style="italic">v</tspan><tspan baseline-shift="sub" font-size="70%">j</tspan></text>
+<text x="111" y="305" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">delivered write</text>
+<path d="M111 327 L111 354" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M108.12344676837478 348.73450462865776 L111 354 L113.87655323162522 348.73450462865776" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="14" y="360" width="194" height="72" rx="7" fill="#e9edfc" stroke="#4557ba"/>
+<text x="111" y="390" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="17" fill="#4557ba"><tspan font-style="italic">φ</tspan><tspan baseline-shift="sub" font-size="70%">j</tspan> = <tspan font-style="italic">u</tspan><tspan baseline-shift="sub" font-size="70%">30</tspan> · (<tspan font-style="italic">α</tspan><tspan baseline-shift="sub" font-size="70%">j</tspan><tspan font-style="italic">W</tspan><tspan baseline-shift="sub" font-size="70%">O</tspan><tspan font-style="italic">v</tspan><tspan baseline-shift="sub" font-size="70%">j</tspan>)</text>
+<text x="111" y="415" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">push toward “30”</text>
+<text x="314" y="45" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#00796b">Head A · attention 0.70</text>
+<text x="314" y="66" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">write (0.1, 1.0)</text>
+<path d="M243 159 L401 159" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M395.73450462865776 161.87655323162522 L401 159 L395.73450462865776 156.12344676837478" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M243 159 L243 89" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M245.87655323162522 94.26549537134224 L243 89 L240.12344676837478 94.26549537134224" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="248" y="96" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#595e5b">other</text>
+<path d="M243 159 L247.7 112.0" fill="none" stroke="#00796b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M250.0383410731494 117.52559146387266 L247.7 112.0 L244.31378618297776 116.9531359748555" fill="none" stroke="#00796b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M243 159 L246.29 126.1" fill="none" stroke="#00796b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M248.62834107314941 131.62559146387267 L246.29 126.1 L242.90378618297777 131.0531359748555" fill="none" stroke="#00796b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M246.29 126.1 L246.29 159" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1" stroke-dasharray="4 5"/>
+<path d="M243 159 L246.29 159" fill="none" stroke="#00796b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="323" y="181" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">toward “30”</text>
+<text x="323" y="206" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#00796b">fact push 0.07</text>
+<text x="314" y="259" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#4557ba">Head B · attention 0.30</text>
+<text x="314" y="280" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">write (3.0, 0.2)</text>
+<path d="M243 373 L401 373" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M395.73450462865776 375.8765532316252 L401 373 L395.73450462865776 370.1234467683748" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M243 373 L243 303" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M245.87655323162522 308.26549537134224 L243 303 L240.12344676837478 308.26549537134224" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="248" y="310" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#595e5b">other</text>
+<path d="M243 373 L384.0 363.6" fill="none" stroke="#4557ba" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M378.9375123443987 366.8204376623193 L384.0 363.6 L378.5548213950254 361.08007342171913" fill="none" stroke="#4557ba" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M243 373 L285.3 370.18" fill="none" stroke="#4557ba" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M280.23751234439874 373.4004376623193 L285.3 370.18 L279.8548213950254 367.6600734217191" fill="none" stroke="#4557ba" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M285.3 370.18 L285.3 373" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1" stroke-dasharray="4 5"/>
+<path d="M243 373 L285.3 373" fill="none" stroke="#4557ba" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="323" y="395" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">toward “30”</text>
+<text x="323" y="420" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#4557ba">fact push 0.90</text>
+<text x="210" y="460" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">Faint: full strength · solid: delivered</text>
+<text x="210" y="480" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">Thick horizontal line: projection · same scales</text>
+</svg>

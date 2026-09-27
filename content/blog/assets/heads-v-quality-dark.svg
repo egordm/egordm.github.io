@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="330" viewBox="0 0 420 330" role="img" aria-labelledby="title desc">
+<title id="title">quality</title>
+<desc id="desc">Clean minus flawed write score. All heads: -0.035, 95% interval -0.052 to -0.020. Top 50: -0.093, interval -0.165 to -0.041. Both intervals lie below zero, where flawed answers score higher.</desc>
+<rect x="0" y="0" width="420" height="330" rx="0" fill="#1e1e1e"/>
+<text x="210" y="25" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#bdbdb8">Write score: clean minus flawed</text>
+<rect x="18" y="48" width="288.0" height="212" rx="0" fill="#443226"/>
+<rect x="306.0" y="48" width="96.0" height="212" rx="0" fill="#253e38"/>
+<text x="30" y="68" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffa96e">Flawed higher</text>
+<text x="354" y="68" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#7bd7c8">Clean higher</text>
+<path d="M306.0 79 L306.0 260" fill="none" stroke="#bdbdb8" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1" stroke-dasharray="4 5"/>
+<text x="306.0" y="279" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#bdbdb8">0</text>
+<text x="30" y="106" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#a6b8ff">All heads</text>
+<path d="M222.8 128 L274.0 128" fill="none" stroke="#a6b8ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M222.8 121 L222.8 135" fill="none" stroke="#a6b8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M274.0 121 L274.0 135" fill="none" stroke="#a6b8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<circle cx="250.0" cy="128" r="5" fill="#a6b8ff"/>
+<text x="30" y="154" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#a6b8ff">-0.035  [-0.052, -0.020]</text>
+<text x="30" y="198" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#ffa96e">Top 50 heads</text>
+<path d="M41.99999999999998 220 L240.39999999999998 220" fill="none" stroke="#ffa96e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M41.99999999999998 213 L41.99999999999998 227" fill="none" stroke="#ffa96e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M240.39999999999998 213 L240.39999999999998 227" fill="none" stroke="#ffa96e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<circle cx="157.2" cy="220" r="5" fill="#ffa96e"/>
+<text x="30" y="246" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#ffa96e">-0.093  [-0.165, -0.041]</text>
+<text x="210" y="313" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">Qwen3-8B · estimates and 95% intervals</text>
+</svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="342" viewBox="0 0 420 342" role="img" aria-labelledby="title desc">
+<title id="title">toolbox</title>
+<desc id="desc">ContextCite locates the source the answer rests on: yes. LOCOS head list locates heads needed to carry the fact: yes. Attention knockout tests whether the answer needs the read: yes. LOCOS write score judges answer quality: no, clean answers scored lower.</desc>
+<rect x="0" y="0" width="420" height="342" rx="0" fill="#1e1e1e"/>
+<rect x="16" y="12" width="388" height="68" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="30" y="36" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#7bd7c8">ContextCite</text>
+<text x="30" y="61" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#efefeb">Locate the source?</text>
+<rect x="347" y="27" width="44" height="37" rx="5" fill="#253e38"/>
+<text x="369" y="51" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#7bd7c8">Yes</text>
+<rect x="16" y="92" width="388" height="68" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="30" y="116" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#a6b8ff">LOCOS head list</text>
+<text x="30" y="141" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#efefeb">Locate the heads needed?</text>
+<rect x="347" y="107" width="44" height="37" rx="5" fill="#30374f"/>
+<text x="369" y="131" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#a6b8ff">Yes</text>
+<rect x="16" y="172" width="388" height="68" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="30" y="196" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#7bd7c8">Attention knockout</text>
+<text x="30" y="221" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#efefeb">Test whether the read is needed?</text>
+<rect x="347" y="187" width="44" height="37" rx="5" fill="#253e38"/>
+<text x="369" y="211" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#7bd7c8">Yes</text>
+<rect x="16" y="252" width="388" height="68" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="30" y="276" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#ffa96e">LOCOS write score</text>
+<text x="30" y="301" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#efefeb">Judge answer quality?</text>
+<rect x="347" y="267" width="44" height="37" rx="5" fill="#443226"/>
+<text x="369" y="291" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#ffa96e">No</text>
+</svg>

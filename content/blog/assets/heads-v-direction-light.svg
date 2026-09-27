@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="340" viewBox="0 0 420 340" role="img" aria-labelledby="title desc">
+<title id="title">direction</title>
+<desc id="desc">Schematic writes from the half-a-minute fact at the answer position. Each panel aligns its horizontal axis with the token being scored, 30 or the mistaken 60. The projection measures support, not correctness. Arrow lengths are illustrative, not measured scores.</desc>
+<rect x="0" y="0" width="420" height="340" rx="0" fill="#ffffff"/>
+<rect x="40" y="12" width="340" height="36" rx="7" fill="#e4f3ee" stroke="#00796b"/>
+<text x="210" y="36" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#00796b">The timeout is half a minute.</text>
+<text x="210" y="73" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#595e5b">Write at the answer position</text>
+<rect x="16" y="91" width="186" height="211" rx="7" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="109" y="118" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#4557ba">Scoring “30”</text>
+<path d="M44 226 L182 226" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M176.73450462865776 228.87655323162522 L182 226 L176.73450462865776 223.12344676837478" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M44 226 L44 140" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M46.876553231625216 145.26549537134224 L44 140 L41.123446768374784 145.26549537134224" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M44 226 L137 171" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M132.90939953719655 177.87509911591914 L137 171 L129.00464271383763 171.27251030551227" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="87" y="158" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#4557ba">write</text>
+<path d="M137 171 L137 226" fill="none" stroke="#4557ba" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1" stroke-dasharray="4 5"/>
+<path d="M44 226 L137 226" fill="none" stroke="#4557ba" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M129.97933950487703 229.83540430883363 L137 226 L129.97933950487703 222.16459569116637" fill="none" stroke="#4557ba" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="174" y="251" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="18" fill="#4557ba"><tspan font-style="italic">u</tspan><tspan baseline-shift="sub" font-size="70%">30</tspan></text>
+<text x="109" y="283" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#4557ba">Strong push for “30”</text>
+<rect x="218" y="91" width="186" height="211" rx="7" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="311" y="118" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#a8460c">Scoring “60”</text>
+<path d="M246 226 L384 226" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M378.73450462865776 228.87655323162522 L384 226 L378.73450462865776 223.12344676837478" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M246 226 L246 140" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M248.87655323162522 145.26549537134224 L246 140 L243.12344676837478 145.26549537134224" fill="none" stroke="#595e5b" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M246 226 L339 171" fill="none" stroke="#a8460c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M334.9093995371965 177.87509911591914 L339 171 L331.00464271383765 171.27251030551227" fill="none" stroke="#a8460c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="289" y="158" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#a8460c">write</text>
+<path d="M339 171 L339 226" fill="none" stroke="#a8460c" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="1" stroke-dasharray="4 5"/>
+<path d="M246 226 L339 226" fill="none" stroke="#a8460c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M331.97933950487703 229.83540430883363 L339 226 L331.97933950487703 222.16459569116637" fill="none" stroke="#a8460c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="376" y="251" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="18" fill="#a8460c"><tspan font-style="italic">u</tspan><tspan baseline-shift="sub" font-size="70%">60</tspan></text>
+<text x="311" y="283" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#a8460c">Strong push for “60”</text>
+<text x="210" y="327" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">Chosen token sets the axis · schematic writes</text>
+</svg>

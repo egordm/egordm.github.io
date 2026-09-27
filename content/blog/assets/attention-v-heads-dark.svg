@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="454" viewBox="0 0 420 454" role="img" aria-labelledby="title desc">
+<title id="title">heads</title>
+<desc id="desc">Two heads in one layer attend differently at the same answer position. Line width is proportional to span attention, on the same scale for both heads.</desc>
+<rect x="0" y="0" width="420" height="454" rx="0" fill="#1e1e1e"/>
+<path d="M45 101 L210 174" fill="none" stroke="#7bd7c8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="18.0" y="32" width="54" height="38" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="45" y="56" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#efefeb">start</text>
+<text x="45" y="91" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#7bd7c8">0.10</text>
+<path d="M126 101 L210 174" fill="none" stroke="#7bd7c8" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="99.0" y="32" width="54" height="38" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="126" y="56" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#efefeb">S1</text>
+<text x="126" y="91" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#7bd7c8">0.05</text>
+<path d="M210 101 L210 174" fill="none" stroke="#7bd7c8" stroke-width="15.399999999999999" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="174.0" y="32" width="72" height="38" rx="7" fill="#443226" stroke="#ffa96e"/>
+<text x="210" y="56" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#ffa96e">S2: fact</text>
+<text x="210" y="91" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#7bd7c8">0.70</text>
+<path d="M294 101 L210 174" fill="none" stroke="#7bd7c8" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="267.0" y="32" width="54" height="38" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="294" y="56" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#efefeb">S3</text>
+<text x="294" y="91" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#7bd7c8">0.05</text>
+<path d="M375 101 L210 174" fill="none" stroke="#7bd7c8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="348.0" y="32" width="54" height="38" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="375" y="56" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#efefeb">Q</text>
+<text x="375" y="91" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#7bd7c8">0.10</text>
+<rect x="153" y="165" width="114" height="40" rx="7" fill="#253e38" stroke="#7bd7c8"/>
+<text x="210" y="191" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#7bd7c8">Head A</text>
+<path d="M45 319 L210 392" fill="none" stroke="#a6b8ff" stroke-width="8.8" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="18.0" y="250" width="54" height="38" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="45" y="274" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#efefeb">start</text>
+<text x="45" y="309" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#a6b8ff">0.40</text>
+<path d="M126 319 L210 392" fill="none" stroke="#a6b8ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="99.0" y="250" width="54" height="38" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="126" y="274" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#efefeb">S1</text>
+<text x="126" y="309" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#a6b8ff">0.10</text>
+<path d="M210 319 L210 392" fill="none" stroke="#a6b8ff" stroke-width="6.6" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="174.0" y="250" width="72" height="38" rx="7" fill="#443226" stroke="#ffa96e"/>
+<text x="210" y="274" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#ffa96e">S2: fact</text>
+<text x="210" y="309" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#a6b8ff">0.30</text>
+<path d="M294 319 L210 392" fill="none" stroke="#a6b8ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="267.0" y="250" width="54" height="38" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="294" y="274" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#efefeb">S3</text>
+<text x="294" y="309" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#a6b8ff">0.10</text>
+<path d="M375 319 L210 392" fill="none" stroke="#a6b8ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="348.0" y="250" width="54" height="38" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="375" y="274" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#efefeb">Q</text>
+<text x="375" y="309" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#a6b8ff">0.10</text>
+<rect x="153" y="383" width="114" height="40" rx="7" fill="#30374f" stroke="#a6b8ff"/>
+<text x="210" y="409" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#a6b8ff">Head B</text>
+<text x="210" y="445" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">Attention summed over tokens in each part</text>
+</svg>

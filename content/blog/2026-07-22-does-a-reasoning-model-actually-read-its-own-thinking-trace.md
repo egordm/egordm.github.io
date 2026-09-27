@@ -3,7 +3,7 @@ title: "Does a Reasoning Model Actually Read Its Own Thinking Trace?"
 date: 2026-07-22
 draft: false
 series: "LLM Comprehension"
-series_order: 3
+series_order: 5
 tags:
   - llm
   - agents

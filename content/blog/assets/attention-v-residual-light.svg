@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="446" viewBox="0 0 420 446" role="img" aria-labelledby="title desc">
+<title id="title">residual</title>
+<desc id="desc">At one position, the residual stream continues upward while heads and then an MLP read it and add updates. The branches do not replace the main stream.</desc>
+<rect x="0" y="0" width="420" height="446" rx="0" fill="#ffffff"/>
+<rect x="115" y="89" width="278" height="289" rx="12" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="375" y="365" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">one layer</text>
+<rect x="63" y="384" width="22" height="44" rx="3" fill="#e9edfc" stroke="#4557ba"/>
+<path d="M68 391 L80 391" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M68 398 L80 398" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M68 405 L80 405" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<path d="M68 412 L80 412" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M68 419 L80 419" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<rect x="63" y="19" width="22" height="44" rx="3" fill="#e9edfc" stroke="#4557ba"/>
+<path d="M68 26 L80 26" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M68 33 L80 33" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<path d="M68 40 L80 40" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M68 47 L80 47" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M68 54 L80 54" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<path d="M74 379 L74 68" fill="none" stroke="#4557ba" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M77.83540430883363 75.02066049512298 L74 68 L70.16459569116638 75.02066049512298" fill="none" stroke="#4557ba" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="99" y="410" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">embedding / earlier layers</text>
+<text x="99" y="45" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">to later layers</text>
+<path d="M74 345 L153 345 L153 321" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M153 345 L248 345 L248 321" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M248 345 L343 345 L343 321" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M91 245 L343 245" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="123" y="271" width="60" height="50" rx="7" fill="#ffffff" stroke="#00796b"/>
+<text x="153" y="301" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#00796b">A</text>
+<path d="M153 271 L153 245" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M155.87655323162522 250.26549537134224 L153 245 L150.12344676837478 250.26549537134224" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="218" y="271" width="60" height="50" rx="7" fill="#ffffff" stroke="#4557ba"/>
+<text x="248" y="301" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#4557ba">B</text>
+<path d="M248 271 L248 245" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M250.87655323162522 250.26549537134224 L248 245 L245.12344676837478 250.26549537134224" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="313" y="271" width="60" height="50" rx="7" fill="#ffffff" stroke="#595e5b"/>
+<text x="343" y="301" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#595e5b">…</text>
+<path d="M343 271 L343 245" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M345.8765532316252 250.26549537134224 L343 245 L340.1234467683748 250.26549537134224" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="248" y="232" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">heads</text>
+<circle cx="74" cy="245" r="14" fill="#ffffff" stroke="#4557ba" stroke-width="1.5"/>
+<text x="74" y="251" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#4557ba">+</text>
+<path d="M74 206 L248 206 L248 185" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="206" y="139" width="84" height="46" rx="7" fill="#ffffff" stroke="#4557ba"/>
+<text x="248" y="168" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#4557ba">MLP</text>
+<path d="M248 139 L248 112 L91 112" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<circle cx="74" cy="112" r="14" fill="#ffffff" stroke="#4557ba" stroke-width="1.5"/>
+<text x="74" y="118" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#4557ba">+</text>
+</svg>

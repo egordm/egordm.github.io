@@ -1,102 +1,178 @@
-# /// script
-# requires-python = ">=3.9"
-# dependencies = []
-# ///
-"""Rebuild the two figures of "Did Your LLM Actually Read That File?", offline.
+#!/usr/bin/env python3
+"""Rebuild this post's five attribution-v figures, offline with standard Python.
 
-Run: python3 content/blog/assets/src/attribution_visuals.py
-Writes attribution-v-{ablate,weights}-{light,dark}.svg into assets/, in the style of luna_v_visuals.
-The probabilities are the post's invented toy values; the weights are the exact least-squares fit
-of their log-odds (logit), the quantity ContextCite regresses.
+All canvases are 420 px wide. Probabilities and rounded weights come from the
+post's invented example. Probability bars share a linear scale; signed weights
+share another. Mask cells and redundancy scores are schematic, not measurements.
+Only the shared palette and drawing primitives are imported; no shared file is
+changed. Run: python3 content/blog/assets/src/attribution_visuals.py
 """
 
-import math
 import sys
+from html import escape
 from pathlib import Path
 
-sys.dont_write_bytecode = True  # no __pycache__ under content/: the site build copies it
+sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from luna_v_visuals import ASSETS, PALETTES, SVG  # noqa: E402
 
-# P("3000") with (config kept, lsof kept)
-PROB = {(1, 1): 0.90, (0, 1): 0.95, (1, 0): 0.02}
+
+class Figure(SVG):
+    def math(self, x, y, body, size=18, color="ink", anchor="middle"):
+        self.parts.append(
+            f'<text x="{x}" y="{y}" text-anchor="{anchor}" '
+            f'font-family="Georgia, Times New Roman, serif" font-size="{size}" '
+            f'fill="{self.color(color)}">{body}</text>'
+        )
+
+    def save(self, name, theme):
+        (ASSETS / f"attribution-v-{name}-{theme}.svg").write_text(
+            "\n".join(self.parts + ["</svg>"]) + "\n", encoding="utf-8"
+        )
 
 
-def logit(p):
-    return math.log(p / (1 - p))
+def sub(symbol, index):
+    return (f'<tspan font-style="italic">{escape(symbol)}</tspan>'
+            f'<tspan baseline-shift="sub" font-size="12">{escape(index)}</tspan>')
 
 
-W_LSOF = logit(PROB[1, 1]) - logit(PROB[1, 0])
-W_CONFIG = logit(PROB[1, 1]) - logit(PROB[0, 1])
-
-
-def save(svg, name, theme):
-    path = ASSETS / f"attribution-v-{name}-{theme}.svg"
-    path.write_text("\n".join(svg.parts + ["</svg>"]) + "\n", encoding="utf-8")
+def chip(s, x, y, w, label, color, kept=True):
+    s.box(x, y, w, 30, color + "_bg" if kept else "bg",
+          color if kept else "line", radius=5)
+    s.text(x + w / 2, y + 20, label, 13, color if kept else "muted", anchor="middle")
+    if not kept:
+        s.line(x + 6, y + 15, x + w - 6, y + 15, "muted")
 
 
 def ablate(theme):
-    s = SVG(theme, 540, "Lock the answer.",
-            "Two sources: a config file saying port 8080 and an lsof tool result saying the server "
-            "listens on 3000. The recorded answer 3000 stays fixed. The model assigns it 90% with "
-            "both sources, 95% with the config removed, and 2% with the lsof result removed. "
-            "Invented numbers.")
-    s.header("01", "THE EXPERIMENT", "Lock the answer.", "Then remove sources, one at a time. Invented numbers.")
-    s.box(24, 112, 180, 70, "amber_bg")
-    s.text(38, 136, "CONFIG FILE", 12, "amber", 700)
-    s.text(38, 162, "port = 8080", 16, weight=700)
-    s.box(216, 112, 180, 70, "teal_bg")
-    s.text(230, 136, "LSOF TOOL RESULT", 12, "teal", 700)
-    s.text(230, 162, "listening on 3000", 16, weight=700)
-    s.box(24, 196, 372, 50, stroke="line")
-    s.text(40, 227, "Recorded answer:", 15, "muted")
-    s.text(170, 227, "\"3000\"  (locked)", 16, weight=700)
+    s = Figure(theme, 362, "Ablating sources",
+               'The fixed answer is 3000. With both sources its probability is 90%; '
+               'without lsof, 2%; without config, 95%. Bars share a linear scale.')
+    s.text(24, 30, 'Fixed answer: “3000”', 16, weight=700)
+    s.text(396, 30, 'probability', 13, "muted", anchor="end")
+    for y, config, lsof, p in ((56, True, True, 90),
+                              (151, True, False, 2),
+                              (246, False, True, 95)):
+        chip(s, 24, y, 145, "config: 8080", "amber", config)
+        chip(s, 183, y, 145, "lsof: 3000", "teal", lsof)
+        s.box(24, y + 43, 304, 20, "faint", radius=2)
+        s.box(24, y + 43, 304 * p / 100, 20,
+              "teal" if lsof else "amber", radius=2)
+        s.text(396, y + 59, f"{p}%", 17, weight=700, anchor="end")
+    s.text(210, 348, "Crossed out: source removed · invented probabilities", 12,
+           "muted", anchor="middle")
+    s.save("ablate", theme)
 
-    s.text(24, 280, "PROBABILITY THE MODEL GIVES \"3000\"", 12, "muted", 700)
-    rows = [("Both sources", PROB[1, 1], "blue"), ("Config removed", PROB[0, 1], "blue"),
-            ("lsof removed", PROB[1, 0], "amber")]
-    bar_x, bar_w = 150, 190
-    for i, (label, p, color) in enumerate(rows):
-        y = 300 + i * 56
-        s.text(24, y + 25, label, 15)
-        s.box(bar_x, y + 8, bar_w, 24, "faint", radius=6)
-        s.box(bar_x, y + 8, max(bar_w * p, 6), 24, color, radius=6)
-        s.text(bar_x + bar_w + 10, y + 26, f"{round(p * 100)}%", 15, color, 700)
-    s.text(24, 490, "Removing the lsof result makes the same", 15, weight=700)
-    s.text(24, 512, "answer 45 times less likely.", 15, weight=700)
-    save(s, "ablate", theme)
+
+def generate_grade(theme):
+    s = Figure(theme, 346, "Generate, then grade",
+               'Generate once from the full context. Reuse the recorded answer '
+               'in every grading pass, alongside a modified context. No answer is sampled again.')
+    s.box(24, 16, 135, 38, stroke="line", radius=7)
+    s.text(91.5, 40, "full context", 14, anchor="middle")
+    s.arrow(168, 35, 214, 35)
+    s.box(224, 16, 172, 38, "blue_bg", "blue", radius=7)
+    s.text(310, 40, "Generate once", 14, "blue", 700, "middle")
+    s.line(310, 54, 310, 74, "blue")
+    s.line(310, 74, 210, 74, "blue")
+    s.arrow(210, 74, 210, 91, "blue")
+    s.box(144, 97, 132, 40, "blue_bg", "blue", radius=7)
+    s.text(210, 123, "fixed answer", 16, "blue", 700, "middle")
+    s.line(210, 137, 210, 158, "blue")
+    s.line(82, 158, 338, 158, "blue")
+    for x, label in ((24, "context A"), (152, "context B"), (280, "context C")):
+        cx = x + 58
+        s.arrow(cx, 158, cx, 181, "blue")
+        s.box(x, 187, 116, 120, stroke="line", radius=7)
+        s.text(cx, 211, label, 13, anchor="middle")
+        s.text(cx, 235, "+ fixed answer", 13, "blue", 700, "middle")
+        s.arrow(cx, 245, cx, 263)
+        s.text(cx, 286, "Grade → p", 14, "teal", 700, "middle")
+    s.text(210, 331, "Same recorded answer in every grading pass", 12,
+           "muted", anchor="middle")
+    s.save("generate-grade", theme)
 
 
 def weights(theme):
-    s = SVG(theme, 400, "One signed number per source.",
-            f"Fitted ContextCite weights in log-odds: the lsof result +{W_LSOF:.1f}, the config file "
-            f"{W_CONFIG:.2f}. Positive supports the recorded answer, negative pushes against it.")
-    s.header("02", "THE ATTRIBUTION", "One signed number per source.", "Weights on the log-odds of the recorded answer.")
-    zero, scale = 150, 34  # x of zero, pixels per log-odds unit
-    top, bottom = 124, 290
-    for v in range(-1, 7):
-        x = zero + v * scale
-        s.line(x, top, x, bottom, "faint", 1)
-        s.text(x, bottom + 20, f"{v:+d}" if v else "0", 12, "muted", anchor="middle")
-    s.line(zero, top - 6, zero, bottom, "ink", 2)
-    s.text(zero + 3 * scale, bottom + 42, "change in log-odds when the source is kept", 13, "muted", anchor="middle")
+    s = Figure(theme, 282, "Signed source weights",
+               'Signed log-odds weights: lsof +6.1 and config -0.75. Keeping lsof '
+               'multiplies the odds of 3000 by about 440; config by about one half.')
+    zero, scale = 110, 43
+    s.text(24, 28, 'Weights for “3000”', 14, "muted")
+    s.text(24, 60, "lsof result", 15, "teal", 700)
+    s.text(396, 60, "+6.1", 16, "teal", 700, "end")
+    s.box(zero, 72, 6.1 * scale, 24, "teal", radius=2)
+    s.text(396, 121, "odds × about 440", 14, "teal", anchor="end")
+    s.text(24, 158, "config file", 15, "amber", 700)
+    s.text(396, 158, "−0.75", 16, "amber", 700, "end")
+    s.box(zero - .75 * scale, 170, .75 * scale, 24, "amber", radius=2)
+    s.text(396, 219, "odds × about one half", 14, "amber", anchor="end")
+    s.line(zero, 66, zero, 200, "muted", 1)
+    s.text(zero, 219, "0", 12, "muted", anchor="middle")
+    s.text(24, 260, "← opposes", 13, "amber")
+    s.text(396, 260, "supports →", 13, "teal", anchor="end")
+    s.text(210, 260, "log-odds", 13, "muted", anchor="middle")
+    s.save("weights", theme)
 
-    s.text(24, 170, "lsof result", 15, weight=700)
-    s.box(zero, 150, W_LSOF * scale, 30, "teal", radius=4)
-    s.text(zero + W_LSOF * scale - 8, 171, f"+{W_LSOF:.1f}", 14, "bg", 700, "end")
-    s.text(24, 250, "config file", 15, weight=700)
-    s.box(zero + W_CONFIG * scale, 230, -W_CONFIG * scale, 30, "amber", radius=4)
-    s.text(zero + 8, 251, f"{W_CONFIG:.2f}", 14, "amber", 700)
 
-    s.text(24, 364, f"Odds of \"3000\": x{math.exp(W_LSOF):.0f} with the lsof result,", 14, "ink")
-    s.text(24, 384, f"x{math.exp(W_CONFIG):.2f} with the config file.", 14, "ink")
-    save(s, "weights", theme)
+def masks(theme):
+    s = Figure(theme, 345, "Random masks feed a regression",
+               'Each row keeps or removes sources and receives a graded score. '
+               'The sampled rows feed one regression with a base and a weight per source. '
+               'The default is 32 masks; the diagram shows schematic rows and scores.')
+    s.math(32, 27, '<tspan font-style="italic">d</tspan>', 17)
+    s.text(45, 27, "sources", 13, "muted")
+    s.text(259, 27, "grade", 13, "muted", anchor="middle")
+    rows = ((1, 0, 1, 1, 0), (0, 1, 1, 0, 1),
+            (1, 1, 0, 0, 1), (0, 0, 1, 1, 1))
+    for i, row in enumerate(rows):
+        y = 44 + i * 36
+        for j, kept in enumerate(row):
+            s.box(24 + j * 31, y, 23, 23, "teal" if kept else "bg",
+                  None if kept else "line", radius=3)
+        s.arrow(185, y + 12, 220, y + 12)
+        s.math(259, y + 18, sub("s", str(i + 1)), 18, "blue")
+        s.line(292, y + 12, 314, y + 12)
+    s.text(94, 200, "…", 19, "muted", anchor="middle")
+    s.text(259, 200, "…", 19, "muted", anchor="middle")
+    # All measured rows converge on the same regression.
+    s.line(314, 56, 314, 164)
+    s.arrow(314, 164, 314, 240)
+    s.box(24, 246, 372, 65, "blue_bg", "blue", radius=7)
+    s.text(40, 269, "one regression", 14, "blue", 700)
+    s.math(379, 270, '<tspan font-style="italic">d</tspan> + 1 unknowns', 17, "blue", "end")
+    s.math(210, 296, 'base + ' + sub("w", "1") + ' · ' + sub("x", "1")
+           + ' + … + ' + sub("w", "d") + ' · ' + sub("x", "d"), 18)
+    s.text(210, 332, "Filled: kept · empty: removed · default: 32 masks", 12,
+           "muted", anchor="middle")
+    s.save("masks", theme)
+
+
+def redundancy(theme):
+    s = Figure(theme, 322, "Redundant sources",
+               'A file and a tool result carry the same fact. Keeping either or both '
+               'leaves the score high. Removing both collapses it. Qualitative scores, '
+               'not numerical measurements: this OR cannot be represented by an additive model.')
+    s.text(24, 27, "file", 13, "muted")
+    s.text(132, 27, "tool result", 13, "muted")
+    s.text(258, 27, "score", 13, "muted")
+    for y, a, b in ((44, True, True), (104, False, True),
+                    (164, True, False), (224, False, False)):
+        chip(s, 24, y, 93, "same fact", "teal", a)
+        chip(s, 132, y, 93, "same fact", "teal", b)
+        s.arrow(234, y + 15, 248, y + 15)
+        s.box(258, y + 5, 138, 20, "faint", radius=2)
+        s.box(258, y + 5, 138 if a or b else 5, 20,
+              "teal" if a or b else "amber", radius=2)
+    s.text(210, 290, "Either copy is enough; remove both and it collapses.", 12,
+           "muted", anchor="middle")
+    s.save("redundancy", theme)
 
 
 def main():
     for theme in PALETTES:
-        ablate(theme)
-        weights(theme)
+        for draw in (ablate, generate_grade, weights, masks, redundancy):
+            draw(theme)
 
 
 if __name__ == "__main__":

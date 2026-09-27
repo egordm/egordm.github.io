@@ -23,11 +23,7 @@ output matter? Did it ignore the config file it so dutifully opened?
 You can't just ask it; models make up plausible justifications. Attention maps feel like the answer
 but are famously unreliable as explanations. There is a better way, and it needs nothing but
 forward passes and a linear regression: **ablation attribution**, published as
-[ContextCite](https://arxiv.org/abs/2409.00729) by Cohen-Wang et al. (NeurIPS 2024). The whole idea
-fits in one picture:
-
-<img class="theme-dark-only figure-narrow" src="/blog/assets/attribution-v-ablate-dark.svg" alt="Two sources: a config file saying port 8080 and an lsof tool result saying the server listens on 3000. The recorded answer 3000 stays locked. The model gives it 90% with both sources, 95% with the config removed, and 2% with the lsof result removed." />
-<img class="theme-light-only figure-narrow" src="/blog/assets/attribution-v-ablate-light.svg" alt="The same experiment in the light theme." />
+[ContextCite](https://arxiv.org/abs/2409.00729) by Cohen-Wang et al. (NeurIPS 2024).
 
 Keep the model's answer fixed, remove one source at a time, and measure how much less likely that
 same answer becomes. A source whose removal makes the answer collapse is a source the answer rested
@@ -55,6 +51,9 @@ exactly **once**, and from then on we never generate again. We use the model's o
 - **Grade**: "here's a prompt *and* a finished answer; how probable would you have found these
   exact tokens?" Deterministic, no sampling at all.
 
+<img class="theme-dark-only figure-center" src="/blog/assets/attribution-v-generate-grade-dark.svg" alt="The full context produces an answer once. The recorded answer is then supplied to every grading pass, alongside a modified context. Each pass returns its probability without sampling another answer." />
+<img class="theme-light-only figure-center" src="/blog/assets/attribution-v-generate-grade-light.svg" alt="The full context produces an answer once. The recorded answer is then supplied to every grading pass, alongside a modified context. Each pass returns its probability without sampling another answer." />
+
 Grading gives one number for any context: the probability $p$ the model assigns to the recorded
 answer (for a multi-token answer, the product over its tokens). ContextCite works with its
 **log-odds**:
@@ -77,7 +76,7 @@ needs.
 We have turned a sampling machine into a deterministic function: give it any *modified* context
 plus the fixed answer, get back one score. Now we can experiment on that function.
 
-## The toy example, step by step
+## An example, step by step
 
 The context holds a question ("What port is the server on? Reply with just the number."), a config
 file that says `port = 8080`, and an `lsof` tool result that says the server listens on port 3000.
@@ -91,6 +90,9 @@ treat "3000" as a single token.)
   became 45 times less likely.
 - **The config file removed.** "3000" goes *up*, to 95%. The config file was a distractor, mildly
   pushing against the answer.
+
+<img class="theme-dark-only figure-center" src="/blog/assets/attribution-v-ablate-dark.svg" alt="The recorded answer 3000 stays fixed. Probability bars on the same scale show 90% with both sources, 2% with lsof removed, and 95% with config removed. Crossed out source labels mark removals." />
+<img class="theme-light-only figure-center" src="/blog/assets/attribution-v-ablate-light.svg" alt="The recorded answer 3000 stays fixed. Probability bars on the same scale show 90% with both sources, 2% with lsof removed, and 95% with config removed. Crossed out source labels mark removals." />
 
 ## From ablations to attributions
 
@@ -107,13 +109,13 @@ Now fit a linear regression: $\text{score} \approx \text{base} + w_{\text{config
 \text{config} + w_{\text{lsof}} \cdot \text{lsof}$, where each source is 1 when kept and 0 when
 removed. (The invented values were chosen so this fit is exact.)
 
-<img class="theme-dark-only figure-narrow" src="/blog/assets/attribution-v-weights-dark.svg" alt="Fitted weights in log-odds: the lsof result +6.1, the config file -0.75. Kept, the lsof result multiplies the odds of 3000 by 441; the config file multiplies them by 0.47." />
-<img class="theme-light-only figure-narrow" src="/blog/assets/attribution-v-weights-light.svg" alt="The fitted weights in the light theme." />
-
 The weights are **signed**, and a negative weight is a real finding: a source that pushed against
 the answer. They also have a clean reading. Because they add in log-odds, each kept source
 *multiplies* the odds of the answer by $e^{w}$: the `lsof` result by about 440, the config file by
 about one half.
+
+<img class="theme-dark-only figure-center" src="/blog/assets/attribution-v-weights-dark.svg" alt="Signed log-odds weights for the recorded answer 3000: lsof extends right to +6.1, multiplying the odds by about 440; config extends left to -0.75, multiplying the odds by about one half." />
+<img class="theme-light-only figure-center" src="/blog/assets/attribution-v-weights-light.svg" alt="Signed log-odds weights for the recorded answer 3000: lsof extends right to +6.1, multiplying the odds by about 440; config extends left to -0.75, multiplying the odds by about one half." />
 
 A single ablation only tells you about one *combination* of sources. The regression over many
 combinations is what separates each source's individual share. The linear model is not the idea;
@@ -130,6 +132,9 @@ So: sample a few dozen random keep-or-remove masks (each source kept with probab
 each one, fit the regression. The paper's default is 32 masks. It also fits with **Lasso**, betting
 that only a handful of sources really matter, which lets it get away with even fewer. On a single
 consumer GPU with a 7B model, this takes a few minutes per answer.
+
+<img class="theme-dark-only figure-center" src="/blog/assets/attribution-v-masks-dark.svg" alt="Random masks keep or remove sources. Each row receives a graded score; the rows feed one regression with a base and a weight per source, d + 1 unknowns. Filled cells mean kept, empty cells removed. The default is 32 masks." />
+<img class="theme-light-only figure-center" src="/blog/assets/attribution-v-masks-light.svg" alt="Random masks keep or remove sources. Each row receives a graded score; the rows feed one regression with a base and a weight per source, d + 1 unknowns. Filled cells mean kept, empty cells removed. The default is 32 masks." />
 
 ## Checking the fit, per answer
 
@@ -150,6 +155,9 @@ are not worth quoting here.
 > shape of the model. The authors document this case. The danger is that the check above can look
 > fine while the two copies quietly split or hide their credit. If your context repeats itself,
 > add targeted experiments that remove both copies together.
+
+<img class="theme-dark-only figure-center" src="/blog/assets/attribution-v-redundancy-dark.svg" alt="A file and a tool result repeat the same fact. Keeping both or either copy leaves the score high; removing both collapses it. Bars show the qualitative OR pattern, not numerical measurements." />
+<img class="theme-light-only figure-center" src="/blog/assets/attribution-v-redundancy-light.svg" alt="A file and a tool result repeat the same fact. Keeping both or either copy leaves the score high; removing both collapses it. Bars show the qualitative OR pattern, not numerical measurements." />
 
 ## What it can never tell you
 
@@ -190,8 +198,7 @@ probabilities.
 
 ---
 
-*Revised on 2026-09-27: retitled from "Did Your Agent Actually Read That File?", with new figures, a
-few corrections and a validation test.*
+*Revised on 2026-09-27: retitled from "Did Your Agent Actually Read That File?", with new figures, a few corrections and a validation test.*
 
 **References.**
 

@@ -1,33 +1,32 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="420" height="540" viewBox="0 0 420 540" role="img" aria-labelledby="title desc">
-<title id="title">Lock the answer.</title>
-<desc id="desc">Two sources: a config file saying port 8080 and an lsof tool result saying the server listens on 3000. The recorded answer 3000 stays fixed. The model assigns it 90% with both sources, 95% with the config removed, and 2% with the lsof result removed. Invented numbers.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="362" viewBox="0 0 420 362" role="img" aria-labelledby="title desc">
+<title id="title">Ablating sources</title>
+<desc id="desc">The fixed answer is 3000. With both sources its probability is 90%; without lsof, 2%; without config, 95%. Bars share a linear scale.</desc>
 <defs><pattern id="untested" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M-2 2L2-2M0 8L8 0M6 10L10 6" fill="none" stroke="#4c504d" stroke-width="1"/></pattern></defs>
-<rect x="0" y="0" width="420" height="540" rx="0" fill="#1e1e1e"/>
-<text x="24" y="30" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="start">01 / THE EXPERIMENT</text>
-<text x="24" y="65" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" text-anchor="start">Lock the answer.</text>
-<text x="24" y="91" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">Then remove sources, one at a time. Invented numbers.</text>
-<rect x="24" y="112" width="180" height="70" rx="12" fill="#443226"/>
-<text x="38" y="136" fill="#ffa96e" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="start">CONFIG FILE</text>
-<text x="38" y="162" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" text-anchor="start">port = 8080</text>
-<rect x="216" y="112" width="180" height="70" rx="12" fill="#253e38"/>
-<text x="230" y="136" fill="#7bd7c8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="start">LSOF TOOL RESULT</text>
-<text x="230" y="162" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" text-anchor="start">listening on 3000</text>
-<rect x="24" y="196" width="372" height="50" rx="12" fill="#292b2a" stroke="#4c504d"/>
-<text x="40" y="227" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="start">Recorded answer:</text>
-<text x="170" y="227" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" text-anchor="start">&quot;3000&quot;  (locked)</text>
-<text x="24" y="280" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="start">PROBABILITY THE MODEL GIVES &quot;3000&quot;</text>
-<text x="24" y="325" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="start">Both sources</text>
-<rect x="150" y="308" width="190" height="24" rx="6" fill="#323532"/>
-<rect x="150" y="308" width="171.0" height="24" rx="6" fill="#a6b8ff"/>
-<text x="350" y="326" fill="#a6b8ff" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" text-anchor="start">90%</text>
-<text x="24" y="381" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="start">Config removed</text>
-<rect x="150" y="364" width="190" height="24" rx="6" fill="#323532"/>
-<rect x="150" y="364" width="180.5" height="24" rx="6" fill="#a6b8ff"/>
-<text x="350" y="382" fill="#a6b8ff" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" text-anchor="start">95%</text>
-<text x="24" y="437" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="start">lsof removed</text>
-<rect x="150" y="420" width="190" height="24" rx="6" fill="#323532"/>
-<rect x="150" y="420" width="6" height="24" rx="6" fill="#ffa96e"/>
-<text x="350" y="438" fill="#ffa96e" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" text-anchor="start">2%</text>
-<text x="24" y="490" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" text-anchor="start">Removing the lsof result makes the same</text>
-<text x="24" y="512" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" text-anchor="start">answer 45 times less likely.</text>
+<rect x="0" y="0" width="420" height="362" rx="0" fill="#1e1e1e"/>
+<text x="24" y="30" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" text-anchor="start">Fixed answer: “3000”</text>
+<text x="396" y="30" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end">probability</text>
+<rect x="24" y="56" width="145" height="30" rx="5" fill="#443226" stroke="#ffa96e"/>
+<text x="96.5" y="76" fill="#ffa96e" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle">config: 8080</text>
+<rect x="183" y="56" width="145" height="30" rx="5" fill="#253e38" stroke="#7bd7c8"/>
+<text x="255.5" y="76" fill="#7bd7c8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle">lsof: 3000</text>
+<rect x="24" y="99" width="304" height="20" rx="2" fill="#323532"/>
+<rect x="24" y="99" width="273.6" height="20" rx="2" fill="#7bd7c8"/>
+<text x="396" y="115" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" text-anchor="end">90%</text>
+<rect x="24" y="151" width="145" height="30" rx="5" fill="#443226" stroke="#ffa96e"/>
+<text x="96.5" y="171" fill="#ffa96e" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle">config: 8080</text>
+<rect x="183" y="151" width="145" height="30" rx="5" fill="#1e1e1e" stroke="#4c504d"/>
+<text x="255.5" y="171" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle">lsof: 3000</text>
+<path d="M189 166L322 166" fill="none" stroke="#bdbdb8" stroke-width="1.5" stroke-linecap="round"/>
+<rect x="24" y="194" width="304" height="20" rx="2" fill="#323532"/>
+<rect x="24" y="194" width="6.08" height="20" rx="2" fill="#ffa96e"/>
+<text x="396" y="210" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" text-anchor="end">2%</text>
+<rect x="24" y="246" width="145" height="30" rx="5" fill="#1e1e1e" stroke="#4c504d"/>
+<text x="96.5" y="266" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle">config: 8080</text>
+<path d="M30 261L163 261" fill="none" stroke="#bdbdb8" stroke-width="1.5" stroke-linecap="round"/>
+<rect x="183" y="246" width="145" height="30" rx="5" fill="#253e38" stroke="#7bd7c8"/>
+<text x="255.5" y="266" fill="#7bd7c8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle">lsof: 3000</text>
+<rect x="24" y="289" width="304" height="20" rx="2" fill="#323532"/>
+<rect x="24" y="289" width="288.8" height="20" rx="2" fill="#7bd7c8"/>
+<text x="396" y="305" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" text-anchor="end">95%</text>
+<text x="210" y="348" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">Crossed out: source removed · invented probabilities</text>
 </svg>

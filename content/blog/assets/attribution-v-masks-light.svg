@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="345" viewBox="0 0 420 345" role="img" aria-labelledby="title desc">
+<title id="title">Random masks feed a regression</title>
+<desc id="desc">Each row keeps or removes sources and receives a graded score. The sampled rows feed one regression with a base and a weight per source. The default is 32 masks; the diagram shows schematic rows and scores.</desc>
+<defs><pattern id="untested" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M-2 2L2-2M0 8L8 0M6 10L10 6" fill="none" stroke="#d8dcd7" stroke-width="1"/></pattern></defs>
+<rect x="0" y="0" width="420" height="345" rx="0" fill="#ffffff"/>
+<text x="32" y="27" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="17" fill="#252725"><tspan font-style="italic">d</tspan></text>
+<text x="45" y="27" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">sources</text>
+<text x="259" y="27" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle">grade</text>
+<rect x="24" y="44" width="23" height="23" rx="3" fill="#00796b"/>
+<rect x="55" y="44" width="23" height="23" rx="3" fill="#ffffff" stroke="#d8dcd7"/>
+<rect x="86" y="44" width="23" height="23" rx="3" fill="#00796b"/>
+<rect x="117" y="44" width="23" height="23" rx="3" fill="#00796b"/>
+<rect x="148" y="44" width="23" height="23" rx="3" fill="#ffffff" stroke="#d8dcd7"/>
+<path d="M185 56L220 56" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M215 52L220 56" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M215 60L220 56" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round"/>
+<text x="259" y="62" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="18" fill="#4557ba"><tspan font-style="italic">s</tspan><tspan baseline-shift="sub" font-size="12">1</tspan></text>
+<path d="M292 56L314 56" fill="none" stroke="#d8dcd7" stroke-width="1.5" stroke-linecap="round"/>
+<rect x="24" y="80" width="23" height="23" rx="3" fill="#ffffff" stroke="#d8dcd7"/>
+<rect x="55" y="80" width="23" height="23" rx="3" fill="#00796b"/>
+<rect x="86" y="80" width="23" height="23" rx="3" fill="#00796b"/>
+<rect x="117" y="80" width="23" height="23" rx="3" fill="#ffffff" stroke="#d8dcd7"/>
+<rect x="148" y="80" width="23" height="23" rx="3" fill="#00796b"/>
+<path d="M185 92L220 92" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M215 88L220 92" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M215 96L220 92" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round"/>
+<text x="259" y="98" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="18" fill="#4557ba"><tspan font-style="italic">s</tspan><tspan baseline-shift="sub" font-size="12">2</tspan></text>
+<path d="M292 92L314 92" fill="none" stroke="#d8dcd7" stroke-width="1.5" stroke-linecap="round"/>
+<rect x="24" y="116" width="23" height="23" rx="3" fill="#00796b"/>
+<rect x="55" y="116" width="23" height="23" rx="3" fill="#00796b"/>
+<rect x="86" y="116" width="23" height="23" rx="3" fill="#ffffff" stroke="#d8dcd7"/>
+<rect x="117" y="116" width="23" height="23" rx="3" fill="#ffffff" stroke="#d8dcd7"/>
+<rect x="148" y="116" width="23" height="23" rx="3" fill="#00796b"/>
+<path d="M185 128L220 128" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M215 124L220 128" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M215 132L220 128" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round"/>
+<text x="259" y="134" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="18" fill="#4557ba"><tspan font-style="italic">s</tspan><tspan baseline-shift="sub" font-size="12">3</tspan></text>
+<path d="M292 128L314 128" fill="none" stroke="#d8dcd7" stroke-width="1.5" stroke-linecap="round"/>
+<rect x="24" y="152" width="23" height="23" rx="3" fill="#ffffff" stroke="#d8dcd7"/>
+<rect x="55" y="152" width="23" height="23" rx="3" fill="#ffffff" stroke="#d8dcd7"/>
+<rect x="86" y="152" width="23" height="23" rx="3" fill="#00796b"/>
+<rect x="117" y="152" width="23" height="23" rx="3" fill="#00796b"/>
+<rect x="148" y="152" width="23" height="23" rx="3" fill="#00796b"/>
+<path d="M185 164L220 164" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M215 160L220 164" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M215 168L220 164" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round"/>
+<text x="259" y="170" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="18" fill="#4557ba"><tspan font-style="italic">s</tspan><tspan baseline-shift="sub" font-size="12">4</tspan></text>
+<path d="M292 164L314 164" fill="none" stroke="#d8dcd7" stroke-width="1.5" stroke-linecap="round"/>
+<text x="94" y="200" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" text-anchor="middle">…</text>
+<text x="259" y="200" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" text-anchor="middle">…</text>
+<path d="M314 56L314 164" fill="none" stroke="#d8dcd7" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M314 164L314 240" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M310 235L314 240" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M318 235L314 240" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round"/>
+<rect x="24" y="246" width="372" height="65" rx="7" fill="#e9edfc" stroke="#4557ba"/>
+<text x="40" y="269" fill="#4557ba" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="start">one regression</text>
+<text x="379" y="270" text-anchor="end" font-family="Georgia, Times New Roman, serif" font-size="17" fill="#4557ba"><tspan font-style="italic">d</tspan> + 1 unknowns</text>
+<text x="210" y="296" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="18" fill="#252725">base + <tspan font-style="italic">w</tspan><tspan baseline-shift="sub" font-size="12">1</tspan> · <tspan font-style="italic">x</tspan><tspan baseline-shift="sub" font-size="12">1</tspan> + … + <tspan font-style="italic">w</tspan><tspan baseline-shift="sub" font-size="12">d</tspan> · <tspan font-style="italic">x</tspan><tspan baseline-shift="sub" font-size="12">d</tspan></text>
+<text x="210" y="332" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">Filled: kept · empty: removed · default: 32 masks</text>
+</svg>

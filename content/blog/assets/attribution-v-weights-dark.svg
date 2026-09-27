@@ -1,35 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="420" height="400" viewBox="0 0 420 400" role="img" aria-labelledby="title desc">
-<title id="title">One signed number per source.</title>
-<desc id="desc">Fitted ContextCite weights in log-odds: the lsof result +6.1, the config file -0.75. Positive supports the recorded answer, negative pushes against it.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="282" viewBox="0 0 420 282" role="img" aria-labelledby="title desc">
+<title id="title">Signed source weights</title>
+<desc id="desc">Signed log-odds weights: lsof +6.1 and config -0.75. Keeping lsof multiplies the odds of 3000 by about 440; config by about one half.</desc>
 <defs><pattern id="untested" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M-2 2L2-2M0 8L8 0M6 10L10 6" fill="none" stroke="#4c504d" stroke-width="1"/></pattern></defs>
-<rect x="0" y="0" width="420" height="400" rx="0" fill="#1e1e1e"/>
-<text x="24" y="30" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="start">02 / THE ATTRIBUTION</text>
-<text x="24" y="65" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" text-anchor="start">One signed number per source.</text>
-<text x="24" y="91" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">Weights on the log-odds of the recorded answer.</text>
-<path d="M116 124L116 290" fill="none" stroke="#323532" stroke-width="1" stroke-linecap="round"/>
-<text x="116" y="310" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">-1</text>
-<path d="M150 124L150 290" fill="none" stroke="#323532" stroke-width="1" stroke-linecap="round"/>
-<text x="150" y="310" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">0</text>
-<path d="M184 124L184 290" fill="none" stroke="#323532" stroke-width="1" stroke-linecap="round"/>
-<text x="184" y="310" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">+1</text>
-<path d="M218 124L218 290" fill="none" stroke="#323532" stroke-width="1" stroke-linecap="round"/>
-<text x="218" y="310" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">+2</text>
-<path d="M252 124L252 290" fill="none" stroke="#323532" stroke-width="1" stroke-linecap="round"/>
-<text x="252" y="310" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">+3</text>
-<path d="M286 124L286 290" fill="none" stroke="#323532" stroke-width="1" stroke-linecap="round"/>
-<text x="286" y="310" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">+4</text>
-<path d="M320 124L320 290" fill="none" stroke="#323532" stroke-width="1" stroke-linecap="round"/>
-<text x="320" y="310" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">+5</text>
-<path d="M354 124L354 290" fill="none" stroke="#323532" stroke-width="1" stroke-linecap="round"/>
-<text x="354" y="310" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">+6</text>
-<path d="M150 118L150 290" fill="none" stroke="#efefeb" stroke-width="2" stroke-linecap="round"/>
-<text x="252" y="332" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle">change in log-odds when the source is kept</text>
-<text x="24" y="170" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" text-anchor="start">lsof result</text>
-<rect x="150" y="150" width="207.02752576519276" height="30" rx="4" fill="#7bd7c8"/>
-<text x="349.02752576519276" y="171" fill="#1e1e1e" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="end">+6.1</text>
-<text x="24" y="250" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" text-anchor="start">config file</text>
-<rect x="124.59471033777253" y="230" width="25.405289662227474" height="30" rx="4" fill="#ffa96e"/>
-<text x="158" y="251" fill="#ffa96e" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" text-anchor="start">-0.75</text>
-<text x="24" y="364" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">Odds of &quot;3000&quot;: x441 with the lsof result,</text>
-<text x="24" y="384" fill="#efefeb" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">x0.47 with the config file.</text>
+<rect x="0" y="0" width="420" height="282" rx="0" fill="#1e1e1e"/>
+<text x="24" y="28" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start">Weights for “3000”</text>
+<text x="24" y="60" fill="#7bd7c8" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" text-anchor="start">lsof result</text>
+<text x="396" y="60" fill="#7bd7c8" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" text-anchor="end">+6.1</text>
+<rect x="110" y="72" width="262.3" height="24" rx="2" fill="#7bd7c8"/>
+<text x="396" y="121" fill="#7bd7c8" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="end">odds × about 440</text>
+<text x="24" y="158" fill="#ffa96e" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" text-anchor="start">config file</text>
+<text x="396" y="158" fill="#ffa96e" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" text-anchor="end">−0.75</text>
+<rect x="77.75" y="170" width="32.25" height="24" rx="2" fill="#ffa96e"/>
+<text x="396" y="219" fill="#ffa96e" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="end">odds × about one half</text>
+<path d="M110 66L110 200" fill="none" stroke="#bdbdb8" stroke-width="1" stroke-linecap="round"/>
+<text x="110" y="219" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">0</text>
+<text x="24" y="260" fill="#ffa96e" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">← opposes</text>
+<text x="396" y="260" fill="#7bd7c8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end">supports →</text>
+<text x="210" y="260" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle">log-odds</text>
 </svg>

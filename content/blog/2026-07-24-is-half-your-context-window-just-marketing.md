@@ -35,12 +35,12 @@ between them is knowledge the model has to apply. And the answer is an invented 
 cannot know it from training; it has to have read the sentence. Here is a real item from my test
 set:
 
-<img class="theme-dark-only figure-narrow" src="/blog/assets/recall-v-pair-dark.svg" alt="The question 'Which character is a Shakespeare devotee?'. The original needle, 'Greta Simeon can recite Hamlet's soliloquy from memory', needs the hop Shakespeare to Hamlet to Greta. The keyword twin, 'Greta Simeon can recite Shakespeare's Hamlet soliloquy', puts the question's own word next to the answer." />
+<img class="theme-dark-only figure-narrow" src="/blog/assets/recall-v-pair-dark.svg" alt="The question 'Which character is a Shakespeare devotee?'. The original needle, 'Greta Simeon can recite Hamlet's soliloquy from memory', needs the hop Shakespeare to Hamlet to Greta. The keyword version, 'Greta Simeon can recite Shakespeare's Hamlet soliloquy', puts the question's own word next to the answer." />
 <img class="theme-light-only figure-narrow" src="/blog/assets/recall-v-pair-light.svg" alt="The same pair of needles in the light theme." />
 
 To answer from the original, the model has to know that Hamlet is Shakespeare's play and link that
-to a sentence it read thousands of tokens earlier. The keyword twin carries the same fact, but a
-simple word match finds it. Every item in the set has such a twin, and it is the control that makes
+to a sentence it read thousands of tokens earlier. The keyword version carries the same fact, but a
+simple word match finds it. Every item in the set has such a version, and it is the control that makes
 the result readable: if the model loses both, it is losing the text; if it loses only the original,
 it is losing the connection.
 
@@ -65,7 +65,7 @@ leaves 14 items and 70 answers per length.
 
 ## What happened
 
-<img class="theme-dark-only figure-narrow" src="/blog/assets/recall-v-curve-dark.svg" alt="Share of needles found by document length: 100% at 1K, 4K and 8K, 90% at 16K, 76% at 24K, crossing the 85% bar between 16K and 24K, inside the 32K window. The keyword twin was found 14 of 14 times at both cells tested, 1K and 24K." />
+<img class="theme-dark-only figure-narrow" src="/blog/assets/recall-v-curve-dark.svg" alt="Share of needles found by document length: 100% at 1K, 4K and 8K, 90% at 16K, 76% at 24K, crossing the 85% bar between 16K and 24K, inside the 32K window. The keyword version was found 14 of 14 times at both cells tested, 1K and 24K." />
 <img class="theme-light-only figure-narrow" src="/blog/assets/recall-v-curve-light.svg" alt="The result chart in the light theme." />
 
 **Perfect to 8K, then a slide.** Qwen3-8B found every fact up to 8K tokens, 90% at 16K and 76% at
@@ -78,8 +78,8 @@ lies somewhere between 16K and 24K; those are the lengths I tested.)
 miss: the model either said no character fit, or named a character from the filler text. None was a
 grading error.
 
-**The keyword twin held where the original slipped.** At 24K tokens, with the fact near the end of
-the document, the twin was still found 14 times out of 14. The twin was only tested at two cells, so
+**The keyword version held where the original slipped.** At 24K tokens, with the fact near the end of
+the document, the keyword version was still found 14 times out of 14. It was only tested at two cells, so
 this is a strong hint rather than a full curve, but it points one way: the model can still find the
 text; what gets harder is making the connection.
 
@@ -97,7 +97,7 @@ still connect to your question is a separate, smaller number, and nobody prints 
 
 - **Plan around half the window, not all of it.** On this model the decline starts well inside the
   advertised range, not at the edge.
-- **Restate what matters, in the same words.** The keyword twin held where the original slipped.
+- **Restate what matters, in the same words.** The keyword version held where the original slipped.
   Repeating a key fact near where it is needed turns a hard connection into an easy word match.
 - **Measure your own model.** These numbers are for one model at one setting. The test is cheap to
   run, and the yardstick above tells you what to read off it.

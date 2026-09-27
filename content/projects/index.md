@@ -22,6 +22,20 @@ Boosters is designed for speed and flexibility, providing state-of-the-art gradi
 
 ---
 
+### 📐 Tenspec
+
+**Declare what an array must be, beside the value it describes, and check it at one boundary.**
+
+Shape and dtype checks move from the top of a function into its signature, where a reader and a type checker both see them, and are checked once where the value enters.
+
+- **Language**: Python (NumPy, PyTorch)
+- **Documentation**: [egordmitriev.dev/tenspec](https://egordmitriev.dev/tenspec/)
+- **Series page**: [[series/programming-with-invariants|Programming with Invariants]]
+
+[[tenspec|Read more →]]
+
+---
+
 ### 🔭 Research
 
 **Pre-build surveys and reference notes for projects I am considering building.**

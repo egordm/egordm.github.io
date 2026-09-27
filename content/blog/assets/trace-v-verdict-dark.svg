@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="355" viewBox="0 0 420 355" role="img" aria-labelledby="title desc">
+<title id="title">verdict</title>
+<desc id="desc">Over the same 12 filtered pairs: masking every derivation restatement leaves correctness at 0.83; a random-sentence mask leaves 1.00. Corrupting every derivation restatement is followed on 0.92; corrupting an unrelated placeholder is followed on 0.00. All bars run from zero to one. The written derivation is usually not needed, but trusted.</desc>
+<rect x="0" y="0" width="420" height="355" rx="0" fill="#1e1e1e"/>
+<rect x="16" y="12" width="388" height="154" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="30" y="37" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#7bd7c8">Not needed on most items</text>
+<text x="30" y="57" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">Correct answer</text>
+<text x="30" y="78" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#efefeb">Derivation masked</text>
+<rect x="30" y="87" width="302" height="14" rx="2" fill="#323532"/>
+<rect x="30" y="87" width="250.66" height="14" rx="2" fill="#7bd7c8"/>
+<text x="388" y="100" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#7bd7c8">0.83</text>
+<text x="30" y="124" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#efefeb">Random sentences masked</text>
+<rect x="30" y="133" width="302" height="14" rx="2" fill="#323532"/>
+<rect x="30" y="133" width="302.0" height="14" rx="2" fill="#7bd7c8"/>
+<text x="388" y="146" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#7bd7c8">1.00</text>
+<rect x="16" y="176" width="388" height="154" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="30" y="201" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#ffa96e">But trusted when wrong</text>
+<text x="30" y="221" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">Wrong value followed</text>
+<text x="30" y="242" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#efefeb">Derivation corrupted</text>
+<rect x="30" y="251" width="302" height="14" rx="2" fill="#323532"/>
+<rect x="30" y="251" width="277.84000000000003" height="14" rx="2" fill="#ffa96e"/>
+<text x="388" y="264" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#ffa96e">0.92</text>
+<text x="30" y="288" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#efefeb">Unrelated placeholder</text>
+<rect x="30" y="297" width="302" height="14" rx="2" fill="#323532"/>
+<path d="M30 297 L30 311" fill="none" stroke="#ffa96e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="388" y="310" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#ffa96e">0.00</text>
+<text x="210" y="348" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">12 filtered pairs · all bars share a 0 to 1 scale</text>
+</svg>

@@ -1,0 +1,10 @@
+{
+  "source": "nightjar N82 (GPT-6 Luna via locked-down codex exec, official NoLiMa needle set, 2026-09-27). Counts are correct answers of calls; one sampled draw per call. Lengths in tokens.",
+  "latent_reasoning_off": {"book": "rand_book_1",
+    "points": [[250,76,84],[500,73,84],[1000,83,84],[2000,69,84],[4000,79,84],[8000,70,84],[16000,65,84],[32000,25,28],[64000,24,28],[128000,56,84],[192000,48,84],[224000,39,84]]},
+  "literal_reasoning_off": {"book": "rand_book_1", "note": "control question sharing words with the fact; depth 0.5 only from 8K",
+    "points": [[250,82,84],[500,79,84],[1000,84,84],[2000,82,84],[4000,83,84],[8000,28,28],[16000,28,28],[32000,27,28],[64000,27,28],[128000,27,28],[192000,26,28],[224000,27,28]]},
+  "latent_reasoning_high": {"book": "books 1 and 2 pooled where both were run; 384K and 512K use books 1+2 joined",
+    "points": [[1000,157,168],[16000,71,84],[64000,76,84],[128000,138,168],[192000,128,168],[224000,53,84],[384000,48,84],[512000,22,84]]},
+  "markers": {"codex_default_window": 272000, "advertised_window": 1000000, "codex_message_cap_note": "points above 224K sent the text through the instructions file"}
+}

@@ -2,6 +2,8 @@
 title: "Your Agent Read the File. Did It Understand It?"
 date: 2026-07-19
 draft: false
+series: "LLM Comprehension"
+series_order: 2
 tags:
   - llm
   - agents

@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="432" viewBox="0 0 420 432" role="img" aria-labelledby="title desc">
+<title id="title">positions</title>
+<desc id="desc">The context and question form a wrapped sequence of schematic token boxes. QRHead measures attention from the question tokens to the fact. The sequence ends in an empty answer slot, filled with 30. Wu and LOCOS measure at the step that predicts this answer token. Token boundaries are illustrative.</desc>
+<rect x="0" y="0" width="420" height="432" rx="0" fill="#ffffff"/>
+<text x="28" y="24" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">Context</text>
+<rect x="28" y="36" width="45" height="31" rx="4" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="50.5" y="56" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">Logs</text>
+<rect x="78" y="36" width="54" height="31" rx="4" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="105.0" y="56" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">rotate</text>
+<rect x="137" y="36" width="46" height="31" rx="4" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="160.0" y="56" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">daily</text>
+<rect x="188" y="36" width="20" height="31" rx="4" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="198.0" y="56" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">.</text>
+<rect x="28" y="79" width="38" height="31" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<text x="47.0" y="99" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#00796b">The</text>
+<rect x="71" y="79" width="67" height="31" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<text x="104.5" y="99" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#00796b">timeout</text>
+<rect x="143" y="79" width="24" height="31" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<text x="155.0" y="99" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#00796b">is</text>
+<rect x="172" y="79" width="38" height="31" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<text x="191.0" y="99" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#00796b">half</text>
+<rect x="215" y="79" width="22" height="31" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<text x="226.0" y="99" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#00796b">a</text>
+<rect x="242" y="79" width="59" height="31" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<text x="271.5" y="99" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#00796b">minute</text>
+<rect x="306" y="79" width="20" height="31" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<text x="316.0" y="99" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#00796b">.</text>
+<rect x="28" y="122" width="63" height="31" rx="4" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="59.5" y="142" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">Retries</text>
+<rect x="96" y="122" width="36" height="31" rx="4" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="114.0" y="142" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">use</text>
+<rect x="137" y="122" width="65" height="31" rx="4" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="169.5" y="142" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">backoff</text>
+<rect x="207" y="122" width="20" height="31" rx="4" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="217.0" y="142" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">.</text>
+<text x="28" y="189" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#00796b">Question tokens · QRHead reads from here</text>
+<rect x="28" y="205" width="42" height="31" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<text x="49.0" y="225" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#00796b">How</text>
+<rect x="75" y="205" width="46" height="31" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<text x="98.0" y="225" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#00796b">many</text>
+<rect x="126" y="205" width="66" height="31" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<text x="159.0" y="225" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#00796b">seconds</text>
+<rect x="197" y="205" width="24" height="31" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<text x="209.0" y="225" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#00796b">is</text>
+<rect x="226" y="205" width="32" height="31" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<text x="242.0" y="225" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#00796b">the</text>
+<rect x="263" y="205" width="67" height="31" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<text x="296.5" y="225" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#00796b">timeout</text>
+<rect x="335" y="205" width="22" height="31" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<text x="346.0" y="225" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#00796b">?</text>
+<text x="28" y="257" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">Average their attention to the fact tokens</text>
+<path d="M357 221 L400 221 L400 276 L61 276 L61 294" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M61 294 L61 306" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M58.123446768374784 300.73450462865776 L61 306 L63.876553231625216 300.73450462865776" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="28" y="314" width="66" height="40" rx="4" fill="#ffffff" stroke="#4557ba"/>
+<text x="199" y="319" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">model fills it</text>
+<path d="M107 337 L289 337" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M283.73450462865776 339.8765532316252 L289 337 L283.73450462865776 334.1234467683748" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="302" y="314" width="66" height="40" rx="4" fill="#e9edfc" stroke="#4557ba"/>
+<text x="335" y="341" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#4557ba">30</text>
+<text x="28" y="379" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#4557ba">Answer position · Wu and LOCOS</text>
+<text x="28" y="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">Measure at the step that fills this slot</text>
+<text x="210" y="425" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#595e5b">Sequence wraps · token boundaries are schematic</text>
+</svg>

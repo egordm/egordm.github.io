@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="420" viewBox="0 0 420 420" role="img" aria-labelledby="title desc">
+<title id="title">stack</title>
+<desc id="desc">Selected tokens become vectors and pass upward through an abbreviated layer stack.</desc>
+<rect x="0" y="0" width="420" height="420" rx="0" fill="#ffffff"/>
+<rect x="26" y="106" width="368" height="42" rx="7" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="210" y="132" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#595e5b">layer</text>
+<rect x="26" y="204" width="368" height="42" rx="7" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="210" y="230" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#595e5b">layer</text>
+<text x="210" y="182" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="400" fill="#595e5b">⋮</text>
+<rect x="29.0" y="349" width="70" height="36" rx="7" fill="#e4f3ee" stroke="#00796b"/>
+<text x="64" y="372" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#00796b">half</text>
+<path d="M64 340 L64 318" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M66.87655323162522 323.26549537134224 L64 318 L61.123446768374784 323.26549537134224" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="53" y="266" width="22" height="44" rx="3" fill="#e4f3ee" stroke="#00796b"/>
+<path d="M58 273 L70 273" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M58 280 L70 280" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M58 287 L70 287" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<path d="M58 294 L70 294" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M58 301 L70 301" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M64 258 L64 249" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M66.87655323162522 254.26549537134224 L64 249 L61.123446768374784 254.26549537134224" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M64 196 L64 156" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M66.87655323162522 161.26549537134224 L64 156 L61.123446768374784 161.26549537134224" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M64 97 L64 78" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M66.87655323162522 83.26549537134224 L64 78 L61.123446768374784 83.26549537134224" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="53" y="25" width="22" height="44" rx="3" fill="#e4f3ee" stroke="#00796b"/>
+<path d="M58 32 L70 32" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M58 39 L70 39" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<path d="M58 46 L70 46" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M58 53 L70 53" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M58 60 L70 60" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<rect x="128.0" y="349" width="52" height="36" rx="7" fill="#e4f3ee" stroke="#00796b"/>
+<text x="154" y="372" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#00796b">a</text>
+<path d="M154 340 L154 318" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M156.87655323162522 323.26549537134224 L154 318 L151.12344676837478 323.26549537134224" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="143" y="266" width="22" height="44" rx="3" fill="#e4f3ee" stroke="#00796b"/>
+<path d="M148 273 L160 273" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M148 280 L160 280" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<path d="M148 287 L160 287" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M148 294 L160 294" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M148 301 L160 301" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<path d="M154 258 L154 249" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M156.87655323162522 254.26549537134224 L154 249 L151.12344676837478 254.26549537134224" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M154 196 L154 156" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M156.87655323162522 161.26549537134224 L154 156 L151.12344676837478 161.26549537134224" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M154 97 L154 78" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M156.87655323162522 83.26549537134224 L154 78 L151.12344676837478 83.26549537134224" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="143" y="25" width="22" height="44" rx="3" fill="#e4f3ee" stroke="#00796b"/>
+<path d="M148 32 L160 32" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<path d="M148 39 L160 39" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M148 46 L160 46" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M148 53 L160 53" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<path d="M148 60 L160 60" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<rect x="207.0" y="349" width="86" height="36" rx="7" fill="#e4f3ee" stroke="#00796b"/>
+<text x="250" y="372" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#00796b">minute</text>
+<path d="M250 340 L250 318" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M252.87655323162522 323.26549537134224 L250 318 L247.12344676837478 323.26549537134224" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="239" y="266" width="22" height="44" rx="3" fill="#e4f3ee" stroke="#00796b"/>
+<path d="M244 273 L256 273" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<path d="M244 280 L256 280" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M244 287 L256 287" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M244 294 L256 294" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<path d="M244 301 L256 301" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M250 258 L250 249" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M252.87655323162522 254.26549537134224 L250 249 L247.12344676837478 254.26549537134224" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M250 196 L250 156" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M252.87655323162522 161.26549537134224 L250 156 L247.12344676837478 161.26549537134224" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M250 97 L250 78" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M252.87655323162522 83.26549537134224 L250 78 L247.12344676837478 83.26549537134224" fill="none" stroke="#00796b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="239" y="25" width="22" height="44" rx="3" fill="#e4f3ee" stroke="#00796b"/>
+<path d="M244 32 L256 32" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M244 39 L256 39" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M244 46 L256 46" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<path d="M244 53 L256 53" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M244 60 L256 60" fill="none" stroke="#00796b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<rect x="328.0" y="349" width="52" height="36" rx="7" fill="#e9edfc" stroke="#4557ba"/>
+<text x="354" y="372" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#4557ba">?</text>
+<path d="M354 340 L354 318" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M356.8765532316252 323.26549537134224 L354 318 L351.1234467683748 323.26549537134224" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="343" y="266" width="22" height="44" rx="3" fill="#e9edfc" stroke="#4557ba"/>
+<path d="M348 273 L360 273" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M348 280 L360 280" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M348 287 L360 287" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<path d="M348 294 L360 294" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M348 301 L360 301" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M354 258 L354 249" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M356.8765532316252 254.26549537134224 L354 249 L351.1234467683748 254.26549537134224" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M354 196 L354 156" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M356.8765532316252 161.26549537134224 L354 156 L351.1234467683748 161.26549537134224" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M354 97 L354 78" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M356.8765532316252 83.26549537134224 L354 78 L351.1234467683748 83.26549537134224" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="343" y="25" width="22" height="44" rx="3" fill="#e9edfc" stroke="#4557ba"/>
+<path d="M348 32 L360 32" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M348 39 L360 39" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<path d="M348 46 L360 46" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"/>
+<path d="M348 53 L360 53" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M348 60 L360 60" fill="none" stroke="#4557ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+<text x="210" y="407" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">Selected positions; layer stack abbreviated.</text>
+</svg>

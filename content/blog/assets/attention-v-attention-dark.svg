@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="494" viewBox="0 0 420 494" role="img" aria-labelledby="title desc">
+<title id="title">attention</title>
+<desc id="desc">A source&#x27;s key is matched to the receiver&#x27;s query. Softmax over permitted sources gives a weight that scales the separately transformed value.</desc>
+<rect x="0" y="0" width="420" height="494" rx="0" fill="#1e1e1e"/>
+<text x="117" y="24" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#bdbdb8">source</text>
+<text x="339" y="24" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#bdbdb8">receiver</text>
+<rect x="83" y="38" width="68" height="42" rx="7" fill="#253e38" stroke="#7bd7c8"/>
+<text x="117" y="64" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="20" fill="#7bd7c8"><tspan font-style="italic">x</tspan><tspan baseline-shift="sub" font-size="70%">j</tspan></text>
+<rect x="305" y="38" width="68" height="42" rx="7" fill="#30374f" stroke="#a6b8ff"/>
+<text x="339" y="64" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="20" fill="#a6b8ff"><tspan font-style="italic">x</tspan><tspan baseline-shift="sub" font-size="70%">t</tspan></text>
+<path d="M117 80 L117 100 L58 100 L58 132" fill="none" stroke="#7bd7c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M117 100 L173 100 L173 132" fill="none" stroke="#7bd7c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M339 80 L339 132" fill="none" stroke="#a6b8ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M336.1234467683748 126.73450462865776 L339 132 L341.8765532316252 126.73450462865776" fill="none" stroke="#a6b8ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="46" y="120" text-anchor="end" font-family="Georgia, Times New Roman, serif" font-size="16" fill="#7bd7c8"><tspan font-style="italic">W</tspan><tspan baseline-shift="sub" font-size="70%">V</tspan></text>
+<text x="189" y="120" text-anchor="start" font-family="Georgia, Times New Roman, serif" font-size="16" fill="#7bd7c8"><tspan font-style="italic">W</tspan><tspan baseline-shift="sub" font-size="70%">K</tspan></text>
+<text x="355" y="115" text-anchor="start" font-family="Georgia, Times New Roman, serif" font-size="16" fill="#a6b8ff"><tspan font-style="italic">W</tspan><tspan baseline-shift="sub" font-size="70%">Q</tspan></text>
+<rect x="32" y="133" width="52" height="38" rx="7" fill="#253e38"/>
+<text x="58" y="158" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="20" fill="#7bd7c8"><tspan font-style="italic">v</tspan><tspan baseline-shift="sub" font-size="70%">j</tspan></text>
+<rect x="147" y="133" width="52" height="38" rx="7" fill="#253e38"/>
+<text x="173" y="158" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="20" fill="#7bd7c8"><tspan font-style="italic">k</tspan><tspan baseline-shift="sub" font-size="70%">j</tspan></text>
+<rect x="313" y="133" width="52" height="38" rx="7" fill="#30374f"/>
+<text x="339" y="158" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="20" fill="#a6b8ff"><tspan font-style="italic">q</tspan><tspan baseline-shift="sub" font-size="70%">t</tspan></text>
+<path d="M173 177 L228 207" fill="none" stroke="#7bd7c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M222.00000128031763 207.00391966964042 L228 207 L224.7548885682773 201.95329297504773" fill="none" stroke="#7bd7c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M339 177 L284 207" fill="none" stroke="#a6b8ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M287.2451114317227 201.95329297504773 L284 207 L289.99999871968237 207.00391966964042" fill="none" stroke="#a6b8ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="201" y="212" width="110" height="36" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="256" y="235" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#efefeb">dot product</text>
+<path d="M256 250 L256 286" fill="none" stroke="#bdbdb8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M253.12344676837478 280.73450462865776 L256 286 L258.8765532316252 280.73450462865776" fill="none" stroke="#bdbdb8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="272" y="274" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">scale</text>
+<rect x="197" y="291" width="118" height="36" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="256" y="314" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#efefeb">softmax</text>
+<text x="256" y="348" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">all allowed sources</text>
+<path d="M256 355 L256 370" fill="none" stroke="#bdbdb8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M253.12344676837478 364.73450462865776 L256 370 L258.8765532316252 364.73450462865776" fill="none" stroke="#bdbdb8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="256" y="394" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="20" fill="#a6b8ff"><tspan font-style="italic">α</tspan><tspan baseline-shift="sub" font-size="70%">j</tspan></text>
+<path d="M58 179 L58 273" fill="none" stroke="#7bd7c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M55.123446768374784 267.73450462865776 L58 273 L60.876553231625216 267.73450462865776" fill="none" stroke="#7bd7c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="32" y="280" width="52" height="40" rx="7" fill="#253e38"/>
+<text x="58" y="306" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="20" fill="#7bd7c8"><tspan font-style="italic">W</tspan><tspan baseline-shift="sub" font-size="70%">O</tspan></text>
+<path d="M58 327 L58 369" fill="none" stroke="#7bd7c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M55.123446768374784 363.73450462865776 L58 369 L60.876553231625216 363.73450462865776" fill="none" stroke="#7bd7c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="58" y="394" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="20" fill="#7bd7c8"><tspan font-style="italic">W</tspan><tspan baseline-shift="sub" font-size="70%">O</tspan><tspan font-style="italic">v</tspan><tspan baseline-shift="sub" font-size="70%">j</tspan></text>
+<path d="M58 407 L58 433 L145 433" fill="none" stroke="#7bd7c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M256 407 L256 433 L173 433" fill="none" stroke="#a6b8ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<circle cx="159" cy="433" r="14" fill="#1e1e1e" stroke="#efefeb" stroke-width="1.5"/>
+<text x="159" y="439" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#efefeb">×</text>
+<path d="M159 448 L159 462" fill="none" stroke="#bdbdb8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M156.12344676837478 456.73450462865776 L159 462 L161.87655323162522 456.73450462865776" fill="none" stroke="#bdbdb8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="176" y="468" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#efefeb">source contribution</text>
+</svg>

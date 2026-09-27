@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="401" viewBox="0 0 420 401" role="img" aria-labelledby="title desc">
+<title id="title">qrhead</title>
+<desc id="desc">Same head and fact with the question or N/A. Attention is averaged over question tokens and summed over fact tokens. Subtracting N/A gives A 0.60, B 0.15 and C 0.00. All bars share a scale.</desc>
+<rect x="0" y="0" width="420" height="401" rx="0" fill="#ffffff"/>
+<rect x="16" y="12" width="388" height="104" rx="7" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="28" y="36" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#00796b">Head A</text>
+<text x="390" y="36" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#00796b">0.70 − 0.10 = 0.60</text>
+<text x="28" y="65" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">Question</text>
+<rect x="111" y="50" width="236" height="20" rx="2" fill="#ffffff"/>
+<rect x="111" y="50" width="165.2" height="20" rx="2" fill="#00796b"/>
+<text x="390" y="65" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#00796b">0.70</text>
+<text x="28" y="97" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">N/A</text>
+<rect x="111" y="82" width="236" height="20" rx="2" fill="#ffffff"/>
+<rect x="111" y="82" width="23.6" height="20" rx="2" fill="#595e5b"/>
+<text x="390" y="97" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">0.10</text>
+<rect x="16" y="128" width="388" height="104" rx="7" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="28" y="152" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#4557ba">Head B</text>
+<text x="390" y="152" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#4557ba">0.30 − 0.15 = 0.15</text>
+<text x="28" y="181" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">Question</text>
+<rect x="111" y="166" width="236" height="20" rx="2" fill="#ffffff"/>
+<rect x="111" y="166" width="70.8" height="20" rx="2" fill="#4557ba"/>
+<text x="390" y="181" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#4557ba">0.30</text>
+<text x="28" y="213" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">N/A</text>
+<rect x="111" y="198" width="236" height="20" rx="2" fill="#ffffff"/>
+<rect x="111" y="198" width="35.4" height="20" rx="2" fill="#595e5b"/>
+<text x="390" y="213" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">0.15</text>
+<rect x="16" y="244" width="388" height="104" rx="7" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="28" y="268" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#a8460c">Head C</text>
+<text x="390" y="268" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#a8460c">0.05 − 0.05 = 0.00</text>
+<text x="28" y="297" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">Question</text>
+<rect x="111" y="282" width="236" height="20" rx="2" fill="#ffffff"/>
+<rect x="111" y="282" width="11.8" height="20" rx="2" fill="#a8460c"/>
+<text x="390" y="297" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#a8460c">0.05</text>
+<text x="28" y="329" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">N/A</text>
+<rect x="111" y="314" width="236" height="20" rx="2" fill="#ffffff"/>
+<rect x="111" y="314" width="11.8" height="20" rx="2" fill="#595e5b"/>
+<text x="390" y="329" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">0.05</text>
+<text x="210" y="373" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">Attention summed over fact tokens</text>
+<text x="210" y="391" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">Averaged over receiving question tokens</text>
+</svg>

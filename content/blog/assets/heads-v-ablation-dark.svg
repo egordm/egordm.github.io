@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="405" viewBox="0 0 420 405" role="img" aria-labelledby="title desc">
+<title id="title">ablation</title>
+<desc id="desc">Qwen3-8B NoLiMa ROUGE-L. Published and reproduction: no heads off 0.401 and 0.412; LOCOS top 50 off 0.000 and 0.000; Wu top 50 off 0.292 and 0.342; random 50 off 0.391 in the reproduction only.</desc>
+<rect x="0" y="0" width="420" height="405" rx="0" fill="#1e1e1e"/>
+<rect x="18" y="14" width="10" height="10" rx="2" fill="#a6b8ff"/>
+<text x="35" y="24" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#bdbdb8">Published</text>
+<rect x="175" y="14" width="10" height="10" rx="2" fill="#7bd7c8"/>
+<text x="192" y="24" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#bdbdb8">My reproduction</text>
+<text x="18" y="56" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#efefeb">No heads off</text>
+<rect x="18" y="66" width="292.73" height="16" rx="2" fill="#a6b8ff"/>
+<text x="320.73" y="79" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#a6b8ff">0.401</text>
+<rect x="18" y="89" width="300.76" height="16" rx="2" fill="#7bd7c8"/>
+<text x="328.76" y="102" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#7bd7c8">0.412</text>
+<text x="18" y="136" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#efefeb">LOCOS: top 50 off</text>
+<path d="M18 146 L18 162" fill="none" stroke="#a6b8ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="28.0" y="159" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#a6b8ff">0.000</text>
+<path d="M18 169 L18 185" fill="none" stroke="#7bd7c8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="28.0" y="182" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#7bd7c8">0.000</text>
+<text x="18" y="216" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#efefeb">Wu: top 50 off</text>
+<rect x="18" y="226" width="213.16" height="16" rx="2" fill="#a6b8ff"/>
+<text x="241.16" y="239" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#a6b8ff">0.292</text>
+<rect x="18" y="249" width="249.66000000000003" height="16" rx="2" fill="#7bd7c8"/>
+<text x="277.66" y="262" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#7bd7c8">0.342</text>
+<text x="18" y="296" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#efefeb">Random: 50 off</text>
+<text x="28" y="319" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">Not reported</text>
+<rect x="18" y="329" width="285.43" height="16" rx="2" fill="#7bd7c8"/>
+<text x="313.43" y="342" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#7bd7c8">0.391</text>
+<path d="M18 366 L402 366" fill="none" stroke="#4c504d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="210" y="389" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">Qwen3-8B · NoLiMa · answer score (ROUGE-L)</text>
+</svg>

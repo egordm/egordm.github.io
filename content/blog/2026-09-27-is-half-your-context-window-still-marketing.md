@@ -3,7 +3,7 @@ title: "Is Half Your Context Window Still Marketing in 2026?"
 date: 2026-09-27
 draft: false
 series: "LLM Comprehension"
-series_order: 6
+series_order: 8
 tags:
   - llm
   - agents

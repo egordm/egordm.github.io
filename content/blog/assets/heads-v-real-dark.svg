@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="329" viewBox="0 0 420 329" role="img" aria-labelledby="title desc">
+<title id="title">real</title>
+<desc id="desc">Fact attention is summed over its tokens. QRHead measures at the question above N/A; answer-step attention is raw. L13 H4: 0.151, 0.034, 0.010. L20 H13: 0.0045, 0.315, 0.434. Scores describe the supplied answer 30.</desc>
+<rect x="0" y="0" width="420" height="329" rx="0" fill="#1e1e1e"/>
+<text x="274" y="27" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#7bd7c8">L13 H4</text>
+<text x="367" y="27" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#a6b8ff">L20 H13</text>
+<text x="274" y="47" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#bdbdb8">QRHead pick</text>
+<text x="367" y="47" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#bdbdb8">LOCOS pick</text>
+<text x="18" y="84" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#efefeb">QRHead</text>
+<text x="18" y="104" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">question above N/A</text>
+<rect x="235" y="65" width="78" height="46" rx="7" fill="#253e38" stroke="#7bd7c8"/>
+<text x="274" y="94" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#7bd7c8">0.151</text>
+<rect x="328" y="65" width="78" height="46" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="367" y="94" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#efefeb">0.0045</text>
+<text x="18" y="152" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#efefeb">Fact attention</text>
+<text x="18" y="172" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">at the answer step</text>
+<rect x="235" y="133" width="78" height="46" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="274" y="162" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#efefeb">0.034</text>
+<rect x="328" y="133" width="78" height="46" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="367" y="162" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#efefeb">0.315</text>
+<text x="18" y="220" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#efefeb">LOCOS</text>
+<text x="18" y="240" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">write above rest of context</text>
+<rect x="235" y="201" width="78" height="46" rx="7" fill="#292b2a" stroke="#4c504d"/>
+<text x="274" y="230" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#efefeb">0.010</text>
+<rect x="328" y="201" width="78" height="46" rx="7" fill="#30374f" stroke="#a6b8ff"/>
+<text x="367" y="230" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#a6b8ff">0.434</text>
+<path d="M18 265 L402 265" fill="none" stroke="#4c504d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="18" y="288" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#bdbdb8">Shared in top 10: 0</text>
+<text x="402" y="288" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#bdbdb8">Rank correlation: -0.04</text>
+<text x="210" y="316" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#bdbdb8">Attention summed over fact tokens · one item</text>
+</svg>

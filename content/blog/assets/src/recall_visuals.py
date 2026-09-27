@@ -7,7 +7,7 @@
 Run: python3 content/blog/assets/src/recall_visuals.py
 Writes recall-v-{pair,curve}-{light,dark}.svg into assets/, in the style of luna_v_visuals.
 Data: the Qwen3-8B recall grid (14 used needles x 5 positions per length), its item-bootstrapped
-95% intervals, and the keyword twin's two tested cells (14 of 14 each on the used set).
+95% intervals, and the keyword version's two tested cells (14 of 14 each on the used set).
 """
 
 import sys
@@ -36,7 +36,7 @@ def pair(theme):
     s = SVG(theme, 560, "One fact, two ways to plant it.",
             "The question asks which character is a Shakespeare devotee. The original needle says "
             "Greta Simeon can recite Hamlet's soliloquy; answering needs the hop Shakespeare to "
-            "Hamlet to Greta Simeon. The keyword twin says Shakespeare's Hamlet, so the question's "
+            "Hamlet to Greta Simeon. The keyword version says Shakespeare's Hamlet, so the question's "
             "own word sits next to the answer.")
     s.header("01", "THE PAIR", "One fact, two ways to plant it.", "A real item from the test set.")
     s.box(24, 112, 372, 70, stroke="line")
@@ -55,7 +55,7 @@ def pair(theme):
     s.arrow(268, 319, 287, 319, "blue")
 
     s.box(24, 374, 372, 136, "teal_bg")
-    s.text(40, 400, "KEYWORD TWIN: SAME FACT, SHARED WORD", 12, "teal", 700)
+    s.text(40, 400, "KEYWORD VERSION: SAME FACT, SHARED WORD", 12, "teal", 700)
     s.text(40, 428, "Greta Simeon can recite Shakespeare's Hamlet", 15)
     s.text(40, 450, "soliloquy from memory ...", 15)
     s.box(40, 464, 112, 34, "panel")
@@ -72,7 +72,7 @@ def curve(theme):
     s = SVG(theme, 512, "Perfect to 8K, then a slide.",
             "Share of needles the model found, by document length, averaged over five positions: "
             "100% at 1K, 4K and 8K, 90% at 16K, 76% at 24K, with 95% intervals. It crosses the 85% "
-            "bar between 16K and 24K, inside the advertised 32K window. The keyword twin, tested at "
+            "bar between 16K and 24K, inside the advertised 32K window. The keyword version, tested at "
             "1K and at 24K, found 14 of 14 at both.")
     s.header("02", "THE RESULT", "Perfect to 8K, then a slide.", "Qwen3-8B, thinking on · 70 answers per length")
     left, right, top, bottom = 56, 380, 150, 390
@@ -117,7 +117,7 @@ def curve(theme):
     cx, cy = 32, 492
     raw(s, f'<path d="M{cx} {cy - 7} L{cx + 7} {cy} L{cx} {cy + 7} L{cx - 7} {cy} Z" fill="none" '
            f'stroke="{c["teal"]}" stroke-width="2.5"/>')
-    s.text(44, 497, "Keyword twin: 14 of 14 at both cells tested", 13, "ink")
+    s.text(44, 497, "Keyword version: 14 of 14 at both cells tested", 13, "ink")
     save(s, "curve", theme)
 
 

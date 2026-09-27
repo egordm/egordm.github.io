@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="420" height="560" viewBox="0 0 420 560" role="img" aria-labelledby="title desc">
 <title id="title">One fact, two ways to plant it.</title>
-<desc id="desc">The question asks which character is a Shakespeare devotee. The original needle says Greta Simeon can recite Hamlet&#x27;s soliloquy; answering needs the hop Shakespeare to Hamlet to Greta Simeon. The keyword twin says Shakespeare&#x27;s Hamlet, so the question&#x27;s own word sits next to the answer.</desc>
+<desc id="desc">The question asks which character is a Shakespeare devotee. The original needle says Greta Simeon can recite Hamlet&#x27;s soliloquy; answering needs the hop Shakespeare to Hamlet to Greta Simeon. The keyword version says Shakespeare&#x27;s Hamlet, so the question&#x27;s own word sits next to the answer.</desc>
 <defs><pattern id="untested" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M-2 2L2-2M0 8L8 0M6 10L10 6" fill="none" stroke="#d8dcd7" stroke-width="1"/></pattern></defs>
 <rect x="0" y="0" width="420" height="560" rx="0" fill="#ffffff"/>
 <text x="24" y="30" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="start">01 / THE PAIR</text>
@@ -26,7 +26,7 @@
 <path d="M282 315L287 319" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round"/>
 <path d="M282 323L287 319" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round"/>
 <rect x="24" y="374" width="372" height="136" rx="12" fill="#e4f3ee"/>
-<text x="40" y="400" fill="#00796b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="start">KEYWORD TWIN: SAME FACT, SHARED WORD</text>
+<text x="40" y="400" fill="#00796b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="start">KEYWORD VERSION: SAME FACT, SHARED WORD</text>
 <text x="40" y="428" fill="#252725" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="start">Greta Simeon can recite Shakespeare&#x27;s Hamlet</text>
 <text x="40" y="450" fill="#252725" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="start">soliloquy from memory ...</text>
 <rect x="40" y="464" width="112" height="34" rx="12" fill="#ffffff"/>

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="420" height="512" viewBox="0 0 420 512" role="img" aria-labelledby="title desc">
 <title id="title">Perfect to 8K, then a slide.</title>
-<desc id="desc">Share of needles the model found, by document length, averaged over five positions: 100% at 1K, 4K and 8K, 90% at 16K, 76% at 24K, with 95% intervals. It crosses the 85% bar between 16K and 24K, inside the advertised 32K window. The keyword twin, tested at 1K and at 24K, found 14 of 14 at both.</desc>
+<desc id="desc">Share of needles the model found, by document length, averaged over five positions: 100% at 1K, 4K and 8K, 90% at 16K, 76% at 24K, with 95% intervals. It crosses the 85% bar between 16K and 24K, inside the advertised 32K window. The keyword version, tested at 1K and at 24K, found 14 of 14 at both.</desc>
 <defs><pattern id="untested" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M-2 2L2-2M0 8L8 0M6 10L10 6" fill="none" stroke="#d8dcd7" stroke-width="1"/></pattern></defs>
 <rect x="0" y="0" width="420" height="512" rx="0" fill="#ffffff"/>
 <text x="24" y="30" fill="#595e5b" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" text-anchor="start">02 / THE RESULT</text>
@@ -41,5 +41,5 @@
 <circle cx="32" cy="466" r="5" fill="#4557ba"/>
 <text x="44" y="471" fill="#252725" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">Original: share found, 95% interval shaded</text>
 <path d="M32 485 L39 492 L32 499 L25 492 Z" fill="none" stroke="#00796b" stroke-width="2.5"/>
-<text x="44" y="497" fill="#252725" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">Keyword twin: 14 of 14 at both cells tested</text>
+<text x="44" y="497" fill="#252725" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start">Keyword version: 14 of 14 at both cells tested</text>
 </svg>

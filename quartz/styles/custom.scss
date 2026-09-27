@@ -22,3 +22,15 @@
         }
     }
 }
+// Theme-matched figures: a post embeds a light and a dark variant; show the one for the theme.
+// The site defaults to dark, so the light variant hides unless the light theme is chosen.
+:root:not([saved-theme="light"]) img.theme-light-only,
+:root[saved-theme="light"] img.theme-dark-only {
+    display: none;
+}
+// Figures drawn for phone width stay that size on desktop, left-aligned with the text column.
+img.figure-narrow {
+    display: block;
+    max-width: min(100%, 460px);
+    margin-inline: 0;
+}

@@ -2,6 +2,8 @@
 title: "Did Your Agent Actually Read That File?"
 date: 2026-07-12
 draft: false
+series: "LLM Comprehension"
+series_order: 1
 tags:
   - llm
   - agents
@@ -13,7 +15,7 @@ aliases:
   - "context-attribution"
 ---
 
-*Part of the [[series/agent-comprehension-instruments|Agent Comprehension Instruments]] series.*
+*Part of the [[series/llm-comprehension|LLM Comprehension]] series.*
 
 Your coding agent just read twelve files, ran three shell commands, and confidently told you the server config is wrong. Which of those twelve files did it *actually use* to reach that conclusion? Did the `lsof` output matter? Did it ignore the config file it so dutifully opened?
 

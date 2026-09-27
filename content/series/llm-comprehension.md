@@ -1,9 +1,11 @@
 ---
-title: "Agent Comprehension Instruments"
-description: "Building, from scratch, the instruments that measure whether an agent actually uses and understands its context, and what each one's failure modes are."
+title: "LLM Comprehension"
+description: "What a language model actually does with the text you give it: which sources it used, whether it understood them, and how much of a long context it can still use. Each post builds one measurement from scratch."
+aliases:
+  - "series/agent-comprehension-instruments"
 ---
 
-An agent that reads its context and produces an answer leaves two separate questions open: did the answer lean on the right source, and did the agent get that source right. Each post in this series builds one instrument from scratch, follows the exact reasoning path to get there, and spends real space on what the instrument cannot tell you.
+When a language model reads a context and answers, two questions stay open: did the answer lean on the right source, and did the model get that source right? Each post in this series builds one way to measure this from scratch, shows the reasoning behind it, and spends real space on what the measurement cannot tell you.
 
 ## Posts in this series
 
@@ -12,3 +14,4 @@ An agent that reads its context and produces an answer leaves two separate quest
 3. **[[blog/2026-07-22-does-a-reasoning-model-actually-read-its-own-thinking-trace|Does a Reasoning Model Actually Read Its Own Thinking Trace?]]** - Cut, corrupt, and time the chain-of-thought against length-matched filler. The trace turns out to be trusted narration, not working memory, and both halves of that finding matter.
 4. **[[blog/2026-07-24-is-half-your-context-window-just-marketing|Is Half Your Context Window Just Marketing?]]** - A context window is a claim about attention capacity, not recall. Needles built so nothing can be grepped put the real operating range at roughly half the number on the box, and the lexical-overlap twin shows exactly what dies at depth: the hop, not the fetch.
 5. **[[blog/2026-08-12-does-precision-loss-break-retrieval-or-does-distance|Does Precision Loss Break Retrieval, or Does Distance?]]** - The same two-fact, no-shared-words task run down a quantization ladder and out a length ladder. Precision is innocent to roughly 3.5 bits per weight; distance is already breaking retrieval inside the native window. And the one real precision failure is confident and wrong, not uncertain.
+6. **[[blog/2026-09-27-is-half-your-context-window-still-marketing|Is Half Your Context Window Still Marketing in 2026?]]** - The same no-shared-words test on a 2026 frontier model, GPT-6 Luna, from 250 tokens to 512K. Its usable range is about 64K (128K with reasoning on) of an advertised million, well before Codex's default compaction point, and what that means for where you set yours.

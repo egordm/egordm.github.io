@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="336" viewBox="0 0 420 336" role="img" aria-labelledby="title desc">
+<title id="title">stories</title>
+<desc id="desc">Two hypotheses, drawn schematically. Working memory: facts feed a written note, which is read back for the answer. Narration: extra processing steps lead to the answer and emit a written report; the report is not the necessary route to the answer.</desc>
+<rect x="0" y="0" width="420" height="336" rx="0" fill="#ffffff"/>
+<rect x="16" y="12" width="186" height="294" rx="7" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="109" y="37" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#4557ba">Working memory</text>
+<rect x="39" y="55" width="140" height="34" rx="7" fill="#e9edfc" stroke="#4557ba"/>
+<text x="109" y="77" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#4557ba">Facts</text>
+<rect x="59" y="259" width="100" height="33" rx="7" fill="#e9edfc" stroke="#4557ba"/>
+<text x="109" y="281" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#4557ba">Answer</text>
+<rect x="218" y="12" width="186" height="294" rx="7" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="311" y="37" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#00796b">Narration</text>
+<rect x="241" y="55" width="140" height="34" rx="7" fill="#e4f3ee" stroke="#00796b"/>
+<text x="311" y="77" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#00796b">Facts</text>
+<rect x="261" y="259" width="100" height="33" rx="7" fill="#e4f3ee" stroke="#00796b"/>
+<text x="311" y="281" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#00796b">Answer</text>
+<path d="M109 95 L109 137" fill="none" stroke="#4557ba" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M106.12344676837478 131.73450462865776 L109 137 L111.87655323162522 131.73450462865776" fill="none" stroke="#4557ba" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="45" y="144" width="128" height="56" rx="7" fill="#e9edfc" stroke="#4557ba"/>
+<text x="109" y="166" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#4557ba">Written note</text>
+<path d="M67 181 L151 181" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M67 188 L134 188" fill="none" stroke="#4557ba" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M109 205 L109 252" fill="none" stroke="#4557ba" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M106.12344676837478 246.73450462865776 L109 252 L111.87655323162522 246.73450462865776" fill="none" stroke="#4557ba" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="120" y="233" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#4557ba">read back</text>
+<path d="M244 89 L244 119" fill="none" stroke="#00796b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="321" y="111" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#00796b">Extra steps</text>
+<rect x="234" y="125" width="20" height="20" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<rect x="300" y="125" width="20" height="20" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<rect x="366" y="125" width="20" height="20" rx="4" fill="#e4f3ee" stroke="#00796b"/>
+<path d="M257 135 L296 135" fill="none" stroke="#00796b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M290.73450462865776 137.87655323162522 L296 135 L290.73450462865776 132.12344676837478" fill="none" stroke="#00796b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M323 135 L362 135" fill="none" stroke="#00796b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M356.73450462865776 137.87655323162522 L362 135 L356.73450462865776 132.12344676837478" fill="none" stroke="#00796b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M310 151 L310 173" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M307.1234467683748 167.73450462865776 L310 173 L312.8765532316252 167.73450462865776" fill="none" stroke="#595e5b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<rect x="251" y="181" width="118" height="46" rx="7" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="310" y="200" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">Written</text>
+<text x="310" y="217" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#595e5b">report</text>
+<path d="M376 151 L376 243 L311 243" fill="none" stroke="#00796b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M311 243 L311 253" fill="none" stroke="#00796b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<path d="M308.1234467683748 247.73450462865776 L311 253 L313.8765532316252 247.73450462865776" fill="none" stroke="#00796b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1"/>
+<text x="210" y="327" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#595e5b">Competing stories · schematic paths</text>
+</svg>

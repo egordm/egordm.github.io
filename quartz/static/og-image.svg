@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title">
+  <title id="title">Egor Dmitriev, egordmitriev.dev</title>
+  <desc>Render with chrome-headless-shell --no-sandbox --single-process --in-process-gpu --disable-gpu --disable-features=MojoIpcz --screenshot=og-image.png --window-size=1200,630 --hide-scrollbars file:///absolute/path/to/og-image.svg</desc>
+  <rect width="1200" height="630" fill="#ffffff" />
+  <g transform="translate(80 180) scale(4)">
+    <path d="M4 3h8v2H6v2h5v2H6v2h6v2H4Z" fill="#7c3aed" />
+  </g>
+  <g font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif">
+    <text x="96" y="330" fill="#1a1a1a" font-size="56" font-weight="500" letter-spacing="-1.5">Egor Dmitriev</text>
+    <text x="98" y="379" fill="#4e4e4e" font-size="24" font-weight="400">egordmitriev.dev</text>
+  </g>
+</svg>

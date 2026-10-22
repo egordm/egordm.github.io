@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="420" viewBox="0 0 420 420" role="img" aria-labelledby="title desc">
+<title id="title">Lever takeoffs beside their own control branches.</title>
+<desc id="desc">Seventeen tests in source order. Each grey bar spans the fastest to slowest control takeoff for that test; an open end reaches the 27,500 update cap when control is censored. Three dots show each lever&#x27;s takeoffs, teal for the supplied pass verdict and warm for fail. Hollow dots with right chevrons mark branches that never took off before the cap. Nearby dots are separated vertically. Verdicts follow the source data.</desc>
+<rect x="0" y="0" width="420" height="420" rx="0" fill="#1e1e1e"/>
+<path d="M166.0 11L166.0 343" fill="none" stroke="#323532" stroke-width="0.7" stroke-linecap="round"/>
+<path d="M166.0 343L166.0 347" fill="none" stroke="#bdbdb8" stroke-width="0.7" stroke-linecap="round"/>
+<text x="166.0" y="360" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="middle">0</text>
+<path d="M207.45454545454544 11L207.45454545454544 343" fill="none" stroke="#323532" stroke-width="0.7" stroke-linecap="round"/>
+<path d="M207.45454545454544 343L207.45454545454544 347" fill="none" stroke="#bdbdb8" stroke-width="0.7" stroke-linecap="round"/>
+<text x="207.45454545454544" y="360" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="middle">5k</text>
+<path d="M248.9090909090909 11L248.9090909090909 343" fill="none" stroke="#323532" stroke-width="0.7" stroke-linecap="round"/>
+<path d="M248.9090909090909 343L248.9090909090909 347" fill="none" stroke="#bdbdb8" stroke-width="0.7" stroke-linecap="round"/>
+<text x="248.9090909090909" y="360" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="middle">10k</text>
+<path d="M290.3636363636364 11L290.3636363636364 343" fill="none" stroke="#323532" stroke-width="0.7" stroke-linecap="round"/>
+<path d="M290.3636363636364 343L290.3636363636364 347" fill="none" stroke="#bdbdb8" stroke-width="0.7" stroke-linecap="round"/>
+<text x="290.3636363636364" y="360" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="middle">15k</text>
+<path d="M331.8181818181818 11L331.8181818181818 343" fill="none" stroke="#323532" stroke-width="0.7" stroke-linecap="round"/>
+<path d="M331.8181818181818 343L331.8181818181818 347" fill="none" stroke="#bdbdb8" stroke-width="0.7" stroke-linecap="round"/>
+<text x="331.8181818181818" y="360" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="middle">20k</text>
+<path d="M373.27272727272725 11L373.27272727272725 343" fill="none" stroke="#323532" stroke-width="0.7" stroke-linecap="round"/>
+<path d="M373.27272727272725 343L373.27272727272725 347" fill="none" stroke="#bdbdb8" stroke-width="0.7" stroke-linecap="round"/>
+<text x="373.27272727272725" y="360" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="middle">25k</text>
+<g id="test-1" data-verdict="pass">
+<text x="16" y="23.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">repeated keys, 2x</text>
+<path class="control-range" d="M311.0909090909091 17H240.61818181818182V23H311.0909090909091Z" fill="#4c504d" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-1-takeoff-3" cx="172.21818181818182" cy="17.0" r="2.4" fill="#7bd7c8"/>
+<circle id="test-1-takeoff-2" cx="174.29090909090908" cy="23.0" r="2.4" fill="#7bd7c8"/>
+<circle id="test-1-takeoff-1" cx="186.72727272727272" cy="20.0" r="2.4" fill="#7bd7c8"/>
+</g>
+<g id="test-2" data-verdict="pass">
+<text x="16" y="42.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">repeated keys, 1.5x</text>
+<path class="control-range" d="M311.0909090909091 36H240.61818181818182V42H311.0909090909091Z" fill="#4c504d" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-2-takeoff-2" cx="182.5818181818182" cy="33.0" r="2.4" fill="#7bd7c8"/>
+<circle id="test-2-takeoff-1" cx="186.72727272727272" cy="39.0" r="2.4" fill="#7bd7c8"/>
+<circle id="test-2-takeoff-3" cx="188.8" cy="45.0" r="2.4" fill="#7bd7c8"/>
+</g>
+<g id="test-3" data-verdict="pass">
+<text x="16" y="61.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">repeated keys, 3x</text>
+<path class="control-range" d="M311.0909090909091 55H240.61818181818182V61H311.0909090909091Z" fill="#4c504d" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-3-takeoff-3" cx="170.14545454545456" cy="58.0" r="2.4" fill="#7bd7c8"/>
+<circle id="test-3-takeoff-1" cx="186.72727272727272" cy="55.0" r="2.4" fill="#7bd7c8"/>
+<circle id="test-3-takeoff-2" cx="188.8" cy="61.0" r="2.4" fill="#7bd7c8"/>
+</g>
+<g id="test-4" data-verdict="pass">
+<text x="16" y="80.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">Muon 3e-4</text>
+<path class="control-range" d="M394.0 74H255.12727272727273V80H394.0" fill="#1e1e1e" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-4-takeoff-1" cx="197.0909090909091" cy="74.0" r="2.4" fill="#7bd7c8"/>
+<circle id="test-4-takeoff-3" cx="197.0909090909091" cy="80.0" r="2.4" fill="#7bd7c8"/>
+<circle id="test-4-takeoff-2" cx="207.45454545454544" cy="77.0" r="2.4" fill="#7bd7c8"/>
+</g>
+<g id="test-5" data-verdict="pass">
+<text x="16" y="99.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">Muon 1e-4</text>
+<path class="control-range" d="M394.0 93H255.12727272727273V99H394.0" fill="#1e1e1e" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-5-takeoff-1" cx="228.1818181818182" cy="96.0" r="2.4" fill="#7bd7c8"/>
+<circle id="test-5-takeoff-3" cx="244.76363636363635" cy="93.0" r="2.4" fill="#7bd7c8"/>
+<circle id="test-5-takeoff-2" cx="250.9818181818182" cy="99.0" r="2.4" fill="#7bd7c8"/>
+</g>
+<g id="test-6" data-verdict="pass">
+<text x="16" y="118.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">length ramp, a pair per 750</text>
+<path class="control-range" d="M315.23636363636365 112H250.9818181818182V118H315.23636363636365Z" fill="#4c504d" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-6-takeoff-1" cx="219.89090909090908" cy="109.0" r="2.4" fill="#7bd7c8"/>
+<circle id="test-6-takeoff-2" cx="224.03636363636363" cy="115.0" r="2.4" fill="#7bd7c8"/>
+<circle id="test-6-takeoff-3" cx="226.10909090909092" cy="121.0" r="2.4" fill="#7bd7c8"/>
+</g>
+<g id="test-7" data-verdict="fail">
+<text x="16" y="144.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">Muon 1e-3</text>
+<path class="control-range" d="M394.0 138H255.12727272727273V144H394.0" fill="#1e1e1e" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-7-takeoff-1" cx="201.23636363636365" cy="135.0" r="2.4" fill="#ffa96e"/>
+<circle id="test-7-takeoff-3" cx="201.23636363636365" cy="141.0" r="2.4" fill="#ffa96e"/>
+<circle id="test-7-takeoff-2" cx="203.3090909090909" cy="147.0" r="2.4" fill="#ffa96e"/>
+</g>
+<g id="test-8" data-verdict="fail">
+<text x="16" y="163.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">AdamW 3e-4 (rate control)</text>
+<path class="control-range" d="M292.43636363636364 157H236.47272727272727V163H292.43636363636364Z" fill="#4c504d" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-8-takeoff-1" cx="394.0" cy="154.0" r="2.4" fill="#1e1e1e" stroke="#ffa96e" stroke-width="1.2"/>
+<path d="M399.0 152.0l2.5 2 -2.5 2" fill="none" stroke="#ffa96e" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<circle id="test-8-takeoff-2" cx="394.0" cy="160.0" r="2.4" fill="#1e1e1e" stroke="#ffa96e" stroke-width="1.2"/>
+<path d="M399.0 158.0l2.5 2 -2.5 2" fill="none" stroke="#ffa96e" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<circle id="test-8-takeoff-3" cx="394.0" cy="166.0" r="2.4" fill="#1e1e1e" stroke="#ffa96e" stroke-width="1.2"/>
+<path d="M399.0 164.0l2.5 2 -2.5 2" fill="none" stroke="#ffa96e" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="test-9" data-verdict="fail">
+<text x="16" y="182.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">length ramp, a pair per 1,500</text>
+<path class="control-range" d="M315.23636363636365 176H250.9818181818182V182H315.23636363636365Z" fill="#4c504d" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-9-takeoff-1" cx="255.12727272727273" cy="176.0" r="2.4" fill="#ffa96e"/>
+<circle id="test-9-takeoff-3" cx="261.3454545454546" cy="182.0" r="2.4" fill="#ffa96e"/>
+<circle id="test-9-takeoff-2" cx="269.6363636363636" cy="179.0" r="2.4" fill="#ffa96e"/>
+</g>
+<g id="test-10" data-verdict="fail">
+<text x="16" y="201.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">short three-stage curriculum</text>
+<path class="control-range" d="M277.92727272727274 195H240.61818181818182V201H277.92727272727274Z" fill="#4c504d" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-10-takeoff-3" cx="236.47272727272727" cy="198.0" r="2.4" fill="#ffa96e"/>
+<circle id="test-10-takeoff-2" cx="246.83636363636364" cy="195.0" r="2.4" fill="#ffa96e"/>
+<circle id="test-10-takeoff-1" cx="250.9818181818182" cy="201.0" r="2.4" fill="#ffa96e"/>
+</g>
+<g id="test-11" data-verdict="fail">
+<text x="16" y="220.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">10% easy batches</text>
+<path class="control-range" d="M277.92727272727274 214H240.61818181818182V220H277.92727272727274Z" fill="#4c504d" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-11-takeoff-3" cx="215.74545454545455" cy="217.0" r="2.4" fill="#ffa96e"/>
+<circle id="test-11-takeoff-2" cx="242.6909090909091" cy="214.0" r="2.4" fill="#ffa96e"/>
+<circle id="test-11-takeoff-1" cx="244.76363636363635" cy="220.0" r="2.4" fill="#ffa96e"/>
+</g>
+<g id="test-12" data-verdict="fail">
+<text x="16" y="239.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">90% easy batches</text>
+<path class="control-range" d="M277.92727272727274 233H240.61818181818182V239H277.92727272727274Z" fill="#4c504d" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-12-takeoff-1" cx="375.3454545454546" cy="236.0" r="2.4" fill="#ffa96e"/>
+<circle id="test-12-takeoff-2" cx="394.0" cy="233.0" r="2.4" fill="#1e1e1e" stroke="#ffa96e" stroke-width="1.2"/>
+<path d="M399.0 231.0l2.5 2 -2.5 2" fill="none" stroke="#ffa96e" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<circle id="test-12-takeoff-3" cx="394.0" cy="239.0" r="2.4" fill="#1e1e1e" stroke="#ffa96e" stroke-width="1.2"/>
+<path d="M399.0 237.0l2.5 2 -2.5 2" fill="none" stroke="#ffa96e" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="test-13" data-verdict="fail">
+<text x="16" y="258.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">sharper attention, 4x</text>
+<path class="control-range" d="M277.92727272727274 252H240.61818181818182V258H277.92727272727274Z" fill="#4c504d" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-13-takeoff-1" cx="269.6363636363636" cy="255.0" r="2.4" fill="#ffa96e"/>
+<circle id="test-13-takeoff-3" cx="277.92727272727274" cy="255.0" r="2.4" fill="#ffa96e"/>
+<circle id="test-13-takeoff-2" cx="348.4" cy="255.0" r="2.4" fill="#ffa96e"/>
+</g>
+<g id="test-14" data-verdict="fail">
+<text x="16" y="277.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">sharper attention, 12x</text>
+<path class="control-range" d="M277.92727272727274 271H240.61818181818182V277H277.92727272727274Z" fill="#4c504d" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-14-takeoff-1" cx="257.2" cy="274.0" r="2.4" fill="#ffa96e"/>
+<circle id="test-14-takeoff-3" cx="282.07272727272726" cy="274.0" r="2.4" fill="#ffa96e"/>
+<circle id="test-14-takeoff-2" cx="290.3636363636364" cy="274.0" r="2.4" fill="#ffa96e"/>
+</g>
+<g id="test-15" data-verdict="fail">
+<text x="16" y="296.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">sharper attention, 24x</text>
+<path class="control-range" d="M277.92727272727274 290H240.61818181818182V296H277.92727272727274Z" fill="#4c504d" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-15-takeoff-3" cx="275.8545454545455" cy="293.0" r="2.4" fill="#ffa96e"/>
+<circle id="test-15-takeoff-2" cx="294.5090909090909" cy="290.0" r="2.4" fill="#ffa96e"/>
+<circle id="test-15-takeoff-1" cx="296.5818181818182" cy="296.0" r="2.4" fill="#ffa96e"/>
+</g>
+<g id="test-16" data-verdict="fail">
+<text x="16" y="315.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">10% fixed-map batches</text>
+<path class="control-range" d="M323.5272727272727 309H238.54545454545456V315H323.5272727272727Z" fill="#4c504d" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-16-takeoff-1" cx="375.3454545454546" cy="312.0" r="2.4" fill="#ffa96e"/>
+<circle id="test-16-takeoff-2" cx="394.0" cy="309.0" r="2.4" fill="#1e1e1e" stroke="#ffa96e" stroke-width="1.2"/>
+<path d="M399.0 307.0l2.5 2 -2.5 2" fill="none" stroke="#ffa96e" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<circle id="test-16-takeoff-3" cx="394.0" cy="315.0" r="2.4" fill="#1e1e1e" stroke="#ffa96e" stroke-width="1.2"/>
+<path d="M399.0 313.0l2.5 2 -2.5 2" fill="none" stroke="#ffa96e" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="test-17" data-verdict="fail">
+<text x="16" y="334.5" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">90% fixed-map batches</text>
+<path class="control-range" d="M323.5272727272727 328H238.54545454545456V334H323.5272727272727Z" fill="#4c504d" stroke="#4c504d" stroke-width="1"/>
+<circle id="test-17-takeoff-1" cx="394.0" cy="325.0" r="2.4" fill="#1e1e1e" stroke="#ffa96e" stroke-width="1.2"/>
+<path d="M399.0 323.0l2.5 2 -2.5 2" fill="none" stroke="#ffa96e" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<circle id="test-17-takeoff-2" cx="394.0" cy="331.0" r="2.4" fill="#1e1e1e" stroke="#ffa96e" stroke-width="1.2"/>
+<path d="M399.0 329.0l2.5 2 -2.5 2" fill="none" stroke="#ffa96e" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<circle id="test-17-takeoff-3" cx="394.0" cy="337.0" r="2.4" fill="#1e1e1e" stroke="#ffa96e" stroke-width="1.2"/>
+<path d="M399.0 335.0l2.5 2 -2.5 2" fill="none" stroke="#ffa96e" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<text x="280" y="383" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" text-anchor="middle">updates to takeoff after branching</text>
+<rect x="166" y="401" width="16" height="6" rx="0" fill="#4c504d"/>
+<text x="188" y="408" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">control branches, same test</text>
+</svg>

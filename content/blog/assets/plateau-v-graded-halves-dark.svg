@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="330" viewBox="0 0 420 330" role="img" aria-labelledby="title desc">
+<title id="title">The copy half is ready while the graded match lags.</title>
+<desc id="desc">Three AdamW 1e-4 seeds after the 20,000-update verbatim warm stage. Teal lines show restatement forced lead; dashed grey lines show stock lead. Only checkpoints with restatement accuracy below 0.45 are drawn, ending with dots at each seed&#x27;s last plateau checkpoint. The vertical axis starts at zero. The faint band marks 1 to 3 logits, where MQAR took off; graded forced leads can pass this range while stock stays flat.</desc>
+<rect x="0" y="0" width="420" height="330" rx="0" fill="#1e1e1e"/>
+<rect x="48" y="161.96723752792258" width="320" height="61.35517498138495" rx="0" fill="#323532"/>
+<text x="16" y="29" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="start">lead (logits)</text>
+<path d="M48 254.0L368 254.0" fill="none" stroke="#4c504d" stroke-width="0.6" stroke-linecap="round"/>
+<text x="39" y="258.0" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">0</text>
+<path d="M48 192.64482501861505L368 192.64482501861505" fill="none" stroke="#4c504d" stroke-width="0.6" stroke-linecap="round"/>
+<text x="39" y="196.64482501861505" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">2</text>
+<path d="M48 131.28965003723007L368 131.28965003723007" fill="none" stroke="#4c504d" stroke-width="0.6" stroke-linecap="round"/>
+<text x="39" y="135.28965003723007" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">4</text>
+<path d="M48 69.93447505584513L368 69.93447505584513" fill="none" stroke="#4c504d" stroke-width="0.6" stroke-linecap="round"/>
+<text x="39" y="73.93447505584513" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="end">6</text>
+<path d="M48 48L48 254" fill="none" stroke="#4c504d" stroke-width="0.7" stroke-linecap="round"/>
+<path d="M48.0 254L48.0 259" fill="none" stroke="#bdbdb8" stroke-width="0.7" stroke-linecap="round"/>
+<text x="48.0" y="277" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">20k</text>
+<path d="M136.88888888888889 254L136.88888888888889 259" fill="none" stroke="#bdbdb8" stroke-width="0.7" stroke-linecap="round"/>
+<text x="136.88888888888889" y="277" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">30k</text>
+<path d="M225.77777777777777 254L225.77777777777777 259" fill="none" stroke="#bdbdb8" stroke-width="0.7" stroke-linecap="round"/>
+<text x="225.77777777777777" y="277" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">40k</text>
+<path d="M314.6666666666667 254L314.6666666666667 259" fill="none" stroke="#bdbdb8" stroke-width="0.7" stroke-linecap="round"/>
+<text x="314.6666666666667" y="277" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle">50k</text>
+<text x="208" y="302" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle">updates</text>
+<path id="stock_lead-1" class="stock_lead-curve" d="M83.556 227.280 L119.111 226.850 L154.667 227.464 L190.222 227.863 L225.778 227.893 L261.333 228.630 L296.889 228.415" fill="none" stroke="#bdbdb8" stroke-width="1.1" stroke-opacity="0.65" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<circle cx="296.889" cy="228.415" r="2.2" fill="#bdbdb8" fill-opacity="0.8"/>
+<path id="stock_lead-2" class="stock_lead-curve" d="M83.556 226.267 L119.111 225.654 L154.667 226.298 L190.222 226.421 L225.778 226.206 L261.333 228.507 L296.889 227.617 L332.444 227.464 L368.000 227.280" fill="none" stroke="#bdbdb8" stroke-width="1.1" stroke-opacity="0.65" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<circle cx="368.000" cy="227.280" r="2.2" fill="#bdbdb8" fill-opacity="0.8"/>
+<path id="stock_lead-3" class="stock_lead-curve" d="M83.556 230.317 L119.111 230.225 L154.667 229.949 L190.222 229.918" fill="none" stroke="#bdbdb8" stroke-width="1.1" stroke-opacity="0.65" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<circle cx="190.222" cy="229.918" r="2.2" fill="#bdbdb8" fill-opacity="0.8"/>
+<path id="forced_lead-1" class="forced_lead-curve" d="M83.556 159.390 L119.111 158.593 L154.667 160.648 L190.222 162.397 L225.778 154.973 L261.333 156.046 L296.889 182.675" fill="none" stroke="#7bd7c8" stroke-width="1.1" stroke-opacity="0.65" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="296.889" cy="182.675" r="2.2" fill="#7bd7c8" fill-opacity="0.8"/>
+<path id="forced_lead-2" class="forced_lead-curve" d="M83.556 144.297 L119.111 117.761 L154.667 109.509 L190.222 95.489 L225.778 88.218 L261.333 71.407 L296.889 55.087 L332.444 48.000 L368.000 53.982" fill="none" stroke="#7bd7c8" stroke-width="1.1" stroke-opacity="0.65" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="368.000" cy="53.982" r="2.2" fill="#7bd7c8" fill-opacity="0.8"/>
+<path id="forced_lead-3" class="forced_lead-curve" d="M83.556 175.343 L119.111 172.183 L154.667 171.171 L190.222 181.601" fill="none" stroke="#7bd7c8" stroke-width="1.1" stroke-opacity="0.65" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="190.222" cy="181.601" r="2.2" fill="#7bd7c8" fill-opacity="0.8"/>
+<text x="205" y="207.9836187639613" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">MQAR took off here</text>
+<path d="M282 29L296 29" fill="none" stroke="#bdbdb8" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="4 4"/>
+<text x="302" y="32" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" text-anchor="start">unforced</text>
+</svg>

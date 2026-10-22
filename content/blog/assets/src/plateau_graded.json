@@ -1,0 +1,1472 @@
+{
+ "task": "graded language, 4 x 128, 16 properties, 144 carriers, batch 64",
+ "warm_updates": 20000,
+ "runs": [
+  {
+   "recipe": "AdamW 1e-4",
+   "seed": 1,
+   "home": "20261021T122425586389Z",
+   "evaluations": [
+    {
+     "update": 4000,
+     "verbatim": 0.3826,
+     "restatement": 0.392
+    },
+    {
+     "update": 8000,
+     "verbatim": 0.3837,
+     "restatement": 0.3952
+    },
+    {
+     "update": 12000,
+     "verbatim": 0.3851,
+     "restatement": 0.3941
+    },
+    {
+     "update": 16000,
+     "verbatim": 0.3758,
+     "restatement": 0.3916
+    },
+    {
+     "update": 20000,
+     "verbatim": 0.3766,
+     "restatement": 0.3894
+    },
+    {
+     "update": 24000,
+     "verbatim": 0.3848,
+     "restatement": 0.387
+    },
+    {
+     "update": 28000,
+     "verbatim": 0.3747,
+     "restatement": 0.3914
+    },
+    {
+     "update": 32000,
+     "verbatim": 0.3776,
+     "restatement": 0.3899
+    },
+    {
+     "update": 36000,
+     "verbatim": 0.3822,
+     "restatement": 0.384
+    },
+    {
+     "update": 40000,
+     "verbatim": 0.3823,
+     "restatement": 0.3941
+    },
+    {
+     "update": 44000,
+     "verbatim": 0.3834,
+     "restatement": 0.3827
+    },
+    {
+     "update": 48000,
+     "verbatim": 0.3856,
+     "restatement": 0.383
+    },
+    {
+     "update": 52000,
+     "verbatim": 0.4597,
+     "restatement": 0.4678
+    },
+    {
+     "update": 56000,
+     "verbatim": 0.4818,
+     "restatement": 0.4918
+    }
+   ]
+  },
+  {
+   "recipe": "AdamW 1e-4",
+   "seed": 2,
+   "home": "20261021T122426769535Z",
+   "evaluations": [
+    {
+     "update": 4000,
+     "verbatim": 0.3756,
+     "restatement": 0.383
+    },
+    {
+     "update": 8000,
+     "verbatim": 0.6601,
+     "restatement": 0.1154
+    },
+    {
+     "update": 12000,
+     "verbatim": 0.6965,
+     "restatement": 0.0949
+    },
+    {
+     "update": 16000,
+     "verbatim": 0.7065,
+     "restatement": 0.0919
+    },
+    {
+     "update": 20000,
+     "verbatim": 0.8905,
+     "restatement": 0.1088
+    },
+    {
+     "update": 24000,
+     "verbatim": 0.9477,
+     "restatement": 0.3776
+    },
+    {
+     "update": 28000,
+     "verbatim": 0.9683,
+     "restatement": 0.3939
+    },
+    {
+     "update": 32000,
+     "verbatim": 0.9869,
+     "restatement": 0.3942
+    },
+    {
+     "update": 36000,
+     "verbatim": 0.9914,
+     "restatement": 0.3903
+    },
+    {
+     "update": 40000,
+     "verbatim": 0.9926,
+     "restatement": 0.3863
+    },
+    {
+     "update": 44000,
+     "verbatim": 0.9954,
+     "restatement": 0.383
+    },
+    {
+     "update": 48000,
+     "verbatim": 0.9956,
+     "restatement": 0.3917
+    },
+    {
+     "update": 52000,
+     "verbatim": 0.9976,
+     "restatement": 0.3887
+    },
+    {
+     "update": 56000,
+     "verbatim": 0.9968,
+     "restatement": 0.3876
+    }
+   ]
+  },
+  {
+   "recipe": "AdamW 1e-4",
+   "seed": 3,
+   "home": "20261021T122428762355Z",
+   "evaluations": [
+    {
+     "update": 4000,
+     "verbatim": 0.386,
+     "restatement": 0.374
+    },
+    {
+     "update": 8000,
+     "verbatim": 0.6417,
+     "restatement": 0.1255
+    },
+    {
+     "update": 12000,
+     "verbatim": 0.6847,
+     "restatement": 0.1134
+    },
+    {
+     "update": 16000,
+     "verbatim": 0.7154,
+     "restatement": 0.0937
+    },
+    {
+     "update": 20000,
+     "verbatim": 0.7342,
+     "restatement": 0.0793
+    },
+    {
+     "update": 24000,
+     "verbatim": 0.7396,
+     "restatement": 0.3777
+    },
+    {
+     "update": 28000,
+     "verbatim": 0.7569,
+     "restatement": 0.3892
+    },
+    {
+     "update": 32000,
+     "verbatim": 0.7752,
+     "restatement": 0.3792
+    },
+    {
+     "update": 36000,
+     "verbatim": 0.7813,
+     "restatement": 0.3863
+    },
+    {
+     "update": 40000,
+     "verbatim": 0.8288,
+     "restatement": 0.5403
+    },
+    {
+     "update": 44000,
+     "verbatim": 0.9651,
+     "restatement": 0.9314
+    },
+    {
+     "update": 48000,
+     "verbatim": 0.9957,
+     "restatement": 0.9895
+    },
+    {
+     "update": 52000,
+     "verbatim": 0.9976,
+     "restatement": 0.9956
+    },
+    {
+     "update": 56000,
+     "verbatim": 0.9989,
+     "restatement": 0.9972
+    }
+   ]
+  },
+  {
+   "recipe": "AdamW 2.5e-4",
+   "seed": 1,
+   "home": "20261021T174312919945Z",
+   "evaluations": [
+    {
+     "update": 2000,
+     "verbatim": 0.3752,
+     "restatement": 0.3916
+    },
+    {
+     "update": 4000,
+     "verbatim": 0.3849,
+     "restatement": 0.3937
+    },
+    {
+     "update": 6000,
+     "verbatim": 0.3858,
+     "restatement": 0.3921
+    },
+    {
+     "update": 8000,
+     "verbatim": 0.3773,
+     "restatement": 0.3942
+    },
+    {
+     "update": 10000,
+     "verbatim": 0.3737,
+     "restatement": 0.3908
+    },
+    {
+     "update": 12000,
+     "verbatim": 0.3799,
+     "restatement": 0.3955
+    },
+    {
+     "update": 14000,
+     "verbatim": 0.3788,
+     "restatement": 0.3815
+    },
+    {
+     "update": 16000,
+     "verbatim": 0.3772,
+     "restatement": 0.3951
+    },
+    {
+     "update": 18000,
+     "verbatim": 0.3816,
+     "restatement": 0.3973
+    },
+    {
+     "update": 20000,
+     "verbatim": 0.3758,
+     "restatement": 0.3828
+    },
+    {
+     "update": 22000,
+     "verbatim": 0.3784,
+     "restatement": 0.3895
+    },
+    {
+     "update": 24000,
+     "verbatim": 0.3801,
+     "restatement": 0.3938
+    },
+    {
+     "update": 26000,
+     "verbatim": 0.3683,
+     "restatement": 0.3905
+    },
+    {
+     "update": 28000,
+     "verbatim": 0.3766,
+     "restatement": 0.3887
+    },
+    {
+     "update": 30000,
+     "verbatim": 0.3795,
+     "restatement": 0.3865
+    },
+    {
+     "update": 32000,
+     "verbatim": 0.386,
+     "restatement": 0.3959
+    },
+    {
+     "update": 34000,
+     "verbatim": 0.6519,
+     "restatement": 0.6423
+    },
+    {
+     "update": 36000,
+     "verbatim": 0.7379,
+     "restatement": 0.7215
+    },
+    {
+     "update": 38000,
+     "verbatim": 0.7854,
+     "restatement": 0.7567
+    },
+    {
+     "update": 40000,
+     "verbatim": 0.7914,
+     "restatement": 0.7728
+    },
+    {
+     "update": 42000,
+     "verbatim": 0.8184,
+     "restatement": 0.7743
+    }
+   ]
+  },
+  {
+   "recipe": "AdamW 2.5e-4",
+   "seed": 2,
+   "home": "20261021T190029115954Z",
+   "evaluations": [
+    {
+     "update": 2000,
+     "verbatim": 0.3815,
+     "restatement": 0.3888
+    },
+    {
+     "update": 4000,
+     "verbatim": 0.3774,
+     "restatement": 0.3815
+    },
+    {
+     "update": 6000,
+     "verbatim": 0.3705,
+     "restatement": 0.3838
+    },
+    {
+     "update": 8000,
+     "verbatim": 0.377,
+     "restatement": 0.3887
+    },
+    {
+     "update": 10000,
+     "verbatim": 0.3858,
+     "restatement": 0.3916
+    },
+    {
+     "update": 12000,
+     "verbatim": 0.3785,
+     "restatement": 0.3892
+    },
+    {
+     "update": 14000,
+     "verbatim": 0.6131,
+     "restatement": 0.3293
+    },
+    {
+     "update": 16000,
+     "verbatim": 0.6185,
+     "restatement": 0.2521
+    },
+    {
+     "update": 18000,
+     "verbatim": 0.6191,
+     "restatement": 0.0966
+    },
+    {
+     "update": 20000,
+     "verbatim": 0.9951,
+     "restatement": 0.0199
+    },
+    {
+     "update": 22000,
+     "verbatim": 0.9901,
+     "restatement": 0.9556
+    },
+    {
+     "update": 24000,
+     "verbatim": 0.9962,
+     "restatement": 0.9732
+    },
+    {
+     "update": 26000,
+     "verbatim": 0.9971,
+     "restatement": 0.9818
+    },
+    {
+     "update": 28000,
+     "verbatim": 0.9979,
+     "restatement": 0.9895
+    },
+    {
+     "update": 30000,
+     "verbatim": 0.9979,
+     "restatement": 0.9969
+    },
+    {
+     "update": 32000,
+     "verbatim": 0.9992,
+     "restatement": 0.9975
+    },
+    {
+     "update": 34000,
+     "verbatim": 0.9996,
+     "restatement": 0.9965
+    },
+    {
+     "update": 36000,
+     "verbatim": 0.9996,
+     "restatement": 0.9986
+    },
+    {
+     "update": 38000,
+     "verbatim": 0.9997,
+     "restatement": 0.9988
+    },
+    {
+     "update": 40000,
+     "verbatim": 0.9997,
+     "restatement": 0.9978
+    },
+    {
+     "update": 42000,
+     "verbatim": 0.9999,
+     "restatement": 0.9979
+    }
+   ]
+  },
+  {
+   "recipe": "AdamW 2.5e-4",
+   "seed": 3,
+   "home": "20261021T190514728721Z",
+   "evaluations": [
+    {
+     "update": 2000,
+     "verbatim": 0.3783,
+     "restatement": 0.3851
+    },
+    {
+     "update": 4000,
+     "verbatim": 0.3822,
+     "restatement": 0.3848
+    },
+    {
+     "update": 6000,
+     "verbatim": 0.3808,
+     "restatement": 0.3815
+    },
+    {
+     "update": 8000,
+     "verbatim": 0.3815,
+     "restatement": 0.3909
+    },
+    {
+     "update": 10000,
+     "verbatim": 0.648,
+     "restatement": 0.148
+    },
+    {
+     "update": 12000,
+     "verbatim": 0.8749,
+     "restatement": 0.06
+    },
+    {
+     "update": 14000,
+     "verbatim": 0.9782,
+     "restatement": 0.0176
+    },
+    {
+     "update": 16000,
+     "verbatim": 0.9928,
+     "restatement": 0.0126
+    },
+    {
+     "update": 18000,
+     "verbatim": 0.9967,
+     "restatement": 0.0111
+    },
+    {
+     "update": 20000,
+     "verbatim": 0.9989,
+     "restatement": 0.0082
+    },
+    {
+     "update": 22000,
+     "verbatim": 0.9979,
+     "restatement": 0.9738
+    },
+    {
+     "update": 24000,
+     "verbatim": 0.9985,
+     "restatement": 0.9942
+    },
+    {
+     "update": 26000,
+     "verbatim": 0.9994,
+     "restatement": 0.9964
+    },
+    {
+     "update": 28000,
+     "verbatim": 0.9999,
+     "restatement": 0.9968
+    },
+    {
+     "update": 30000,
+     "verbatim": 1.0,
+     "restatement": 0.9982
+    },
+    {
+     "update": 32000,
+     "verbatim": 0.9993,
+     "restatement": 0.9975
+    },
+    {
+     "update": 34000,
+     "verbatim": 0.9997,
+     "restatement": 0.9979
+    },
+    {
+     "update": 36000,
+     "verbatim": 0.9997,
+     "restatement": 0.9985
+    },
+    {
+     "update": 38000,
+     "verbatim": 0.9999,
+     "restatement": 0.9982
+    },
+    {
+     "update": 40000,
+     "verbatim": 0.9997,
+     "restatement": 0.9988
+    },
+    {
+     "update": 42000,
+     "verbatim": 0.9999,
+     "restatement": 0.9981
+    }
+   ]
+  },
+  {
+   "recipe": "Muon 3e-4",
+   "seed": 1,
+   "home": "20261021T174227877075Z",
+   "evaluations": [
+    {
+     "update": 2000,
+     "verbatim": 0.3898,
+     "restatement": 0.3924
+    },
+    {
+     "update": 4000,
+     "verbatim": 0.8412,
+     "restatement": 0.0938
+    },
+    {
+     "update": 6000,
+     "verbatim": 0.9404,
+     "restatement": 0.0447
+    },
+    {
+     "update": 8000,
+     "verbatim": 0.9807,
+     "restatement": 0.0164
+    },
+    {
+     "update": 10000,
+     "verbatim": 0.9996,
+     "restatement": 0.0175
+    },
+    {
+     "update": 12000,
+     "verbatim": 0.9996,
+     "restatement": 0.0081
+    },
+    {
+     "update": 14000,
+     "verbatim": 0.9994,
+     "restatement": 0.0132
+    },
+    {
+     "update": 16000,
+     "verbatim": 0.9997,
+     "restatement": 0.0099
+    },
+    {
+     "update": 18000,
+     "verbatim": 0.9999,
+     "restatement": 0.0099
+    },
+    {
+     "update": 20000,
+     "verbatim": 0.9999,
+     "restatement": 0.0096
+    },
+    {
+     "update": 22000,
+     "verbatim": 0.9989,
+     "restatement": 0.9921
+    },
+    {
+     "update": 24000,
+     "verbatim": 0.9994,
+     "restatement": 0.9976
+    },
+    {
+     "update": 26000,
+     "verbatim": 0.9994,
+     "restatement": 0.9985
+    },
+    {
+     "update": 28000,
+     "verbatim": 0.9996,
+     "restatement": 0.9988
+    },
+    {
+     "update": 30000,
+     "verbatim": 0.9993,
+     "restatement": 0.9981
+    },
+    {
+     "update": 32000,
+     "verbatim": 0.9996,
+     "restatement": 0.9988
+    },
+    {
+     "update": 34000,
+     "verbatim": 0.9999,
+     "restatement": 0.9988
+    },
+    {
+     "update": 36000,
+     "verbatim": 0.9999,
+     "restatement": 0.9986
+    },
+    {
+     "update": 38000,
+     "verbatim": 0.9997,
+     "restatement": 0.999
+    },
+    {
+     "update": 40000,
+     "verbatim": 0.9997,
+     "restatement": 0.9992
+    },
+    {
+     "update": 42000,
+     "verbatim": 0.9996,
+     "restatement": 0.9989
+    }
+   ]
+  },
+  {
+   "recipe": "Muon 3e-4",
+   "seed": 2,
+   "home": "20261021T174357951857Z",
+   "evaluations": [
+    {
+     "update": 2000,
+     "verbatim": 0.3829,
+     "restatement": 0.387
+    },
+    {
+     "update": 4000,
+     "verbatim": 0.8407,
+     "restatement": 0.0987
+    },
+    {
+     "update": 6000,
+     "verbatim": 0.9408,
+     "restatement": 0.0464
+    },
+    {
+     "update": 8000,
+     "verbatim": 0.9653,
+     "restatement": 0.035
+    },
+    {
+     "update": 10000,
+     "verbatim": 0.9992,
+     "restatement": 0.0169
+    },
+    {
+     "update": 12000,
+     "verbatim": 0.9999,
+     "restatement": 0.0226
+    },
+    {
+     "update": 14000,
+     "verbatim": 0.9996,
+     "restatement": 0.0071
+    },
+    {
+     "update": 16000,
+     "verbatim": 0.9999,
+     "restatement": 0.0117
+    },
+    {
+     "update": 18000,
+     "verbatim": 0.9997,
+     "restatement": 0.0078
+    },
+    {
+     "update": 20000,
+     "verbatim": 0.9997,
+     "restatement": 0.0096
+    },
+    {
+     "update": 22000,
+     "verbatim": 0.9992,
+     "restatement": 0.9971
+    },
+    {
+     "update": 24000,
+     "verbatim": 0.9999,
+     "restatement": 0.9982
+    },
+    {
+     "update": 26000,
+     "verbatim": 0.9997,
+     "restatement": 0.9989
+    },
+    {
+     "update": 28000,
+     "verbatim": 1.0,
+     "restatement": 0.999
+    },
+    {
+     "update": 30000,
+     "verbatim": 1.0,
+     "restatement": 0.9993
+    },
+    {
+     "update": 32000,
+     "verbatim": 1.0,
+     "restatement": 0.9996
+    },
+    {
+     "update": 34000,
+     "verbatim": 0.9999,
+     "restatement": 0.9993
+    },
+    {
+     "update": 36000,
+     "verbatim": 1.0,
+     "restatement": 0.9997
+    },
+    {
+     "update": 38000,
+     "verbatim": 1.0,
+     "restatement": 0.9997
+    },
+    {
+     "update": 40000,
+     "verbatim": 0.9996,
+     "restatement": 0.9994
+    },
+    {
+     "update": 42000,
+     "verbatim": 1.0,
+     "restatement": 0.9996
+    }
+   ]
+  },
+  {
+   "recipe": "Muon 3e-4",
+   "seed": 3,
+   "home": "20261021T190300054717Z",
+   "evaluations": [
+    {
+     "update": 2000,
+     "verbatim": 0.4211,
+     "restatement": 0.3726
+    },
+    {
+     "update": 4000,
+     "verbatim": 0.8966,
+     "restatement": 0.0775
+    },
+    {
+     "update": 6000,
+     "verbatim": 0.9626,
+     "restatement": 0.0226
+    },
+    {
+     "update": 8000,
+     "verbatim": 0.9793,
+     "restatement": 0.03
+    },
+    {
+     "update": 10000,
+     "verbatim": 0.9986,
+     "restatement": 0.009
+    },
+    {
+     "update": 12000,
+     "verbatim": 0.9997,
+     "restatement": 0.0101
+    },
+    {
+     "update": 14000,
+     "verbatim": 0.9997,
+     "restatement": 0.0101
+    },
+    {
+     "update": 16000,
+     "verbatim": 1.0,
+     "restatement": 0.0133
+    },
+    {
+     "update": 18000,
+     "verbatim": 0.9999,
+     "restatement": 0.0126
+    },
+    {
+     "update": 20000,
+     "verbatim": 0.9999,
+     "restatement": 0.0089
+    },
+    {
+     "update": 22000,
+     "verbatim": 0.9992,
+     "restatement": 0.9964
+    },
+    {
+     "update": 24000,
+     "verbatim": 0.9999,
+     "restatement": 0.9985
+    },
+    {
+     "update": 26000,
+     "verbatim": 0.9997,
+     "restatement": 0.9981
+    },
+    {
+     "update": 28000,
+     "verbatim": 0.9994,
+     "restatement": 0.9985
+    },
+    {
+     "update": 30000,
+     "verbatim": 0.9996,
+     "restatement": 0.9988
+    },
+    {
+     "update": 32000,
+     "verbatim": 0.9999,
+     "restatement": 0.999
+    },
+    {
+     "update": 34000,
+     "verbatim": 0.9997,
+     "restatement": 0.9994
+    },
+    {
+     "update": 36000,
+     "verbatim": 0.9999,
+     "restatement": 0.9989
+    },
+    {
+     "update": 38000,
+     "verbatim": 0.9999,
+     "restatement": 0.999
+    },
+    {
+     "update": 40000,
+     "verbatim": 0.9996,
+     "restatement": 0.9989
+    },
+    {
+     "update": 42000,
+     "verbatim": 0.9993,
+     "restatement": 0.9985
+    }
+   ]
+  }
+ ],
+ "two_half": [
+  {
+   "seed": 1,
+   "checkpoints": [
+    {
+     "update": 4000,
+     "verbatim": {
+      "stock_lead": 1.274,
+      "forced_lead": 3.482,
+      "accuracy": 0.3826
+     },
+     "restatement": {
+      "stock_lead": 1.204,
+      "forced_lead": 3.444,
+      "accuracy": 0.392
+     }
+    },
+    {
+     "update": 8000,
+     "verbatim": {
+      "stock_lead": 1.054,
+      "forced_lead": 3.011,
+      "accuracy": 0.3837
+     },
+     "restatement": {
+      "stock_lead": 0.997,
+      "forced_lead": 2.956,
+      "accuracy": 0.3952
+     }
+    },
+    {
+     "update": 12000,
+     "verbatim": {
+      "stock_lead": 0.981,
+      "forced_lead": 3.198,
+      "accuracy": 0.3851
+     },
+     "restatement": {
+      "stock_lead": 0.956,
+      "forced_lead": 3.169,
+      "accuracy": 0.3941
+     }
+    },
+    {
+     "update": 16000,
+     "verbatim": {
+      "stock_lead": 0.954,
+      "forced_lead": 3.216,
+      "accuracy": 0.3758
+     },
+     "restatement": {
+      "stock_lead": 0.937,
+      "forced_lead": 3.178,
+      "accuracy": 0.3916
+     }
+    },
+    {
+     "update": 20000,
+     "verbatim": {
+      "stock_lead": 0.922,
+      "forced_lead": 3.224,
+      "accuracy": 0.3766
+     },
+     "restatement": {
+      "stock_lead": 0.913,
+      "forced_lead": 3.194,
+      "accuracy": 0.3894
+     }
+    },
+    {
+     "update": 24000,
+     "verbatim": {
+      "stock_lead": 0.884,
+      "forced_lead": 3.114,
+      "accuracy": 0.3848
+     },
+     "restatement": {
+      "stock_lead": 0.871,
+      "forced_lead": 3.084,
+      "accuracy": 0.387
+     }
+    },
+    {
+     "update": 28000,
+     "verbatim": {
+      "stock_lead": 0.883,
+      "forced_lead": 3.14,
+      "accuracy": 0.3747
+     },
+     "restatement": {
+      "stock_lead": 0.885,
+      "forced_lead": 3.11,
+      "accuracy": 0.3914
+     }
+    },
+    {
+     "update": 32000,
+     "verbatim": {
+      "stock_lead": 0.877,
+      "forced_lead": 3.077,
+      "accuracy": 0.3776
+     },
+     "restatement": {
+      "stock_lead": 0.865,
+      "forced_lead": 3.043,
+      "accuracy": 0.3899
+     }
+    },
+    {
+     "update": 36000,
+     "verbatim": {
+      "stock_lead": 0.867,
+      "forced_lead": 3.051,
+      "accuracy": 0.3822
+     },
+     "restatement": {
+      "stock_lead": 0.852,
+      "forced_lead": 2.986,
+      "accuracy": 0.384
+     }
+    },
+    {
+     "update": 40000,
+     "verbatim": {
+      "stock_lead": 0.835,
+      "forced_lead": 3.267,
+      "accuracy": 0.3823
+     },
+     "restatement": {
+      "stock_lead": 0.851,
+      "forced_lead": 3.228,
+      "accuracy": 0.3941
+     }
+    },
+    {
+     "update": 44000,
+     "verbatim": {
+      "stock_lead": 0.833,
+      "forced_lead": 3.252,
+      "accuracy": 0.3834
+     },
+     "restatement": {
+      "stock_lead": 0.827,
+      "forced_lead": 3.193,
+      "accuracy": 0.3827
+     }
+    },
+    {
+     "update": 48000,
+     "verbatim": {
+      "stock_lead": 0.845,
+      "forced_lead": 2.385,
+      "accuracy": 0.3856
+     },
+     "restatement": {
+      "stock_lead": 0.834,
+      "forced_lead": 2.325,
+      "accuracy": 0.383
+     }
+    },
+    {
+     "update": 52000,
+     "verbatim": {
+      "stock_lead": 1.371,
+      "forced_lead": 2.11,
+      "accuracy": 0.4597
+     },
+     "restatement": {
+      "stock_lead": 1.327,
+      "forced_lead": 2.091,
+      "accuracy": 0.4678
+     }
+    },
+    {
+     "update": 56000,
+     "verbatim": {
+      "stock_lead": 1.732,
+      "forced_lead": 1.849,
+      "accuracy": 0.4818
+     },
+     "restatement": {
+      "stock_lead": 1.724,
+      "forced_lead": 1.886,
+      "accuracy": 0.4918
+     }
+    }
+   ]
+  },
+  {
+   "seed": 2,
+   "checkpoints": [
+    {
+     "update": 4000,
+     "verbatim": {
+      "stock_lead": 1.137,
+      "forced_lead": 3.891,
+      "accuracy": 0.3756
+     },
+     "restatement": {
+      "stock_lead": 1.069,
+      "forced_lead": 3.83,
+      "accuracy": 0.383
+     }
+    },
+    {
+     "update": 8000,
+     "verbatim": {
+      "stock_lead": 5.129,
+      "forced_lead": 6.082,
+      "accuracy": 0.6601
+     },
+     "restatement": {
+      "stock_lead": -0.639,
+      "forced_lead": 3.046,
+      "accuracy": 0.1154
+     }
+    },
+    {
+     "update": 12000,
+     "verbatim": {
+      "stock_lead": 6.375,
+      "forced_lead": 6.627,
+      "accuracy": 0.6965
+     },
+     "restatement": {
+      "stock_lead": -0.614,
+      "forced_lead": 2.644,
+      "accuracy": 0.0949
+     }
+    },
+    {
+     "update": 16000,
+     "verbatim": {
+      "stock_lead": 6.788,
+      "forced_lead": 6.074,
+      "accuracy": 0.7065
+     },
+     "restatement": {
+      "stock_lead": -0.629,
+      "forced_lead": 2.183,
+      "accuracy": 0.0919
+     }
+    },
+    {
+     "update": 20000,
+     "verbatim": {
+      "stock_lead": 9.944,
+      "forced_lead": 5.327,
+      "accuracy": 0.8905
+     },
+     "restatement": {
+      "stock_lead": -0.175,
+      "forced_lead": 2.555,
+      "accuracy": 0.1088
+     }
+    },
+    {
+     "update": 24000,
+     "verbatim": {
+      "stock_lead": 10.518,
+      "forced_lead": 4.203,
+      "accuracy": 0.9477
+     },
+     "restatement": {
+      "stock_lead": 0.904,
+      "forced_lead": 3.576,
+      "accuracy": 0.3776
+     }
+    },
+    {
+     "update": 28000,
+     "verbatim": {
+      "stock_lead": 11.338,
+      "forced_lead": 3.81,
+      "accuracy": 0.9683
+     },
+     "restatement": {
+      "stock_lead": 0.924,
+      "forced_lead": 4.441,
+      "accuracy": 0.3939
+     }
+    },
+    {
+     "update": 32000,
+     "verbatim": {
+      "stock_lead": 12.109,
+      "forced_lead": 3.631,
+      "accuracy": 0.9869
+     },
+     "restatement": {
+      "stock_lead": 0.903,
+      "forced_lead": 4.71,
+      "accuracy": 0.3942
+     }
+    },
+    {
+     "update": 36000,
+     "verbatim": {
+      "stock_lead": 12.517,
+      "forced_lead": 3.611,
+      "accuracy": 0.9914
+     },
+     "restatement": {
+      "stock_lead": 0.899,
+      "forced_lead": 5.167,
+      "accuracy": 0.3903
+     }
+    },
+    {
+     "update": 40000,
+     "verbatim": {
+      "stock_lead": 12.557,
+      "forced_lead": 3.282,
+      "accuracy": 0.9926
+     },
+     "restatement": {
+      "stock_lead": 0.906,
+      "forced_lead": 5.404,
+      "accuracy": 0.3863
+     }
+    },
+    {
+     "update": 44000,
+     "verbatim": {
+      "stock_lead": 12.202,
+      "forced_lead": 4.144,
+      "accuracy": 0.9954
+     },
+     "restatement": {
+      "stock_lead": 0.831,
+      "forced_lead": 5.952,
+      "accuracy": 0.383
+     }
+    },
+    {
+     "update": 48000,
+     "verbatim": {
+      "stock_lead": 12.644,
+      "forced_lead": 3.444,
+      "accuracy": 0.9956
+     },
+     "restatement": {
+      "stock_lead": 0.86,
+      "forced_lead": 6.484,
+      "accuracy": 0.3917
+     }
+    },
+    {
+     "update": 52000,
+     "verbatim": {
+      "stock_lead": 13.036,
+      "forced_lead": 2.634,
+      "accuracy": 0.9976
+     },
+     "restatement": {
+      "stock_lead": 0.865,
+      "forced_lead": 6.715,
+      "accuracy": 0.3887
+     }
+    },
+    {
+     "update": 56000,
+     "verbatim": {
+      "stock_lead": 12.998,
+      "forced_lead": 2.41,
+      "accuracy": 0.9968
+     },
+     "restatement": {
+      "stock_lead": 0.871,
+      "forced_lead": 6.52,
+      "accuracy": 0.3876
+     }
+    }
+   ]
+  },
+  {
+   "seed": 3,
+   "checkpoints": [
+    {
+     "update": 4000,
+     "verbatim": {
+      "stock_lead": 1.091,
+      "forced_lead": 4.685,
+      "accuracy": 0.386
+     },
+     "restatement": {
+      "stock_lead": 1.012,
+      "forced_lead": 4.62,
+      "accuracy": 0.374
+     }
+    },
+    {
+     "update": 8000,
+     "verbatim": {
+      "stock_lead": 4.661,
+      "forced_lead": 6.924,
+      "accuracy": 0.6417
+     },
+     "restatement": {
+      "stock_lead": -0.639,
+      "forced_lead": 2.751,
+      "accuracy": 0.1255
+     }
+    },
+    {
+     "update": 12000,
+     "verbatim": {
+      "stock_lead": 5.939,
+      "forced_lead": 6.842,
+      "accuracy": 0.6847
+     },
+     "restatement": {
+      "stock_lead": -0.699,
+      "forced_lead": 1.763,
+      "accuracy": 0.1134
+     }
+    },
+    {
+     "update": 16000,
+     "verbatim": {
+      "stock_lead": 6.87,
+      "forced_lead": 7.437,
+      "accuracy": 0.7154
+     },
+     "restatement": {
+      "stock_lead": -0.602,
+      "forced_lead": 1.526,
+      "accuracy": 0.0937
+     }
+    },
+    {
+     "update": 20000,
+     "verbatim": {
+      "stock_lead": 7.5,
+      "forced_lead": 7.588,
+      "accuracy": 0.7342
+     },
+     "restatement": {
+      "stock_lead": -0.597,
+      "forced_lead": 1.372,
+      "accuracy": 0.0793
+     }
+    },
+    {
+     "update": 24000,
+     "verbatim": {
+      "stock_lead": 6.613,
+      "forced_lead": 7.24,
+      "accuracy": 0.7396
+     },
+     "restatement": {
+      "stock_lead": 0.772,
+      "forced_lead": 2.564,
+      "accuracy": 0.3777
+     }
+    },
+    {
+     "update": 28000,
+     "verbatim": {
+      "stock_lead": 6.762,
+      "forced_lead": 7.397,
+      "accuracy": 0.7569
+     },
+     "restatement": {
+      "stock_lead": 0.775,
+      "forced_lead": 2.667,
+      "accuracy": 0.3892
+     }
+    },
+    {
+     "update": 32000,
+     "verbatim": {
+      "stock_lead": 7.08,
+      "forced_lead": 7.322,
+      "accuracy": 0.7752
+     },
+     "restatement": {
+      "stock_lead": 0.784,
+      "forced_lead": 2.7,
+      "accuracy": 0.3792
+     }
+    },
+    {
+     "update": 36000,
+     "verbatim": {
+      "stock_lead": 7.192,
+      "forced_lead": 6.817,
+      "accuracy": 0.7813
+     },
+     "restatement": {
+      "stock_lead": 0.785,
+      "forced_lead": 2.36,
+      "accuracy": 0.3863
+     }
+    },
+    {
+     "update": 40000,
+     "verbatim": {
+      "stock_lead": 7.96,
+      "forced_lead": 7.766,
+      "accuracy": 0.8288
+     },
+     "restatement": {
+      "stock_lead": 2.358,
+      "forced_lead": 3.652,
+      "accuracy": 0.5403
+     }
+    },
+    {
+     "update": 44000,
+     "verbatim": {
+      "stock_lead": 11.782,
+      "forced_lead": 12.313,
+      "accuracy": 0.9651
+     },
+     "restatement": {
+      "stock_lead": 8.738,
+      "forced_lead": 11.453,
+      "accuracy": 0.9314
+     }
+    },
+    {
+     "update": 48000,
+     "verbatim": {
+      "stock_lead": 14.693,
+      "forced_lead": 15.399,
+      "accuracy": 0.9957
+     },
+     "restatement": {
+      "stock_lead": 11.76,
+      "forced_lead": 15.033,
+      "accuracy": 0.9895
+     }
+    },
+    {
+     "update": 52000,
+     "verbatim": {
+      "stock_lead": 15.555,
+      "forced_lead": 15.678,
+      "accuracy": 0.9976
+     },
+     "restatement": {
+      "stock_lead": 13.548,
+      "forced_lead": 15.501,
+      "accuracy": 0.9956
+     }
+    },
+    {
+     "update": 56000,
+     "verbatim": {
+      "stock_lead": 15.665,
+      "forced_lead": 15.27,
+      "accuracy": 0.9989
+     },
+     "restatement": {
+      "stock_lead": 14.052,
+      "forced_lead": 14.933,
+      "accuracy": 0.9972
+     }
+    }
+   ]
+  }
+ ]
+}

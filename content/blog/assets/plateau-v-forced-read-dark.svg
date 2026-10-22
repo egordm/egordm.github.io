@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="244" viewBox="0 0 420 244" role="img" aria-labelledby="title desc">
+<title id="title">Forcing attention onto the correct value reveals the copy path&#x27;s lead.</title>
+<desc id="desc">Schematic, not measured data. Both rows contain A 3 B 7 C 1 A ?. Ordinary attention is spread across the seven earlier tokens and the output scores for 3, 7 and 1 are equal. Forced attention permits only the first 3; all other earlier positions are blocked. The score for 3 then exceeds the mean score for 7 and 1, marked by a dashed line. The bracket marks that difference, the answer&#x27;s lead.</desc>
+<rect x="0" y="0" width="420" height="244" rx="0" fill="#1e1e1e"/>
+<text x="16" y="96" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" text-anchor="start">ordinary</text>
+<rect x="80" y="80" width="21" height="24" rx="3" fill="#292b2a" stroke="#4c504d"/>
+<text x="90.5" y="96" fill="#bdbdb8" font-family="Menlo, Consolas, monospace" font-size="12" text-anchor="middle">A</text>
+<rect x="88" y="67.14285714285714" width="5" height="6.857142857142857" rx="1" fill="#bdbdb8"/>
+<rect x="104" y="80" width="21" height="24" rx="3" fill="#292b2a" stroke="#4c504d"/>
+<text x="114.5" y="96" fill="#bdbdb8" font-family="Menlo, Consolas, monospace" font-size="12" text-anchor="middle">3</text>
+<rect x="112" y="67.14285714285714" width="5" height="6.857142857142857" rx="1" fill="#bdbdb8"/>
+<rect x="128" y="80" width="21" height="24" rx="3" fill="#292b2a" stroke="#4c504d"/>
+<text x="138.5" y="96" fill="#bdbdb8" font-family="Menlo, Consolas, monospace" font-size="12" text-anchor="middle">B</text>
+<rect x="136" y="67.14285714285714" width="5" height="6.857142857142857" rx="1" fill="#bdbdb8"/>
+<rect x="152" y="80" width="21" height="24" rx="3" fill="#292b2a" stroke="#4c504d"/>
+<text x="162.5" y="96" fill="#bdbdb8" font-family="Menlo, Consolas, monospace" font-size="12" text-anchor="middle">7</text>
+<rect x="160" y="67.14285714285714" width="5" height="6.857142857142857" rx="1" fill="#bdbdb8"/>
+<rect x="176" y="80" width="21" height="24" rx="3" fill="#292b2a" stroke="#4c504d"/>
+<text x="186.5" y="96" fill="#bdbdb8" font-family="Menlo, Consolas, monospace" font-size="12" text-anchor="middle">C</text>
+<rect x="184" y="67.14285714285714" width="5" height="6.857142857142857" rx="1" fill="#bdbdb8"/>
+<rect x="200" y="80" width="21" height="24" rx="3" fill="#292b2a" stroke="#4c504d"/>
+<text x="210.5" y="96" fill="#bdbdb8" font-family="Menlo, Consolas, monospace" font-size="12" text-anchor="middle">1</text>
+<rect x="208" y="67.14285714285714" width="5" height="6.857142857142857" rx="1" fill="#bdbdb8"/>
+<rect x="224" y="80" width="21" height="24" rx="3" fill="#292b2a" stroke="#4c504d"/>
+<text x="234.5" y="96" fill="#bdbdb8" font-family="Menlo, Consolas, monospace" font-size="12" text-anchor="middle">A</text>
+<rect x="232" y="67.14285714285714" width="5" height="6.857142857142857" rx="1" fill="#bdbdb8"/>
+<rect x="248" y="80" width="21" height="24" rx="3" fill="#253e38" stroke="#7bd7c8"/>
+<text x="258.5" y="96" fill="#7bd7c8" font-family="Menlo, Consolas, monospace" font-size="12" text-anchor="middle">?</text>
+<path d="M280 92L293 92" fill="none" stroke="#bdbdb8" stroke-width="1" stroke-linecap="round"/>
+<path d="M290 89L293 92" fill="none" stroke="#bdbdb8" stroke-width="1" stroke-linecap="round"/>
+<path d="M290 95L293 92" fill="none" stroke="#bdbdb8" stroke-width="1" stroke-linecap="round"/>
+<rect x="304" y="82.66666666666667" width="12" height="21.333333333333332" rx="0" fill="#bdbdb8"/>
+<text x="310" y="120" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" text-anchor="middle">3</text>
+<rect x="334" y="82.66666666666667" width="12" height="21.333333333333332" rx="0" fill="#bdbdb8"/>
+<text x="340" y="120" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" text-anchor="middle">7</text>
+<rect x="364" y="82.66666666666667" width="12" height="21.333333333333332" rx="0" fill="#bdbdb8"/>
+<text x="370" y="120" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" text-anchor="middle">1</text>
+<path d="M300 82.66666666666667L380 82.66666666666667" fill="none" stroke="#efefeb" stroke-width="0.8" stroke-linecap="round" stroke-dasharray="4 4"/>
+<text x="16" y="204" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" text-anchor="start">forced</text>
+<rect x="80" y="188" width="21" height="24" rx="3" fill="#323532" stroke="#4c504d"/>
+<g opacity="0.4">
+<text x="90.5" y="204" fill="#bdbdb8" font-family="Menlo, Consolas, monospace" font-size="12" text-anchor="middle">A</text>
+</g>
+<rect x="104" y="188" width="21" height="24" rx="3" fill="#253e38" stroke="#7bd7c8"/>
+<text x="114.5" y="204" fill="#7bd7c8" font-family="Menlo, Consolas, monospace" font-size="12" text-anchor="middle">3</text>
+<rect x="112" y="134" width="5" height="48" rx="1" fill="#7bd7c8"/>
+<rect x="128" y="188" width="21" height="24" rx="3" fill="#323532" stroke="#4c504d"/>
+<g opacity="0.4">
+<text x="138.5" y="204" fill="#bdbdb8" font-family="Menlo, Consolas, monospace" font-size="12" text-anchor="middle">B</text>
+</g>
+<rect x="152" y="188" width="21" height="24" rx="3" fill="#323532" stroke="#4c504d"/>
+<g opacity="0.4">
+<text x="162.5" y="204" fill="#bdbdb8" font-family="Menlo, Consolas, monospace" font-size="12" text-anchor="middle">7</text>
+</g>
+<rect x="176" y="188" width="21" height="24" rx="3" fill="#323532" stroke="#4c504d"/>
+<g opacity="0.4">
+<text x="186.5" y="204" fill="#bdbdb8" font-family="Menlo, Consolas, monospace" font-size="12" text-anchor="middle">C</text>
+</g>
+<rect x="200" y="188" width="21" height="24" rx="3" fill="#323532" stroke="#4c504d"/>
+<g opacity="0.4">
+<text x="210.5" y="204" fill="#bdbdb8" font-family="Menlo, Consolas, monospace" font-size="12" text-anchor="middle">1</text>
+</g>
+<rect x="224" y="188" width="21" height="24" rx="3" fill="#323532" stroke="#4c504d"/>
+<g opacity="0.4">
+<text x="234.5" y="204" fill="#bdbdb8" font-family="Menlo, Consolas, monospace" font-size="12" text-anchor="middle">A</text>
+</g>
+<rect x="248" y="188" width="21" height="24" rx="3" fill="#253e38" stroke="#7bd7c8"/>
+<text x="258.5" y="204" fill="#7bd7c8" font-family="Menlo, Consolas, monospace" font-size="12" text-anchor="middle">?</text>
+<path d="M280 200L293 200" fill="none" stroke="#bdbdb8" stroke-width="1" stroke-linecap="round"/>
+<path d="M290 197L293 200" fill="none" stroke="#bdbdb8" stroke-width="1" stroke-linecap="round"/>
+<path d="M290 203L293 200" fill="none" stroke="#bdbdb8" stroke-width="1" stroke-linecap="round"/>
+<rect x="304" y="148.0" width="12" height="64.0" rx="0" fill="#7bd7c8"/>
+<text x="310" y="228" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" text-anchor="middle">3</text>
+<rect x="334" y="199.2" width="12" height="12.799999999999999" rx="0" fill="#bdbdb8"/>
+<text x="340" y="228" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" text-anchor="middle">7</text>
+<rect x="364" y="199.2" width="12" height="12.799999999999999" rx="0" fill="#bdbdb8"/>
+<text x="370" y="228" fill="#bdbdb8" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" text-anchor="middle">1</text>
+<path d="M300 199.2L380 199.2" fill="none" stroke="#efefeb" stroke-width="0.8" stroke-linecap="round" stroke-dasharray="4 4"/>
+<path d="M387 148.0L387 199.2" fill="none" stroke="#7bd7c8" stroke-width="1" stroke-linecap="round"/>
+<path d="M383 148.0L391 148.0" fill="none" stroke="#7bd7c8" stroke-width="1" stroke-linecap="round"/>
+<path d="M383 199.2L391 199.2" fill="none" stroke="#7bd7c8" stroke-width="1" stroke-linecap="round"/>
+<g transform="rotate(-90 400 173.6)">
+<text x="400" y="177.6" fill="#7bd7c8" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" text-anchor="middle">lead</text>
+</g>
+</svg>

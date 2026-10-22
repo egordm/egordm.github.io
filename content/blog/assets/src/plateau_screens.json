@@ -1,0 +1,348 @@
+{
+ "task": "MQAR, 32 tokens, 256-word vocabulary, 4 x 128",
+ "resume_from": 5500,
+ "cap": 27500,
+ "note": "N582's final_accuracy is its registered read, 3,000 updates after the crossing (0.855 still rising); its Amendment 1 read after 11,000 more stock updates is 0.992, 1.000, 1.000. Later screens read after 11,000 stock updates.",
+ "rows": [
+  {
+   "node": "N582",
+   "label": "repeated keys, 2x",
+   "verdict": "pass",
+   "takeoff": [
+    2500,
+    1000,
+    750
+   ],
+   "final_accuracy": [
+    0.855,
+    1.0,
+    1.0
+   ],
+   "reference": [
+    9250,
+    17500,
+    9000
+   ]
+  },
+  {
+   "node": "N583",
+   "label": "repeated keys, 1.5x",
+   "verdict": "pass",
+   "takeoff": [
+    2500,
+    2000,
+    2750
+   ],
+   "final_accuracy": [
+    0.997,
+    1.0,
+    0.998
+   ],
+   "reference": [
+    9250,
+    17500,
+    9000
+   ]
+  },
+  {
+   "node": "N583",
+   "label": "repeated keys, 3x",
+   "verdict": "pass",
+   "takeoff": [
+    2500,
+    2750,
+    500
+   ],
+   "final_accuracy": [
+    0.998,
+    0.999,
+    1.0
+   ],
+   "reference": [
+    9250,
+    17500,
+    9000
+   ]
+  },
+  {
+   "node": "N587",
+   "label": "Muon 3e-4",
+   "verdict": "pass",
+   "takeoff": [
+    3750,
+    5000,
+    3750
+   ],
+   "final_accuracy": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "reference": [
+    null,
+    10750,
+    12250
+   ]
+  },
+  {
+   "node": "N587",
+   "label": "Muon 1e-4",
+   "verdict": "pass",
+   "takeoff": [
+    7500,
+    10250,
+    9500
+   ],
+   "final_accuracy": [
+    1.0,
+    0.999,
+    1.0
+   ],
+   "reference": [
+    null,
+    10750,
+    12250
+   ]
+  },
+  {
+   "node": "N588",
+   "label": "length ramp, a pair per 750",
+   "verdict": "pass",
+   "takeoff": [
+    6500,
+    7000,
+    7250
+   ],
+   "final_accuracy": [
+    0.999,
+    0.985,
+    0.989
+   ],
+   "reference": [
+    10500,
+    18000,
+    10250
+   ]
+  },
+  {
+   "node": "N587",
+   "label": "Muon 1e-3",
+   "verdict": "fail",
+   "takeoff": [
+    4250,
+    4500,
+    4250
+   ],
+   "final_accuracy": [
+    0.949,
+    0.965,
+    0.944
+   ],
+   "reference": [
+    null,
+    10750,
+    12250
+   ]
+  },
+  {
+   "node": "N589",
+   "label": "AdamW 3e-4 (rate control)",
+   "verdict": "fail",
+   "takeoff": [
+    null,
+    null,
+    null
+   ],
+   "final_accuracy": [
+    0.032,
+    0.06,
+    0.026
+   ],
+   "reference": [
+    11000,
+    8500,
+    15250
+   ]
+  },
+  {
+   "node": "N588",
+   "label": "length ramp, a pair per 1,500",
+   "verdict": "fail",
+   "takeoff": [
+    10750,
+    12500,
+    11500
+   ],
+   "final_accuracy": [
+    0.981,
+    0.99,
+    1.0
+   ],
+   "reference": [
+    10500,
+    18000,
+    10250
+   ]
+  },
+  {
+   "node": "N585",
+   "label": "short three-stage curriculum",
+   "verdict": "fail",
+   "takeoff": [
+    10250,
+    9750,
+    8500
+   ],
+   "final_accuracy": [
+    0.98,
+    1.0,
+    1.0
+   ],
+   "reference": [
+    9000,
+    9250,
+    13500
+   ]
+  },
+  {
+   "node": "N585",
+   "label": "10% easy batches",
+   "verdict": "fail",
+   "takeoff": [
+    9500,
+    9250,
+    6000
+   ],
+   "final_accuracy": [
+    0.975,
+    0.956,
+    1.0
+   ],
+   "reference": [
+    9000,
+    9250,
+    13500
+   ]
+  },
+  {
+   "node": "N585",
+   "label": "90% easy batches",
+   "verdict": "fail",
+   "takeoff": [
+    25250,
+    null,
+    null
+   ],
+   "final_accuracy": [
+    0.975,
+    0.447,
+    0.297
+   ],
+   "reference": [
+    9000,
+    9250,
+    13500
+   ]
+  },
+  {
+   "node": "N585",
+   "label": "sharper attention, 4x",
+   "verdict": "fail",
+   "takeoff": [
+    12500,
+    22000,
+    13500
+   ],
+   "final_accuracy": [
+    0.941,
+    0.999,
+    0.981
+   ],
+   "reference": [
+    9000,
+    9250,
+    13500
+   ]
+  },
+  {
+   "node": "N585",
+   "label": "sharper attention, 12x",
+   "verdict": "fail",
+   "takeoff": [
+    11000,
+    15000,
+    14000
+   ],
+   "final_accuracy": [
+    0.939,
+    0.937,
+    0.981
+   ],
+   "reference": [
+    9000,
+    9250,
+    13500
+   ]
+  },
+  {
+   "node": "N585",
+   "label": "sharper attention, 24x",
+   "verdict": "fail",
+   "takeoff": [
+    15750,
+    15500,
+    13250
+   ],
+   "final_accuracy": [
+    0.928,
+    1.0,
+    0.998
+   ],
+   "reference": [
+    9000,
+    9250,
+    13500
+   ]
+  },
+  {
+   "node": "N590",
+   "label": "10% fixed-map batches",
+   "verdict": "fail",
+   "takeoff": [
+    25250,
+    null,
+    null
+   ],
+   "final_accuracy": [
+    0.911,
+    0.118,
+    0.13
+   ],
+   "reference": [
+    9750,
+    8750,
+    19000
+   ]
+  },
+  {
+   "node": "N590",
+   "label": "90% fixed-map batches",
+   "verdict": "fail",
+   "takeoff": [
+    null,
+    null,
+    null
+   ],
+   "final_accuracy": [
+    0.011,
+    0.011,
+    0.007
+   ],
+   "reference": [
+    9750,
+    8750,
+    19000
+   ]
+  }
+ ]
+}

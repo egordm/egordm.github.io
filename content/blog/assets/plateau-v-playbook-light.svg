@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="310" viewBox="0 0 420 310" role="img" aria-labelledby="title desc">
+<title id="title">Diagnose the slow half, feed it, and test against control branches.</title>
+<desc id="desc">Accuracy flat at 1/N leads to save checkpoints, stop waiting, then two reads: which half is flat? Feed the slow half, then test against control branches.</desc>
+<rect x="0" y="0" width="420" height="310" rx="0" fill="#ffffff"/>
+<defs><marker id="arrow" viewBox="0 0 6 6" refX="6" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L6 3L0 6" fill="none" stroke="#595e5b" stroke-width="1"/></marker></defs>
+<path d="M210 54V76" fill="none" stroke="#595e5b" stroke-width="1" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M210 114V136" fill="none" stroke="#595e5b" stroke-width="1" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M210 174V196" fill="none" stroke="#595e5b" stroke-width="1" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M210 234V256" fill="none" stroke="#595e5b" stroke-width="1" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="60" y="16" width="300" height="38" rx="8" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="210.0" y="40.0" fill="#252725" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle">accuracy flat at 1/N</text>
+<rect x="60" y="76" width="300" height="38" rx="8" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="210.0" y="100.0" fill="#252725" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle">save checkpoints, stop waiting</text>
+<rect x="60" y="136" width="300" height="38" rx="8" fill="#ffffff" stroke="#d8dcd7"/>
+<text x="210.0" y="160.0" fill="#252725" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle">two reads: which half is flat?</text>
+<rect x="60" y="196" width="300" height="38" rx="8" fill="#e4f3ee" stroke="#00796b"/>
+<text x="210.0" y="220.0" fill="#252725" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle">feed the slow half</text>
+<rect x="60" y="256" width="300" height="38" rx="8" fill="#e9edfc" stroke="#4557ba"/>
+<text x="210.0" y="280.0" fill="#252725" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle">test against control branches</text>
+</svg>
